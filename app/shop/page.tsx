@@ -1,15 +1,67 @@
 import Link from "next/link";
+import { createClient } from "../../lib/supabase/server";
+import { getArtworkUrl } from "../../lib/catalogue";
+import ShopCatalogue, { type CatalogueImage, type CatalogueSeries, type CatalogueWork } from "../../components/shop-catalogue";
+import "./shop.css";
 
-export default function ShopPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ShopPage() {
+  const supabase = await createClient();
+
+  if (!supabase) return <ShopMessage message="The catalogue is temporarily unavailable." />;
+
+  const { data: works, error: worksError } = await supabase
+    .from("works")
+    .select("*")
+    .neq("status", "draft");
+  if (worksError) return <ShopMessage message="The catalogue is temporarily unavailable." />;
+
+  const [{ data: series }, { data: images }] = await Promise.all([
+    supabase.from("series").select("id, name").eq("is_published", true),
+    works.length ? supabase.from("work_images").select("work_id, storage_path, alt, is_primary").in("work_id", works.map((work) => work.id)).order("is_primary", { ascending: false }).order("display_order", { ascending: true }) : Promise.resolve({ data: [], error: null }),
+  ]);
+  const seriesById = new Map((series ?? []).map((item) => [item.id, item as CatalogueSeries]));
+  const imagesByWork = new Map<string, CatalogueImage[]>();
+  (images ?? []).forEach((image) => imagesByWork.set(image.work_id, [
+    ...(imagesByWork.get(image.work_id) ?? []),
+    { ...image, storage_path: getArtworkUrl(supabase, image.storage_path) } as CatalogueImage,
+  ]));
+
+  const catalogueWorks: CatalogueWork[] = works.map((work) => ({
+    id: work.id,
+    title: work.title,
+    slug: work.slug,
+    year: work.year,
+    status: work.status as CatalogueWork["status"],
+    is_new: work.is_new,
+    price_php: work.price_php,
+    price_usd: work.price_usd,
+    price_on_request: work.price_on_request,
+    series_id: work.series_id,
+    series_name: work.series_id ? seriesById.get(work.series_id)?.name ?? null : null,
+    images: imagesByWork.get(work.id) ?? [],
+  }));
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#efe9df] px-6 text-center text-[#0e1a24]">
-      <div>
-        <p className="mb-4 text-xs uppercase tracking-[0.34em] text-[#1f8fa3]">Chroma Fairy</p>
-        <h1 className="font-serif text-5xl">Coming soon</h1>
-        <Link className="mt-8 inline-block text-xs uppercase tracking-[0.24em] text-[#1f8fa3]" href="/">
-          Back home
-        </Link>
+    <main className="shop-shell">
+      <div className="shop-frame">
+        <header className="shop-header">
+          <Link className="shop-back" href="/">← Back home</Link>
+          <div className="shop-wordmark">Chroma Fairy</div>
+          <Link className="shop-link" href="/health">System status</Link>
+        </header>
+        <section className="shop-intro">
+          <div><div className="shop-kicker">Samantha Ty · Original works</div><h1 className="shop-title">The Catalogue</h1></div>
+          <p className="shop-intro-note">Pieces shaped by water, movement, and the quiet force of nature.</p>
+        </section>
+        <ShopCatalogue works={catalogueWorks} />
+        <footer className="shop-footer">Chroma Fairy · Fluid abstract artist · Philippines</footer>
       </div>
     </main>
   );
+}
+
+function ShopMessage({ message }: { message: string }) {
+  return <main className="shop-shell"><div className="shop-frame shop-empty">{message}</div></main>;
 }
