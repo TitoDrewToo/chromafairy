@@ -186,6 +186,9 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       { threshold: 0.14 },
     );
     root.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
+    root.querySelectorAll<HTMLElement>("a, button").forEach((element) => {
+      element.classList.add(element.classList.contains("btn") ? "chroma-button" : "chroma-text");
+    });
 
     return () => {
       cancelAnimationFrame(frameId);
@@ -197,7 +200,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
   }, []);
 
   return (
-    <div ref={rootRef}>
+    <div className="home-shell" ref={rootRef}>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <div dangerouslySetInnerHTML={{ __html: markup }} />
     </div>

@@ -25,7 +25,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   return (
     <main className="shop-shell">
       <div className="shop-frame shop-product">
-        <Link className="shop-back shop-product-back" href="/shop">← Back to catalogue</Link>
+        <Link className="shop-back shop-product-back chroma-text" href="/shop">← Back to catalogue</Link>
         <div className="shop-product-layout">
           <div className="shop-gallery">
             {gallery.length ? gallery.map((image) => <div className="shop-gallery-frame" key={image.storage_path}><img src={image.storage_path} alt={image.alt ?? work.title} /></div>) : <div className="shop-gallery-frame"><div className="shop-placeholder">Chroma Fairy</div></div>}
@@ -42,7 +42,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
               <div className="shop-spec"><dt>Year</dt><dd>{work.year}</dd></div>
               {series?.name && <div className="shop-spec"><dt>Series</dt><dd>{series.name}</dd></div>}
             </dl>
-            <Link className="shop-inquire" href={`/inquire?work=${encodeURIComponent(work.slug)}`}>Inquire about this work</Link>
+            <Link className="shop-inquire chroma-button" href={`/inquire?work=${encodeURIComponent(work.slug)}`}>Inquire about this work</Link>
             <p className="shop-inquire-note">A personal response will follow with availability and details.</p>
           </article>
         </div>

@@ -1,3 +1,54 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --chroma-gradient: linear-gradient(105deg, #e4b84f 0%, #ff66c4 22%, #57e8ff 44%, #9cff57 63%, #ffd75c 80%, #ff66c4 100%);
+  --chroma-size: 300% 100%;
+  --chroma-duration: 4.8s;
+}
+
+.chroma-text:hover,
+.chroma-text:focus-visible {
+  background-image: var(--chroma-gradient);
+  background-size: var(--chroma-size);
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+  animation: chroma-shimmer var(--chroma-duration) linear infinite;
+}
+
+.chroma-button:hover,
+.chroma-button:focus-visible {
+  border-color: transparent !important;
+  background-image: var(--chroma-gradient) !important;
+  background-size: var(--chroma-size);
+  background-position: 0% 50%;
+  color: #fff !important;
+  animation: chroma-shimmer var(--chroma-duration) linear infinite;
+}
+
+.chroma-control:hover,
+.chroma-control:focus-visible {
+  border-color: transparent !important;
+  background-image: var(--chroma-gradient) !important;
+  background-size: var(--chroma-size);
+  background-position: 0% 50%;
+  color: #fff !important;
+  animation: chroma-shimmer var(--chroma-duration) linear infinite;
+}
+
+@keyframes chroma-shimmer {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chroma-text:hover,
+  .chroma-text:focus-visible,
+  .chroma-button:hover,
+  .chroma-button:focus-visible { animation: none; }
+  .chroma-control:hover,
+  .chroma-control:focus-visible { animation: none; }
+}

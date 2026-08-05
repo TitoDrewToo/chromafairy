@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "../../lib/supabase/server";
 import { getArtworkUrl } from "../../lib/catalogue";
-import ShopCatalogue, { type CatalogueImage, type CatalogueSeries, type CatalogueWork } from "../../components/shop-catalogue";
+import ShopCatalogue, { type CatalogueImage, type CatalogueWork } from "../../components/shop-catalogue";
 import "./shop.css";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ export default async function ShopPage() {
     supabase.from("series").select("id, name").eq("is_published", true),
     works.length ? supabase.from("work_images").select("work_id, storage_path, alt, is_primary").in("work_id", works.map((work) => work.id)).order("is_primary", { ascending: false }).order("display_order", { ascending: true }) : Promise.resolve({ data: [], error: null }),
   ]);
-  const seriesById = new Map((series ?? []).map((item) => [item.id, item as CatalogueSeries]));
+  const seriesById = new Map((series ?? []).map((item) => [item.id, item]));
   const imagesByWork = new Map<string, CatalogueImage[]>();
   (images ?? []).forEach((image) => imagesByWork.set(image.work_id, [
     ...(imagesByWork.get(image.work_id) ?? []),
@@ -33,6 +33,7 @@ export default async function ShopPage() {
     title: work.title,
     slug: work.slug,
     year: work.year,
+    month: work.month,
     status: work.status as CatalogueWork["status"],
     is_new: work.is_new,
     price_php: work.price_php,
@@ -47,9 +48,9 @@ export default async function ShopPage() {
     <main className="shop-shell">
       <div className="shop-frame">
         <header className="shop-header">
-          <Link className="shop-back" href="/">← Back home</Link>
+          <Link className="shop-back chroma-text" href="/">← Back home</Link>
           <div className="shop-wordmark">Chroma Fairy</div>
-          <Link className="shop-link" href="/health">System status</Link>
+          <Link className="shop-link chroma-text" href="/health">System status</Link>
         </header>
         <section className="shop-intro">
           <div><div className="shop-kicker">Samantha Ty · Original works</div><h1 className="shop-title">The Catalogue</h1></div>
