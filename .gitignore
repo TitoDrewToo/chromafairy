@@ -1,3 +1,7 @@
 .DS_Store
 node_modules/
 .next/
+
+# local env files (never commit secrets)
+.env
+.env*.local
