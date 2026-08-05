@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "../../../lib/supabase/server";
 import { formatPrice, getArtworkUrl } from "../../../lib/catalogue";
+import ShopImage from "../../../components/shop-image";
 import "../shop.css";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +29,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         <Link className="shop-back shop-product-back chroma-text" href="/shop">← Back to catalogue</Link>
         <div className="shop-product-layout">
           <div className="shop-gallery">
-            {gallery.length ? gallery.map((image) => <div className="shop-gallery-frame" key={image.storage_path}><img src={image.storage_path} alt={image.alt ?? work.title} /></div>) : <div className="shop-gallery-frame"><div className="shop-placeholder">Chroma Fairy</div></div>}
+            {gallery.length ? gallery.map((image) => <div className="shop-gallery-frame" key={image.storage_path}><ShopImage alt={image.alt ?? work.title} src={image.storage_path} /></div>) : <div className="shop-gallery-frame"><ShopImage alt={work.title} /></div>}
           </div>
           <article className="shop-product-info">
             <div className="shop-eyebrow">{series?.name ?? "Original work"} · {work.year}</div>

@@ -1,20 +1,40 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "../../lib/supabase/server";
 import { getArtworkUrl } from "../../lib/catalogue";
 import ShopCatalogue, { type CatalogueImage, type CatalogueWork } from "../../components/shop-catalogue";
+import ShopSkeleton from "../../components/shop-skeleton";
 import "./shop.css";
 
 export const dynamic = "force-dynamic";
 
-export default async function ShopPage() {
-  const supabase = await createClient();
+export default function ShopPage() {
+  return (
+    <main className="shop-shell">
+      <div className="shop-frame">
+        <header className="shop-header">
+          <Link className="shop-back chroma-text" href="/">← Back home</Link>
+          <div className="shop-wordmark">Chroma Fairy</div>
+          <Link className="shop-link chroma-text" href="/health">System status</Link>
+        </header>
+        <section className="shop-intro">
+          <div><div className="shop-kicker">Samantha Ty · Original works</div><h1 className="shop-title">The Catalogue</h1></div>
+          <p className="shop-intro-note">Pieces shaped by water, movement, and the quiet force of nature.</p>
+        </section>
+        <Suspense fallback={<ShopSkeleton />}>
+          <ShopData />
+        </Suspense>
+        <footer className="shop-footer">Chroma Fairy · Fluid abstract artist · Philippines</footer>
+      </div>
+    </main>
+  );
+}
 
+async function ShopData() {
+  const supabase = await createClient();
   if (!supabase) return <ShopMessage message="The catalogue is temporarily unavailable." />;
 
-  const { data: works, error: worksError } = await supabase
-    .from("works")
-    .select("*")
-    .neq("status", "draft");
+  const { data: works, error: worksError } = await supabase.from("works").select("*").neq("status", "draft");
   if (worksError) return <ShopMessage message="The catalogue is temporarily unavailable." />;
 
   const [{ data: series }, { data: images }] = await Promise.all([
@@ -44,25 +64,9 @@ export default async function ShopPage() {
     images: imagesByWork.get(work.id) ?? [],
   }));
 
-  return (
-    <main className="shop-shell">
-      <div className="shop-frame">
-        <header className="shop-header">
-          <Link className="shop-back chroma-text" href="/">← Back home</Link>
-          <div className="shop-wordmark">Chroma Fairy</div>
-          <Link className="shop-link chroma-text" href="/health">System status</Link>
-        </header>
-        <section className="shop-intro">
-          <div><div className="shop-kicker">Samantha Ty · Original works</div><h1 className="shop-title">The Catalogue</h1></div>
-          <p className="shop-intro-note">Pieces shaped by water, movement, and the quiet force of nature.</p>
-        </section>
-        <ShopCatalogue works={catalogueWorks} />
-        <footer className="shop-footer">Chroma Fairy · Fluid abstract artist · Philippines</footer>
-      </div>
-    </main>
-  );
+  return <ShopCatalogue works={catalogueWorks} />;
 }
 
 function ShopMessage({ message }: { message: string }) {
-  return <main className="shop-shell"><div className="shop-frame shop-empty">{message}</div></main>;
+  return <div className="shop-empty">{message}</div>;
 }

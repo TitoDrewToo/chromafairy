@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { formatPrice } from "../lib/catalogue";
+import ShopImage from "./shop-image";
 
 export type CatalogueImage = { storage_path: string; alt: string | null; is_primary: boolean | null };
 export type CatalogueWork = {
@@ -27,17 +28,13 @@ function statusLabel(status: CatalogueWork["status"], isNew: boolean | null) {
   return isNew ? "Available · New" : "Available";
 }
 
-function Placeholder() {
-  return <div className="shop-placeholder">Chroma Fairy</div>;
-}
-
 function WorkCard({ work }: { work: CatalogueWork }) {
   const image = work.images[0];
   return (
     <article className="shop-card">
       <Link className="chroma-text" href={`/shop/${work.slug}`} aria-label={`View ${work.title}`}>
         <div className="shop-card-image">
-          {image ? <img src={image.storage_path} alt={image.alt ?? work.title} loading="lazy" /> : <Placeholder />}
+          <ShopImage alt={image?.alt ?? work.title} src={image?.storage_path} />
           <span className={`shop-card-badge ${work.status}`}>{statusLabel(work.status, work.is_new)}</span>
         </div>
       </Link>
