@@ -32,7 +32,7 @@
 .chroma-cta:hover,
 .chroma-cta:focus-visible {
   border: 1px solid transparent !important;
-  background: linear-gradient(var(--deep), var(--deep)) padding-box, var(--chroma-gradient) border-box !important;
+  background: linear-gradient(#000, #000) padding-box, var(--chroma-gradient) border-box !important;
   background-size: 100% 100%, var(--chroma-size);
   background-position: 0 0, 0% 50%;
   color: #fff !important;
