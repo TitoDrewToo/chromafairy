@@ -97,8 +97,8 @@ export default function ShopCatalogue({ works }: { works: CatalogueWork[] }) {
       <div className="shop-controls" aria-label="Catalogue controls">
         <div className="shop-control-group">
           <span className="shop-control-label">View</span>
-          <button aria-pressed={showAvailable} className={`shop-filter chroma-control ${showAvailable ? "active" : ""}`} onClick={() => setShowAvailable((value) => !value)} type="button">Available / New</button>
-          <button aria-pressed={showArchive} className={`shop-filter chroma-control ${showArchive ? "active" : ""}`} onClick={() => setShowArchive((value) => !value)} type="button">Sold / Reserved</button>
+          <button aria-pressed={showAvailable} className={`shop-filter shop-status-filter chroma-control ${showAvailable ? "active" : ""}`} onClick={() => setShowAvailable((value) => !value)} type="button"><span className="shop-filter-label">Available / New</span></button>
+          <button aria-pressed={showArchive} className={`shop-filter shop-status-filter chroma-control ${showArchive ? "active" : ""}`} onClick={() => setShowArchive((value) => !value)} type="button"><span className="shop-filter-label">Sold / Reserved</span></button>
         </div>
         <div className="shop-control-group">
           <span className="shop-control-label">Arrange</span>
