@@ -29,6 +29,24 @@
   animation: chroma-shimmer var(--chroma-duration) linear infinite;
 }
 
+.chroma-cta:hover,
+.chroma-cta:focus-visible {
+  background: var(--deep) !important;
+  background-image: none !important;
+  color: #fff !important;
+}
+
+.chroma-cta:hover .chroma-cta-label,
+.chroma-cta:focus-visible .chroma-cta-label {
+  background-image: var(--chroma-gradient);
+  background-size: var(--chroma-size);
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: chroma-shimmer var(--chroma-duration) linear infinite;
+}
+
 .chroma-control:hover,
 .chroma-control:focus-visible {
   border-color: transparent !important;
@@ -51,4 +69,6 @@
   .chroma-button:focus-visible { animation: none; }
   .chroma-control:hover,
   .chroma-control:focus-visible { animation: none; }
+  .chroma-cta:hover .chroma-cta-label,
+  .chroma-cta:focus-visible .chroma-cta-label { animation: none; }
 }

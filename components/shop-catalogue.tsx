@@ -102,7 +102,7 @@ export default function ShopCatalogue({ works }: { works: CatalogueWork[] }) {
         </div>
         <div className="shop-control-group">
           <span className="shop-control-label">Arrange</span>
-          <button className="shop-filter chroma-control active" onClick={expandAll} type="button">{allExpanded ? "Collapse all" : "Expand all"}</button>
+          <button className="shop-filter shop-expand-control chroma-control" onClick={expandAll} type="button"><span className="shop-filter-label">{allExpanded ? "Collapse all" : "Expand all"}</span></button>
         </div>
         <span className="shop-result-count">{filteredWorks.length} works</span>
       </div>

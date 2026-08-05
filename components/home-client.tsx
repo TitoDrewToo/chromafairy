@@ -187,7 +187,15 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     );
     root.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
     root.querySelectorAll<HTMLElement>("a, button").forEach((element) => {
-      element.classList.add(element.classList.contains("btn") ? "chroma-button" : "chroma-text");
+      if (element.classList.contains("btn")) {
+        element.classList.add("chroma-cta");
+        const label = document.createElement("span");
+        label.className = "chroma-cta-label";
+        while (element.firstChild) label.append(element.firstChild);
+        element.append(label);
+      } else {
+        element.classList.add("chroma-text");
+      }
     });
 
     return () => {
