@@ -630,6 +630,43 @@
   font-size: 11px;
 }
 
+.shop-inquiry-page {
+  max-width: 620px;
+  margin: clamp(58px, 10vw, 120px) auto 0;
+}
+
+.shop-inquiry-intro {
+  max-width: 46ch;
+  margin: 16px 0 34px;
+  color: var(--shop-muted);
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 21px;
+  line-height: 1.45;
+}
+
+.shop-inquiry-form {
+  display: grid;
+  gap: 14px;
+  max-width: 520px;
+}
+
+.shop-inquiry-form input,
+.shop-inquiry-form textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 14px 15px;
+  border: 1px solid var(--shop-line);
+  border-radius: 0;
+  background: #fff;
+  color: var(--shop-ink);
+  font: inherit;
+}
+
+.shop-inquiry-form textarea { min-height: 140px; resize: vertical; }
+.shop-inquiry-form button { justify-self: start; border: 0; cursor: pointer; }
+.shop-inquiry-form button:disabled { cursor: wait; opacity: .7; }
+.shop-inquiry-success { margin-top: 0; color: var(--shop-gold-deep); }
+
 .fairy-launch {
   position: fixed;
   inset: 0;

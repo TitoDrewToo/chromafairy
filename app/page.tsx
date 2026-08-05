@@ -9,6 +9,7 @@ function getHomeSource() {
   const markup = body
     .replaceAll('src="assets/', 'src="/assets/')
     .replace('      <a href="#contact">Contact</a>', '      <a href="#contact">Contact</a>\n      <a href="/shop">Shop</a>')
+    .replace('<form onsubmit="event.preventDefault();this.reset();alert(\'Thank you — this is a prototype form. We will wire it to email before launch.\');">\n          <input type="text" placeholder="Your name" required />\n          <input type="email" placeholder="Email" required />\n          <textarea placeholder="Tell Samantha about your project…" required></textarea>\n          <button class="btn" type="submit">Send message</button>\n        </form>', '<div id="commission-form-mount"></div>')
     .replace('<div class="brand2">Samantha Ty</div>', '<div id="animated-fairy-mount"></div><div class="brand2">Samantha Ty</div>');
 
   return { styles, markup };

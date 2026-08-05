@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AnimatedFairy from "./animated-fairy";
+import InquiryForm from "./inquiry-form";
 
 type HomeClientProps = {
   styles: string;
@@ -12,11 +13,13 @@ type HomeClientProps = {
 export default function HomeClient({ styles, markup }: HomeClientProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [fairyMount, setFairyMount] = useState<HTMLElement | null>(null);
+  const [commissionMount, setCommissionMount] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     setFairyMount(root.querySelector<HTMLElement>("#animated-fairy-mount"));
+    setCommissionMount(root.querySelector<HTMLElement>("#commission-form-mount"));
 
     const canvas = root.querySelector<HTMLCanvasElement>("#art");
     const fallback = root.querySelector<HTMLElement>("#artFallback");
@@ -216,6 +219,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <div dangerouslySetInnerHTML={{ __html: markup }} />
       {fairyMount ? createPortal(<AnimatedFairy />, fairyMount) : null}
+      {commissionMount ? createPortal(<InquiryForm kind="commission" />, commissionMount) : null}
     </div>
   );
 }
