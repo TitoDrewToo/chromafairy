@@ -4,29 +4,34 @@ import { createClient } from "../../lib/supabase/server";
 import { getArtworkUrl } from "../../lib/catalogue";
 import ShopCatalogue, { type CatalogueImage, type CatalogueWork } from "../../components/shop-catalogue";
 import ShopSkeleton from "../../components/shop-skeleton";
+import FairyLaunch from "../../components/fairy-launch";
 import "./shop.css";
 
 export const dynamic = "force-dynamic";
 
 export default function ShopPage() {
   return (
-    <main className="shop-shell">
-      <div className="shop-frame">
-        <header className="shop-header">
-          <Link className="shop-back chroma-text" href="/">← Back home</Link>
-          <div className="shop-wordmark">Chroma Fairy</div>
-          <Link className="shop-link chroma-text" href="/health">System status</Link>
-        </header>
-        <section className="shop-intro">
-          <div><div className="shop-kicker">Samantha Ty · Original works</div><h1 className="shop-title">The Catalogue</h1></div>
-          <p className="shop-intro-note">Pieces shaped by water, movement, and the quiet force of nature.</p>
-        </section>
-        <Suspense fallback={<ShopSkeleton />}>
-          <ShopData />
-        </Suspense>
-        <footer className="shop-footer">Chroma Fairy · Fluid abstract artist · Philippines</footer>
-      </div>
-    </main>
+    <FairyLaunch>
+      <main className="shop-shell">
+        <div className="shop-frame">
+          <header className="shop-header">
+            <Link className="shop-back chroma-text" href="/">← Back home</Link>
+            <Link aria-label="Chroma Fairy home" className="shop-brand chroma-text" href="/">
+              <img alt="Chroma Fairy" src="/fairy-logo.png" />
+            </Link>
+            <Link className="shop-link chroma-text" href="/health">System status</Link>
+          </header>
+          <section className="shop-intro">
+            <div><div className="shop-kicker">Samantha Ty · Original works</div><h1 className="shop-title">The Catalogue</h1></div>
+            <p className="shop-intro-note">Pieces shaped by water, movement, and the quiet force of nature.</p>
+          </section>
+          <Suspense fallback={<ShopSkeleton />}>
+            <ShopData />
+          </Suspense>
+          <footer className="shop-footer">Chroma Fairy · Fluid abstract artist · Philippines</footer>
+        </div>
+      </main>
+    </FairyLaunch>
   );
 }
 
