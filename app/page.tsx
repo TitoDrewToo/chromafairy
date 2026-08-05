@@ -8,7 +8,8 @@ function getHomeSource() {
   const body = source.match(/<body>([\s\S]*?)<script>/)?.[1] ?? "";
   const markup = body
     .replaceAll('src="assets/', 'src="/assets/')
-    .replace('      <a href="#contact">Contact</a>', '      <a href="#contact">Contact</a>\n      <a href="/shop">Shop</a>');
+    .replace('      <a href="#contact">Contact</a>', '      <a href="#contact">Contact</a>\n      <a href="/shop">Shop</a>')
+    .replace('<div class="brand2">Samantha Ty</div>', '<div id="animated-fairy-mount"></div><div class="brand2">Samantha Ty</div>');
 
   return { styles, markup };
 }

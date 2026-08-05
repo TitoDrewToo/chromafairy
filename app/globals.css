@@ -31,9 +31,12 @@
 
 .chroma-cta:hover,
 .chroma-cta:focus-visible {
-  background: var(--deep) !important;
-  background-image: none !important;
+  border: 1px solid transparent !important;
+  background: linear-gradient(var(--deep), var(--deep)) padding-box, var(--chroma-gradient) border-box !important;
+  background-size: 100% 100%, var(--chroma-size);
+  background-position: 0 0, 0% 50%;
   color: #fff !important;
+  animation: chroma-shimmer var(--chroma-duration) linear infinite;
 }
 
 .chroma-cta:hover .chroma-cta-label,
@@ -71,4 +74,65 @@
   .chroma-control:focus-visible { animation: none; }
   .chroma-cta:hover .chroma-cta-label,
   .chroma-cta:focus-visible .chroma-cta-label { animation: none; }
+  .chroma-cta:hover,
+  .chroma-cta:focus-visible { animation: none; }
+}
+
+.animated-fairy {
+  display: grid;
+  width: 100%;
+  height: var(--fairy-size, 108px);
+  place-items: center;
+}
+
+.animated-fairy-art {
+  position: relative;
+  width: calc(var(--fairy-size, 108px) * 1.42);
+  height: var(--fairy-size, 108px);
+  animation: fairy-float 5.2s ease-in-out infinite;
+}
+
+.animated-fairy-art img,
+.animated-fairy-shimmer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.animated-fairy-art img {
+  filter: drop-shadow(0 5px 9px rgba(166, 132, 77, .18));
+}
+
+.animated-fairy-shimmer {
+  background: var(--chroma-gradient);
+  background-size: 260% 100%;
+  mix-blend-mode: screen;
+  opacity: calc(var(--fairy-intensity, .72) * .42);
+  mask-image: url('/fairy-logo.png');
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  -webkit-mask-image: url('/fairy-logo.png');
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  animation: fairy-shimmer var(--chroma-duration) ease-in-out infinite;
+}
+
+@keyframes fairy-float {
+  0%, 100% { filter: drop-shadow(0 5px 9px rgba(166, 132, 77, .18)); transform: translateY(0); }
+  50% { filter: drop-shadow(0 9px 15px rgba(166, 132, 77, .32)); transform: translateY(-5px); }
+}
+
+@keyframes fairy-shimmer {
+  from { background-position: 120% 50%; }
+  to { background-position: -20% 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animated-fairy-art,
+  .animated-fairy-shimmer { animation: none; }
 }
