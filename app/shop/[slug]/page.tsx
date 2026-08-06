@@ -43,7 +43,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
               <div className="shop-spec"><dt>Year</dt><dd>{work.year}</dd></div>
               {series?.name && <div className="shop-spec"><dt>Series</dt><dd>{series.name}</dd></div>}
             </dl>
-            <Link className="shop-inquire chroma-button" href={`/inquire?work=${encodeURIComponent(work.slug)}`}>Inquire about this work</Link>
+            <Link className="shop-inquire inquiry-chroma-button" href={`/inquire?work=${encodeURIComponent(work.slug)}`}><span className="inquiry-chroma-label">Inquire about this work</span></Link>
             <p className="shop-inquire-note">A personal response will follow with availability and details.</p>
           </article>
         </div>

@@ -135,6 +135,7 @@
 .home-inquiry-form button { justify-self: start; }
 .inquiry-error { margin: 0; color: #9c3d32; font-size: 12px; }
 .inquiry-success { margin: 32px 0 0; color: var(--teal); font-size: 14px; text-align: left; }
+.home-inquiry-success { text-align: center; }
 
 @media (prefers-reduced-motion: reduce) {
   .home-inquiry-form button { animation: none; }

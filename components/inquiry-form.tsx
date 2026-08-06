@@ -87,7 +87,7 @@ export default function InquiryForm(props: InquiryFormProps) {
   }
 
   if (status === "success") {
-    return <p className={isPiece ? "inquiry-success shop-inquiry-success" : "inquiry-success"}>Thank you — Samantha will be in touch.</p>;
+    return <p className={isPiece ? "inquiry-success shop-inquiry-success" : "inquiry-success home-inquiry-success"}>Thank you — Samantha will be in touch.</p>;
   }
 
   return (
@@ -107,8 +107,8 @@ export default function InquiryForm(props: InquiryFormProps) {
       <input aria-label="Phone (optional)" autoComplete="tel" name="phone" placeholder="Phone (optional)" type="tel" value={values.phone} onChange={(event) => update("phone", event.target.value)} />
       <textarea aria-label="Message" name="message" placeholder={isPiece ? "Tell Samantha what you’d like to know…" : "Tell Samantha about your project…"} required={!isPiece} value={values.message} onChange={(event) => update("message", event.target.value)} />
       {error && <p className="inquiry-error" role="alert">{error}</p>}
-      <button className={isPiece ? "shop-inquire chroma-button" : "btn chroma-cta"} disabled={status === "sending"} type="submit">
-        <span className={isPiece ? undefined : "chroma-cta-label"}>{status === "sending" ? "Sending…" : isPiece ? "Send inquiry" : "Send message"}</span>
+      <button className={isPiece ? "shop-inquire inquiry-chroma-button" : "btn chroma-cta"} disabled={status === "sending"} type="submit">
+        <span className={isPiece ? "inquiry-chroma-label" : "chroma-cta-label"}>{status === "sending" ? "Sending…" : isPiece ? "Send inquiry" : "Send message"}</span>
       </button>
     </form>
   );
