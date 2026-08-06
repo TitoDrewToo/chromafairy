@@ -22,7 +22,7 @@ export default function ShopPage() {
             <Link className="shop-link chroma-text" href="/health">System status</Link>
           </header>
           <section className="shop-intro">
-            <div><div className="shop-kicker">Samantha Ty · Original works</div><h1 className="shop-title">The Catalogue</h1></div>
+            <div><div className="shop-kicker">Samantha Ty · Original works</div></div>
             <p className="shop-intro-note">Pieces shaped by water, movement, and the quiet force of nature.</p>
           </section>
           <Suspense fallback={<ShopSkeleton />}>
