@@ -26,7 +26,6 @@ export default function ShopPage() {
             <Link aria-label="Chroma Fairy home" className="shop-brand chroma-text" href="/">
               <img alt="Chroma Fairy" src="/fairy-logo.png" />
             </Link>
-            <Link className="shop-link chroma-text" href="/health">System status</Link>
           </header>
           <section className="shop-intro">
             <div><div className="shop-kicker">Samantha Ty · Original works</div></div>
