@@ -6,9 +6,10 @@ export async function middleware(request: NextRequest) {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const pathname = request.nextUrl.pathname;
   const isLogin = pathname === "/admin/login";
+  const isAuthHandoff = isLogin || pathname === "/admin/set-password";
 
   if (!url || !anonKey) {
-    if (!isLogin) return NextResponse.redirect(new URL("/admin/login", request.url));
+    if (!isAuthHandoff) return NextResponse.redirect(new URL("/admin/login", request.url));
     return NextResponse.next();
   }
 
@@ -27,7 +28,7 @@ export async function middleware(request: NextRequest) {
   });
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user && !isLogin) return NextResponse.redirect(new URL("/admin/login", request.url));
+  if (!user && !isAuthHandoff) return NextResponse.redirect(new URL("/admin/login", request.url));
   if (user && isLogin) return NextResponse.redirect(new URL("/admin", request.url));
   return response;
 }

@@ -270,6 +270,10 @@ export type Database = {
         Args: Record<string, never>;
         Returns: boolean;
       };
+      is_user_manager: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
       record_sale: {
         Args: {
           p_customer_id: string | null;

@@ -13,9 +13,19 @@ $$;
 revoke all on function public.is_owner_or_developer() from public;
 grant execute on function public.is_owner_or_developer() to authenticated;
 
+create or replace function public.is_user_manager() returns boolean
+  language sql security definer stable set search_path = public as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role in ('owner', 'developer', 'admin')
+  );
+$$;
+revoke all on function public.is_user_manager() from public;
+grant execute on function public.is_user_manager() to authenticated;
+
 drop policy if exists p_profiles_admin on public.profiles;
 create policy p_profiles_admin_read on public.profiles for select using (is_admin());
-create policy p_profiles_admin_write on public.profiles for update using (is_owner_or_developer()) with check (is_owner_or_developer());
+create policy p_profiles_admin_write on public.profiles for update using (is_user_manager()) with check (is_user_manager());
 
 drop policy if exists p_flags_admin on public.feature_flags;
 create policy p_flags_admin_write on public.feature_flags for insert with check (is_owner_or_developer());
