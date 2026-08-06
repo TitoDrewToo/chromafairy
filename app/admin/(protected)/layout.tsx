@@ -12,6 +12,7 @@ const areas = [
   ["Scheduling", "/admin/scheduling"],
   ["Users", "/admin/users"],
   ["Insights", "/admin/insights"],
+  ["Settings", "/admin/settings"],
 ] as const;
 
 export default async function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {

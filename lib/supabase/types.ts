@@ -7,6 +7,9 @@ export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
 export type OrderStatus = "new" | "paid" | "packed" | "shipped" | "delivered" | "cancelled";
 export type ShipmentStatus = "pending" | "booked" | "in_transit" | "delivered";
 export type PackageType = "rolled_tube" | "flat" | "crate";
+export type AvailabilityRepeat = "none" | "daily" | "weekly" | "monthly";
+export type AppointmentStatus = "requested" | "confirmed" | "completed" | "cancelled" | "no_show";
+export type AppointmentMode = "video" | "call" | "in_person";
 
 export type Work = {
   id: string;
@@ -148,6 +151,38 @@ export type Shipment = {
 
 export type FeatureFlag = { key: string; enabled: boolean; notes: string | null; updated_at: string | null };
 
+export type Availability = {
+  id: string;
+  starts_at: string;
+  ends_at: string;
+  kind: string | null;
+  all_day: boolean | null;
+  repeat: AvailabilityRepeat | null;
+  repeat_days: number[] | null;
+  repeat_until: string | null;
+  reason: string | null;
+  created_by: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type Appointment = {
+  id: string;
+  customer_id: string | null;
+  inquiry_id: string | null;
+  title: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  mode: AppointmentMode | null;
+  location: string | null;
+  status: AppointmentStatus | null;
+  notes: string | null;
+  external_calendar: string | null;
+  external_event_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -211,6 +246,18 @@ export type Database = {
         Update: Partial<FeatureFlag>;
         Relationships: [];
       };
+      availability: {
+        Row: Availability;
+        Insert: Partial<Omit<Availability, "id" | "created_at" | "updated_at">> & Partial<Pick<Availability, "id" | "created_at" | "updated_at">>;
+        Update: Partial<Availability>;
+        Relationships: [];
+      };
+      appointments: {
+        Row: Appointment;
+        Insert: Partial<Omit<Appointment, "id" | "created_at" | "updated_at">> & Partial<Pick<Appointment, "id" | "created_at" | "updated_at">>;
+        Update: Partial<Appointment>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -229,6 +276,9 @@ export type Database = {
       order_status: OrderStatus;
       shipment_status: ShipmentStatus;
       package_type: PackageType;
+      availability_repeat: AvailabilityRepeat;
+      appointment_status: AppointmentStatus;
+      appointment_mode: AppointmentMode;
     };
     CompositeTypes: Record<string, never>;
   };
