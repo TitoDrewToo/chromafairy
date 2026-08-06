@@ -93,14 +93,16 @@ export type Database = {
     Tables: {
       works: {
         Row: Work;
-        Insert: Omit<Work, "id" | "created_at" | "updated_at" | "sold_at"> &
+        Insert: Partial<Omit<Work, "id" | "created_at" | "updated_at" | "sold_at">> &
+          Pick<Work, "title" | "slug" | "year"> &
           Partial<Pick<Work, "id" | "created_at" | "updated_at" | "sold_at">>;
         Update: Partial<Work>;
         Relationships: [];
       };
       series: {
         Row: Series;
-        Insert: Omit<Series, "id" | "created_at" | "updated_at"> &
+        Insert: Partial<Omit<Series, "id" | "created_at" | "updated_at">> &
+          Pick<Series, "name" | "slug"> &
           Partial<Pick<Series, "id" | "created_at" | "updated_at">>;
         Update: Partial<Series>;
         Relationships: [];
