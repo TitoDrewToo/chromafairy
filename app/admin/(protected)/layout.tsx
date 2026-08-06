@@ -7,7 +7,7 @@ import "../admin.css";
 const areas = [
   ["Catalogue", "/admin/catalogue"],
   ["Inquiries", "/admin/inquiries"],
-  ["Sales / Orders", "/admin/orders"],
+  ["Sales / Orders", "/admin/sales"],
   ["Customers", "/admin/customers"],
   ["Scheduling", "/admin/scheduling"],
   ["Users", "/admin/users"],

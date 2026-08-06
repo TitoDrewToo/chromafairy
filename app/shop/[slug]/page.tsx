@@ -15,9 +15,10 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   const { data: work, error } = await supabase.from("works").select("*").eq("slug", slug).neq("status", "draft").maybeSingle();
   if (error || !work) notFound();
 
-  const [{ data: images }, { data: series }] = await Promise.all([
+  const [{ data: images }, { data: series }, { data: paymentsFlag }] = await Promise.all([
     supabase.from("work_images").select("storage_path, alt, is_primary").eq("work_id", work.id).order("is_primary", { ascending: false }).order("display_order", { ascending: true }),
     work.series_id ? supabase.from("series").select("name").eq("id", work.series_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    supabase.from("feature_flags").select("enabled").eq("key", "payments").maybeSingle(),
   ]);
   const gallery = (images ?? []).map((image) => ({ ...image, storage_path: getArtworkUrl(supabase, image.storage_path) }));
   const dimensions = [work.width, work.height, work.depth].filter((dimension): dimension is number => dimension !== null).join(" × ");
@@ -44,6 +45,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
               {series?.name && <div className="shop-spec"><dt>Series</dt><dd>{series.name}</dd></div>}
             </dl>
             <Link className="shop-inquire inquiry-chroma-button" href={`/inquire?work=${encodeURIComponent(work.slug)}`}><span className="inquiry-chroma-label">Inquire about this work</span></Link>
+            {paymentsFlag?.enabled && <Link className="shop-buy inquiry-chroma-button" href={`/checkout?work=${encodeURIComponent(work.slug)}`}><span className="inquiry-chroma-label">Buy</span></Link>}
             <p className="shop-inquire-note">A personal response will follow with availability and details.</p>
           </article>
         </div>

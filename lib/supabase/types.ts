@@ -3,6 +3,10 @@ export type WorkStatus = "draft" | "available" | "reserved" | "sold";
 export type InquiryType = "piece" | "commission";
 export type InquiryStatus = "new" | "replied" | "closed";
 export type DimensionUnit = "cm" | "in";
+export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
+export type OrderStatus = "new" | "paid" | "packed" | "shipped" | "delivered" | "cancelled";
+export type ShipmentStatus = "pending" | "booked" | "in_transit" | "delivered";
+export type PackageType = "rolled_tube" | "flat" | "crate";
 
 export type Work = {
   id: string;
@@ -88,6 +92,62 @@ export type Profile = {
   updated_at: string | null;
 };
 
+export type Customer = {
+  id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  notes: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type Order = {
+  id: string;
+  work_id: string | null;
+  inquiry_id: string | null;
+  customer_id: string | null;
+  buyer_name: string | null;
+  buyer_email: string | null;
+  buyer_phone: string | null;
+  amount: number | null;
+  currency: string | null;
+  payment_status: PaymentStatus | null;
+  payment_provider: string | null;
+  payment_ref: string | null;
+  order_status: OrderStatus | null;
+  sale_date: string | null;
+  channel: string | null;
+  notes: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type Shipment = {
+  id: string;
+  order_id: string | null;
+  name: string | null;
+  line1: string | null;
+  line2: string | null;
+  city: string | null;
+  region: string | null;
+  postal_code: string | null;
+  country: string | null;
+  phone: string | null;
+  carrier: string | null;
+  service: string | null;
+  tracking_number: string | null;
+  tracking_url: string | null;
+  cost: number | null;
+  currency: string | null;
+  status: ShipmentStatus | null;
+  package_type: PackageType | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type FeatureFlag = { key: string; enabled: boolean; notes: string | null; updated_at: string | null };
+
 export type Database = {
   public: {
     Tables: {
@@ -127,6 +187,30 @@ export type Database = {
         Update: Partial<Profile>;
         Relationships: [];
       };
+      customers: {
+        Row: Customer;
+        Insert: Partial<Omit<Customer, "id" | "created_at" | "updated_at">> & Partial<Pick<Customer, "id" | "created_at" | "updated_at">>;
+        Update: Partial<Customer>;
+        Relationships: [];
+      };
+      orders: {
+        Row: Order;
+        Insert: Partial<Omit<Order, "id" | "created_at" | "updated_at">> & Partial<Pick<Order, "id" | "created_at" | "updated_at">>;
+        Update: Partial<Order>;
+        Relationships: [];
+      };
+      shipments: {
+        Row: Shipment;
+        Insert: Partial<Omit<Shipment, "id" | "created_at" | "updated_at">> & Partial<Pick<Shipment, "id" | "created_at" | "updated_at">>;
+        Update: Partial<Shipment>;
+        Relationships: [];
+      };
+      feature_flags: {
+        Row: FeatureFlag;
+        Insert: Partial<Omit<FeatureFlag, "updated_at">> & Partial<Pick<FeatureFlag, "updated_at">>;
+        Update: Partial<FeatureFlag>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -141,6 +225,10 @@ export type Database = {
       inquiry_type: InquiryType;
       inquiry_status: InquiryStatus;
       dimension_unit: DimensionUnit;
+      payment_status: PaymentStatus;
+      order_status: OrderStatus;
+      shipment_status: ShipmentStatus;
+      package_type: PackageType;
     };
     CompositeTypes: Record<string, never>;
   };
