@@ -1,17 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { createClient } from "../lib/supabase/client";
+import { signOutAdmin } from "../app/actions/admin-auth";
 
 export default function AdminSignOut() {
-  const router = useRouter();
-
-  async function signOut() {
-    const supabase = createClient();
-    await supabase?.auth.signOut();
-    router.replace("/admin/login");
-    router.refresh();
-  }
-
-  return <button className="admin-sign-out" onClick={signOut} type="button">Sign out</button>;
+  return (
+    <form action={signOutAdmin}>
+      <button className="admin-action-button admin-sign-out" type="submit"><span className="admin-action-label">Sign out</span></button>
+    </form>
+  );
 }

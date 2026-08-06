@@ -46,7 +46,7 @@ export default function AdminLoginPage() {
           <label>Email<input autoComplete="email" required type="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>
           <label>Password<input autoComplete="current-password" required type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
           {error && <p className="admin-error" role="alert">{error}</p>}
-          <button className="admin-primary-button" disabled={isSubmitting} type="submit">{isSubmitting ? "Signing in…" : "Sign in"}</button>
+          <button className="admin-action-button admin-primary-button" disabled={isSubmitting} type="submit"><span className="admin-action-label">{isSubmitting ? "Signing in…" : "Sign in"}</span></button>
         </form>
       </div>
     </main>

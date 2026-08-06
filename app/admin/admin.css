@@ -40,11 +40,14 @@
 .admin-login-form label { display: grid; gap: 7px; color: #4e4a43; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
 .admin-login-form input { padding: 13px 14px; border: 1px solid #cfc8bb; background: #fff; color: #171715; font: 16px "Jost", sans-serif; letter-spacing: normal; }
 .admin-error { margin: 0; color: #9c3d32; font-size: 13px; }
-.admin-primary-button,
-.admin-sign-out { cursor: pointer; border: 1px solid #171715; background: #171715; color: #fff; font: 11px "Jost", sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+.admin-action-button { cursor: pointer; border: 1px solid #171715; background: transparent; color: #171715; font: 11px "Jost", sans-serif; letter-spacing: .18em; text-transform: uppercase; transition: border-color 220ms ease, background-color 220ms ease, transform 220ms ease; }
+.admin-action-button:hover,
+.admin-action-button:focus-visible { border-color: #171715; background: transparent !important; transform: translateY(-1px); }
+.admin-action-button:hover .admin-action-label,
+.admin-action-button:focus-visible .admin-action-label { background-image: var(--chroma-gradient); background-size: var(--chroma-size); background-position: 0% 50%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: chroma-shimmer var(--chroma-duration) linear infinite; }
 .admin-primary-button { padding: 15px 20px; }
 .admin-primary-button:disabled { cursor: wait; opacity: .6; }
-.admin-sign-out { padding: 9px 13px; background: transparent; color: inherit; }
+.admin-sign-out { padding: 9px 13px; }
 
 .admin-shell { min-height: 100vh; display: grid; grid-template-columns: 235px 1fr; background: #f7f5f0; color: #171715; }
 .admin-sidebar { display: flex; min-height: 100vh; flex-direction: column; padding: 28px 22px; border-right: 1px solid #ded9cf; background: #fbfaf7; }
@@ -64,6 +67,14 @@
 .admin-role { display: block; margin-top: 4px; color: #a6844d; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }
 .admin-page-content { padding: clamp(34px, 7vw, 90px) clamp(20px, 5vw, 64px); }
 .admin-dashboard { max-width: 680px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-action-button,
+  .admin-action-button:hover,
+  .admin-action-button:focus-visible { transition: none; animation: none; }
+  .admin-action-button:hover .admin-action-label,
+  .admin-action-button:focus-visible .admin-action-label { animation: none; }
+}
 
 @media (max-width: 720px) {
   .admin-shell { display: block; }
