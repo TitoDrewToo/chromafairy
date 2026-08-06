@@ -22,7 +22,7 @@ textarea:focus-visible {
 .global-page-frame {
   min-height: 100vh;
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
   transition: opacity var(--page-transition-duration) cubic-bezier(.2, .7, .2, 1), transform var(--page-transition-duration) cubic-bezier(.2, .7, .2, 1);
 }
 
@@ -36,10 +36,17 @@ textarea:focus-visible {
 .global-page-frame.is-buffering {
   opacity: 0;
   transform: translateY(8px);
+  will-change: opacity, transform;
+}
+
+.global-page-frame.is-ready {
+  transform: none;
+  will-change: auto;
 }
 
 .global-page-frame.is-route-transitioning {
   animation: page-route-reveal var(--page-transition-duration) cubic-bezier(.2, .7, .2, 1) both;
+  will-change: opacity, transform;
 }
 
 .global-fairy-buffer {
