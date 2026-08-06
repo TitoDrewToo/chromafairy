@@ -61,8 +61,13 @@
 
 .shop-brand:hover::after,
 .shop-brand:focus-visible::after {
-  opacity: .72;
-  animation: fairy-shimmer var(--chroma-duration) ease-in-out infinite;
+  opacity: calc(var(--fairy-intensity, .72) * .9);
+  animation: fairy-shimmer calc(var(--chroma-duration) * .82) linear infinite;
+}
+
+.shop-brand:hover,
+.shop-brand:focus-visible {
+  animation: fairy-life 4.8s ease-in-out infinite;
 }
 
 .shop-brand img {
@@ -783,6 +788,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .shop-brand:hover,
+  .shop-brand:focus-visible { animation: none; }
   .shop-brand:hover::after,
   .shop-brand:focus-visible::after { animation: none; }
   .fairy-launch { transition: none; }

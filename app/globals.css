@@ -89,6 +89,8 @@
   position: relative;
   width: calc(var(--fairy-size, 108px) * 1.42);
   height: var(--fairy-size, 108px);
+  transform-origin: center;
+  animation: fairy-life 4.8s ease-in-out infinite;
 }
 
 .animated-fairy-art img,
@@ -148,7 +150,7 @@
   background: var(--chroma-gradient);
   background-size: 260% 100%;
   mix-blend-mode: screen;
-  opacity: calc(var(--fairy-intensity, .72) * .42);
+  opacity: calc(var(--fairy-intensity, .72) * .9);
   mask-image: url('/fairy-logo.png');
   mask-position: center;
   mask-repeat: no-repeat;
@@ -157,12 +159,18 @@
   -webkit-mask-position: center;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: contain;
-  animation: fairy-shimmer var(--chroma-duration) ease-in-out infinite;
+  animation: fairy-shimmer calc(var(--chroma-duration) * .82) linear infinite;
 }
 
-@keyframes fairy-float {
-  0%, 100% { filter: drop-shadow(0 5px 9px rgba(166, 132, 77, .18)); transform: translateY(0); }
-  50% { filter: drop-shadow(0 9px 15px rgba(166, 132, 77, .32)); transform: translateY(-5px); }
+@keyframes fairy-life {
+  0%, 100% {
+    filter: drop-shadow(0 5px 9px rgba(166, 132, 77, .2));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 6px 14px rgba(87, 232, 255, .34)) drop-shadow(0 0 11px rgba(255, 102, 196, .2));
+    transform: scale(1.025);
+  }
 }
 
 @keyframes fairy-shimmer {
@@ -171,6 +179,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animated-fairy-art,
-  .animated-fairy-shimmer { animation: none; }
+.animated-fairy-art,
+.animated-fairy-shimmer { animation: none; }
 }
