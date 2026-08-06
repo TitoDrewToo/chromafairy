@@ -6,6 +6,7 @@ export default function DailyVerseFit({ reference, text, attribution }: { refere
   const frameRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const [fontSize, setFontSize] = useState(2.6);
+  const [sized, setSized] = useState(false);
 
   useLayoutEffect(() => {
     const fit = () => {
@@ -22,7 +23,10 @@ export default function DailyVerseFit({ reference, text, attribution }: { refere
         if (verseText.scrollHeight <= availableHeight && verseText.scrollWidth <= frame.clientWidth) low = middle;
         else high = middle;
       }
-      setFontSize(Math.max(1, Math.min(2.6, low)));
+      const fittedSize = Math.max(1, Math.min(2.6, low));
+      verseText.style.fontSize = `${fittedSize}rem`;
+      setFontSize(fittedSize);
+      setSized(true);
     };
     fit();
     const observer = new ResizeObserver(fit);
@@ -31,7 +35,7 @@ export default function DailyVerseFit({ reference, text, attribution }: { refere
   }, [text]);
 
   return (
-    <section className="daily-verse" aria-label="Daily verse">
+    <section className={`daily-verse ${sized ? "is-sized" : ""}`} aria-label="Daily verse">
       <div className="daily-verse-frame" ref={frameRef}>
         <p className="daily-verse-text" ref={textRef} style={{ fontSize: `${fontSize}rem` }}>“{text}”</p>
       </div>

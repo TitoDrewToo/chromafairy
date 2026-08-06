@@ -2,52 +2,18 @@
 
 import { createPortal } from "react-dom";
 import { cloneElement, isValidElement, type ReactElement, type ReactNode } from "react";
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { studioHints, type StudioHintId } from "../lib/studio-hints";
 
-type TipsContextValue = { tipsOn: boolean; toggleTips: () => void };
 type HintChildProps = { onMouseEnter?: (event: React.MouseEvent) => void; onMouseLeave?: (event: React.MouseEvent) => void; onFocus?: (event: React.FocusEvent) => void; onBlur?: (event: React.FocusEvent) => void; onKeyDown?: (event: React.KeyboardEvent) => void; "aria-describedby"?: string };
-const TipsContext = createContext<TipsContextValue>({ tipsOn: true, toggleTips: () => undefined });
-
-export function StudioHintsProvider({ children }: { children: ReactNode }) {
-  const [tipsOn, setTipsOn] = useState(true);
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem("studio.tipsOn");
-    if (saved !== null) setTipsOn(saved === "true");
-  }, []);
-
-  const toggleTips = useCallback(() => {
-    setTipsOn((current) => {
-      const next = !current;
-      window.localStorage.setItem("studio.tipsOn", String(next));
-      return next;
-    });
-  }, []);
-
-  return <TipsContext.Provider value={{ tipsOn, toggleTips }}>{children}</TipsContext.Provider>;
-}
-
-export function StudioTipsToggle() {
-  const { tipsOn, toggleTips } = useContext(TipsContext);
-  return (
-    <Hint id="tips">
-      <button className={`studio-tips-toggle ${tipsOn ? "is-on" : ""}`} aria-pressed={tipsOn} onClick={toggleTips} type="button">
-        <span aria-hidden="true">◉</span> Tips <span className="studio-tips-state">{tipsOn ? "On" : "Off"}</span>
-      </button>
-    </Hint>
-  );
-}
 
 export function Hint({ id, children, className = "" }: { id: StudioHintId; children: ReactElement | ReactNode; className?: string }) {
-  const { tipsOn } = useContext(TipsContext);
   const [open, setOpen] = useState(false);
   const [placement, setPlacement] = useState<"top" | "bottom">("top");
   const [position, setPosition] = useState({ left: 0, top: 0 });
   const anchorRef = useRef<HTMLSpanElement>(null);
   const timerRef = useRef<number | null>(null);
   const tooltipId = `studio-hint-${id.replace(/[^a-z0-9_-]/gi, "-")}`;
-  const captionId = `${tooltipId}-caption`;
   const text = studioHints[id];
 
   const dismiss = useCallback(() => {
@@ -80,7 +46,7 @@ export function Hint({ id, children, className = "" }: { id: StudioHintId; child
     // The wrapped control is intentionally cloned to attach aria-describedby and event handlers.
     // eslint-disable-next-line react-hooks/refs
     ? cloneElement(element, {
-      "aria-describedby": [open ? tooltipId : "", tipsOn ? captionId : ""].filter(Boolean).join(" ") || undefined,
+      "aria-describedby": open ? tooltipId : undefined,
       onMouseEnter: (event: React.MouseEvent) => { element.props.onMouseEnter?.(event); reveal(); },
       onMouseLeave: (event: React.MouseEvent) => { element.props.onMouseLeave?.(event); dismiss(); },
       onFocus: (event: React.FocusEvent) => { element.props.onFocus?.(event); reveal(); },
@@ -92,7 +58,6 @@ export function Hint({ id, children, className = "" }: { id: StudioHintId; child
   return (
     <span className={`studio-hint-anchor ${className}`} ref={anchorRef} onMouseLeave={dismiss}>
       {child}
-      {tipsOn && <span className="studio-hint-caption" id={captionId}>{text}</span>}
       {open && typeof document !== "undefined" && createPortal(
         <span className={`studio-hint-tooltip is-${placement}`} id={tooltipId} role="tooltip" style={{ left: position.left, top: position.top }}>{text}</span>,
         document.body,
@@ -105,5 +70,5 @@ export function StudioWelcomeCard() {
   const [visible, setVisible] = useState(true);
   useEffect(() => setVisible(window.localStorage.getItem("studio.welcomeDismissed") !== "true"), []);
   if (!visible) return null;
-  return <aside className="studio-welcome-card" role="note"><span>New here? Hover anything — or tap Tips up top — to see what it does.</span><button aria-label="Dismiss welcome message" onClick={() => { window.localStorage.setItem("studio.welcomeDismissed", "true"); setVisible(false); }} type="button">×</button></aside>;
+  return <aside className="studio-welcome-card" role="note"><span>New here? Hover any button or link to see what it does.</span><button aria-label="Dismiss welcome message" onClick={() => { window.localStorage.setItem("studio.welcomeDismissed", "true"); setVisible(false); }} type="button">×</button></aside>;
 }

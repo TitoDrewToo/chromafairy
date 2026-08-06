@@ -67,7 +67,10 @@
 .admin-role { display: block; margin-top: 4px; color: #a6844d; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }
 .admin-page-content { padding: clamp(34px, 7vw, 90px) clamp(20px, 5vw, 64px); }
 .admin-dashboard { max-width: 680px; }
-.daily-verse { margin-top: clamp(42px, 10vh, 110px); text-align: center; }
+.admin-overview { min-height: calc(100svh - 190px); display: flex; flex-direction: column; }
+.admin-overview-verse-space { flex: 1; display: grid; min-height: clamp(260px, 45vh, 520px); place-items: center; }
+.daily-verse { width: min(100%, 700px); margin: 0; text-align: center; opacity: 0; }
+.daily-verse.is-sized { opacity: 1; transition: opacity 420ms ease-out; }
 .daily-verse-frame { display: grid; min-height: clamp(190px, 28vh, 290px); place-items: center; padding: 1.5rem clamp(1rem, 5vw, 3.5rem); overflow: hidden; }
 .daily-verse-text { max-width: 100%; margin: 0; color: #171715; font-family: "Cormorant Garamond", Georgia, serif; font-size: 2.6rem; font-weight: 400; line-height: 1.08; text-wrap: balance; }
 .daily-verse-reference { margin: 0.8rem 0 0; color: #a6844d; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
@@ -97,16 +100,6 @@
   vertical-align: middle;
 }
 
-.studio-hint-caption {
-  display: block;
-  max-width: 260px;
-  margin-top: 0.32rem;
-  color: var(--ink, #171715);
-  font-size: 0.68rem;
-  line-height: 1.35;
-  letter-spacing: 0.01em;
-}
-
 .studio-hint-tooltip {
   position: fixed;
   z-index: 5000;
@@ -123,23 +116,9 @@
   animation: studio-hint-reveal 180ms ease-out both;
 }
 
-.studio-tips-toggle {
-  border: 1px solid rgb(166 132 77 / 55%);
-  border-radius: 999px;
-  padding: 0.38rem 0.62rem;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: 0.72rem;
-  cursor: pointer;
-}
-
-.studio-tips-toggle:hover,
-.studio-tips-toggle:focus-visible { border-color: #a6844d; color: #a6844d; }
-.studio-tips-state { opacity: 0.65; }
 .admin-topbar-actions { display: flex; align-items: center; gap: 0.7rem; }
 .studio-welcome-card { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.4rem; padding: 0.8rem 1rem; border: 1px solid rgb(166 132 77 / 45%); background: rgb(251 250 247 / 86%); color: var(--ink, #171715); box-shadow: 0 7px 18px rgb(23 23 21 / 7%); font-size: 0.85rem; }
 .studio-welcome-card button { border: 0; background: transparent; color: inherit; font-size: 1.25rem; line-height: 1; cursor: pointer; }
 @keyframes studio-hint-reveal { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) { .studio-hint-tooltip { animation: none; } }
-@media (max-width: 700px) { .studio-hint-caption { max-width: 220px; } .admin-topbar-actions { gap: 0.35rem; } .studio-tips-state { display: none; } }
+@media (prefers-reduced-motion: reduce) { .studio-hint-tooltip, .daily-verse.is-sized { animation: none; transition: none; } }
+@media (max-width: 700px) { .admin-topbar-actions { gap: 0.35rem; } }

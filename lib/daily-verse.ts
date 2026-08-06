@@ -22,11 +22,15 @@ export const VERSES = [
 type Verse = { reference: string; text: string; translation_name: string };
 
 const FALLBACKS: Verse[] = [
-  { reference: "Philippians 4:13", text: "I can do all things through Christ, who strengthens me.", translation_name: "World English Bible" },
-  { reference: "Psalm 23:1", text: "Yahweh is my shepherd: I shall lack nothing.", translation_name: "World English Bible" },
-  { reference: "Isaiah 41:10", text: "Don’t be afraid, for I am with you. Don’t be dismayed, for I am your God. I will strengthen you. Yes, I will help you. Yes, I will uphold you with the right hand of my righteousness.", translation_name: "World English Bible" },
-  { reference: "Matthew 11:28", text: "Come to me, all you who labor and are heavily burdened, and I will give you rest.", translation_name: "World English Bible" },
+  { reference: "Philippians 4:13", text: "I can do all things through Christ which strengtheneth me.", translation_name: "King James Version" },
+  { reference: "Psalm 23:1", text: "The LORD is my shepherd; I shall not want.", translation_name: "King James Version" },
+  { reference: "Isaiah 41:10", text: "Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness.", translation_name: "King James Version" },
+  { reference: "Matthew 11:28", text: "Come unto me, all ye that labour and are heavy laden, and I will give you rest.", translation_name: "King James Version" },
 ];
+
+function normalizeWhitespace(text: string) {
+  return text.replace(/\s+/g, " ").trim();
+}
 
 function dayOfYear(date: Date) {
   const start = Date.UTC(date.getUTCFullYear(), 0, 1);
@@ -45,11 +49,11 @@ export function pickReference(date = new Date()) {
 export async function getDailyVerse(): Promise<Verse> {
   const reference = pickReference();
   try {
-    const response = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}?translation=web`, { next: { revalidate: 86400 } });
+    const response = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}?translation=kjv`, { next: { revalidate: 86400 } });
     if (!response.ok) throw new Error(`Bible API returned ${response.status}`);
     const verse = await response.json() as Partial<Verse>;
     if (!verse.text || !verse.reference) throw new Error("Bible API response was incomplete");
-    return { reference: verse.reference, text: verse.text.trim(), translation_name: verse.translation_name || "World English Bible" };
+    return { reference: verse.reference, text: normalizeWhitespace(verse.text), translation_name: "King James Version" };
   } catch {
     return FALLBACKS[VERSES.indexOf(reference) % FALLBACKS.length];
   }

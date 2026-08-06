@@ -3,12 +3,12 @@ import DailyVerse from "../../../components/daily-verse";
 
 export default function AdminDashboardPage() {
   return (
-    <div className="admin-dashboard">
+    <div className="admin-dashboard admin-overview">
       <StudioWelcomeCard />
       <p className="admin-eyebrow">Studio overview</p>
       <h1>Welcome to the studio</h1>
       <p className="admin-muted">Your catalogue, inquiries, and studio operations will live here.</p>
-      <DailyVerse />
+      <div className="admin-overview-verse-space"><DailyVerse /></div>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AdminSignOut from "../../../components/admin-sign-out";
-import { Hint, StudioHintsProvider, StudioTipsToggle } from "../../../components/studio-hint";
+import { Hint } from "../../../components/studio-hint";
 import { createClient } from "../../../lib/supabase/server";
 import "../admin.css";
 
@@ -45,7 +45,6 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   const role = profile?.role ?? "admin";
 
   return (
-    <StudioHintsProvider>
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <Hint id="wordmark"><Link className="admin-wordmark" href="/studio">Chroma Fairy<span>Studio</span></Link></Hint>
@@ -57,11 +56,10 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
       <section className="admin-content">
         <header className="admin-topbar">
           <Hint id="userRole"><div><span className="admin-user-email">{displayName}</span><span className="admin-role">{role}</span></div></Hint>
-          <div className="admin-topbar-actions"><StudioTipsToggle /><AdminSignOut /></div>
+          <div className="admin-topbar-actions"><AdminSignOut /></div>
         </header>
         <div className="admin-page-content">{children}</div>
       </section>
     </div>
-    </StudioHintsProvider>
   );
 }
