@@ -2,14 +2,14 @@
 
 import { createPortal } from "react-dom";
 import { cloneElement, isValidElement, type ReactElement, type ReactNode } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { studioHints, type StudioHintId } from "../lib/studio-hints";
 
 type HintChildProps = { onMouseEnter?: (event: React.MouseEvent) => void; onMouseLeave?: (event: React.MouseEvent) => void; onFocus?: (event: React.FocusEvent) => void; onBlur?: (event: React.FocusEvent) => void; onKeyDown?: (event: React.KeyboardEvent) => void; "aria-describedby"?: string };
 
 export function Hint({ id, children, className = "" }: { id: StudioHintId; children: ReactElement | ReactNode; className?: string }) {
   const [open, setOpen] = useState(false);
-  const [placement, setPlacement] = useState<"top" | "bottom">("top");
+  const [placement, setPlacement] = useState<"right" | "left" | "top" | "bottom">("bottom");
   const [position, setPosition] = useState({ left: 0, top: 0 });
   const anchorRef = useRef<HTMLSpanElement>(null);
   const timerRef = useRef<number | null>(null);
@@ -30,15 +30,35 @@ export function Hint({ id, children, className = "" }: { id: StudioHintId; child
 
   useEffect(() => () => { if (timerRef.current !== null) window.clearTimeout(timerRef.current); }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!open || !anchorRef.current) return;
-    const rect = anchorRef.current.getBoundingClientRect();
-    const tooltipWidth = Math.min(320, window.innerWidth - 16);
-    const left = Math.max(8, Math.min(window.innerWidth - tooltipWidth - 8, rect.left + rect.width / 2 - tooltipWidth / 2));
-    const topSpace = rect.top - 12;
-    const useTop = topSpace > 84;
-    setPlacement(useTop ? "top" : "bottom");
-    setPosition({ left, top: useTop ? Math.max(8, rect.top - 12) : Math.min(window.innerHeight - 8, rect.bottom + 12) });
+    const positionTooltip = () => {
+      const anchor = anchorRef.current;
+      const tooltip = document.getElementById(tooltipId);
+      if (!anchor) return;
+      const rect = anchor.getBoundingClientRect();
+      const tooltipWidth = tooltip?.offsetWidth ?? Math.min(320, window.innerWidth - 16);
+      const tooltipHeight = tooltip?.offsetHeight ?? 54;
+      const gap = 12;
+      const isSidebar = Boolean(anchor.closest(".admin-nav"));
+      if (isSidebar) {
+        const useRight = rect.right + gap + tooltipWidth <= window.innerWidth - 8;
+        const left = useRight ? rect.right + gap : Math.max(8, rect.left - gap - tooltipWidth);
+        const top = Math.max(8, Math.min(window.innerHeight - tooltipHeight - 8, rect.top + (rect.height - tooltipHeight) / 2));
+        setPlacement(useRight ? "right" : "left");
+        setPosition({ left, top });
+        return;
+      }
+      const useBottom = rect.bottom + gap + tooltipHeight <= window.innerHeight - 8;
+      const left = Math.max(8, Math.min(window.innerWidth - tooltipWidth - 8, rect.left + (rect.width - tooltipWidth) / 2));
+      const top = useBottom ? rect.bottom + gap : Math.max(8, rect.top - gap - tooltipHeight);
+      setPlacement(useBottom ? "bottom" : "top");
+      setPosition({ left, top });
+    };
+    const frame = window.requestAnimationFrame(positionTooltip);
+    window.addEventListener("resize", positionTooltip);
+    window.addEventListener("scroll", positionTooltip, true);
+    return () => { window.cancelAnimationFrame(frame); window.removeEventListener("resize", positionTooltip); window.removeEventListener("scroll", positionTooltip, true); };
   }, [open]);
 
   const element = isValidElement(children) ? children as ReactElement<HintChildProps> : null;

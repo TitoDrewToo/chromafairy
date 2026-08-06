@@ -9,7 +9,8 @@ export default function DailyVerseFit({ reference, text, attribution }: { refere
   const [sized, setSized] = useState(false);
 
   useLayoutEffect(() => {
-    const fit = () => {
+    let cancelled = false;
+    const fit = (reveal = false) => {
       const frame = frameRef.current;
       const verseText = textRef.current;
       if (!frame || !verseText) return;
@@ -26,12 +27,19 @@ export default function DailyVerseFit({ reference, text, attribution }: { refere
       const fittedSize = Math.max(1, Math.min(2.6, low));
       verseText.style.fontSize = `${fittedSize}rem`;
       setFontSize(fittedSize);
-      setSized(true);
+      if (reveal) setSized(true);
     };
-    fit();
-    const observer = new ResizeObserver(fit);
-    if (frameRef.current) observer.observe(frameRef.current);
-    return () => observer.disconnect();
+    const prepare = async () => {
+      await document.fonts.ready;
+      if (cancelled) return;
+      fit(true);
+      const observer = new ResizeObserver(() => fit());
+      if (frameRef.current) observer.observe(frameRef.current);
+      cleanupObserver = () => observer.disconnect();
+    };
+    let cleanupObserver: () => void = () => undefined;
+    void prepare();
+    return () => { cancelled = true; cleanupObserver(); };
   }, [text]);
 
   return (
