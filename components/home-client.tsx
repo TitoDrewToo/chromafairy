@@ -12,18 +12,23 @@ type HomeClientProps = {
 
 export default function HomeClient({ styles, markup }: HomeClientProps) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const [backgroundMount, setBackgroundMount] = useState<HTMLElement | null>(null);
   const [fairyMount, setFairyMount] = useState<HTMLElement | null>(null);
   const [commissionMount, setCommissionMount] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
+    setBackgroundMount(document.getElementById("global-background-layer"));
     setFairyMount(root.querySelector<HTMLElement>("#animated-fairy-mount"));
     setCommissionMount(root.querySelector<HTMLElement>("#commission-form-mount"));
+  }, []);
 
-    const canvas = root.querySelector<HTMLCanvasElement>("#art");
-    const fallback = root.querySelector<HTMLElement>("#artFallback");
-    if (!canvas || !fallback) return;
+  useEffect(() => {
+    const root = rootRef.current;
+    const canvas = backgroundMount?.querySelector<HTMLCanvasElement>("#art");
+    const fallback = backgroundMount?.querySelector<HTMLElement>("#artFallback");
+    if (!root || !canvas || !fallback) return;
 
     const gl = (canvas.getContext("webgl") || canvas.getContext("experimental-webgl")) as WebGLRenderingContext | null;
     if (!gl) {
@@ -212,12 +217,13 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       window.removeEventListener("scroll", onScroll);
       observer.disconnect();
     };
-  }, []);
+  }, [backgroundMount]);
 
   return (
     <div className="home-shell" ref={rootRef}>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <div dangerouslySetInnerHTML={{ __html: markup }} />
+      {backgroundMount ? createPortal(<><canvas id="art" /><div id="artFallback" /></>, backgroundMount) : null}
       {fairyMount ? createPortal(<AnimatedFairy />, fairyMount) : null}
       {commissionMount ? createPortal(<InquiryForm kind="commission" />, commissionMount) : null}
     </div>

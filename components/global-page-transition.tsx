@@ -56,6 +56,7 @@ export default function GlobalPageTransition({ children }: { children: ReactNode
 
   return (
     <>
+      <div aria-hidden="true" id="global-background-layer" />
       <div className={frameClass}>{children}</div>
       {showBuffer && (
         <div aria-label="Loading Chroma Fairy" className={`global-fairy-buffer ${bufferPhase === "leaving" ? "is-leaving" : ""}`} role="status">
