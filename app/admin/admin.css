@@ -1,0 +1,76 @@
+.admin-login-page,
+.admin-denied-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 18px;
+  background: #f7f5f0;
+  color: #171715;
+}
+
+.admin-login-card,
+.admin-denied-card {
+  width: min(100%, 440px);
+  padding: clamp(28px, 6vw, 54px);
+  border: 1px solid #ded9cf;
+  background: rgba(255, 255, 255, .82);
+  box-shadow: 0 18px 50px rgba(55, 45, 25, .08);
+}
+
+.admin-eyebrow {
+  margin: 0 0 12px;
+  color: #a6844d;
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.admin-login-card h1,
+.admin-denied-card h1,
+.admin-dashboard h1 {
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(34px, 5vw, 54px);
+  font-weight: 500;
+}
+
+.admin-muted { color: #77736b; line-height: 1.6; }
+.admin-back-link { color: #765b2d; font-size: 12px; text-decoration: none; }
+.admin-login-form { display: grid; gap: 18px; margin-top: 30px; }
+.admin-login-form label { display: grid; gap: 7px; color: #4e4a43; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+.admin-login-form input { padding: 13px 14px; border: 1px solid #cfc8bb; background: #fff; color: #171715; font: 16px "Jost", sans-serif; letter-spacing: normal; }
+.admin-error { margin: 0; color: #9c3d32; font-size: 13px; }
+.admin-primary-button,
+.admin-sign-out { cursor: pointer; border: 1px solid #171715; background: #171715; color: #fff; font: 11px "Jost", sans-serif; letter-spacing: .18em; text-transform: uppercase; }
+.admin-primary-button { padding: 15px 20px; }
+.admin-primary-button:disabled { cursor: wait; opacity: .6; }
+.admin-sign-out { padding: 9px 13px; background: transparent; color: inherit; }
+
+.admin-shell { min-height: 100vh; display: grid; grid-template-columns: 235px 1fr; background: #f7f5f0; color: #171715; }
+.admin-sidebar { display: flex; min-height: 100vh; flex-direction: column; padding: 28px 22px; border-right: 1px solid #ded9cf; background: #fbfaf7; }
+.admin-wordmark { color: #171715; font-family: "Cormorant Garamond", Georgia, serif; font-size: 27px; text-decoration: none; }
+.admin-wordmark span { display: block; margin-top: -2px; color: #a6844d; font: 10px "Jost", sans-serif; letter-spacing: .25em; text-transform: uppercase; }
+.admin-nav { display: grid; gap: 3px; margin-top: 58px; }
+.admin-nav a,
+.admin-site-link { padding: 11px 10px; color: #5d5952; font-size: 12px; text-decoration: none; transition: color 180ms ease, background 180ms ease; }
+.admin-nav a:hover,
+.admin-nav a:focus-visible,
+.admin-site-link:hover,
+.admin-site-link:focus-visible { background: #f1eee7; color: #765b2d; }
+.admin-site-link { margin-top: auto; }
+.admin-content { min-width: 0; }
+.admin-topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px clamp(20px, 5vw, 64px); border-bottom: 1px solid #ded9cf; background: rgba(251, 250, 247, .78); }
+.admin-user-email { display: block; font-size: 13px; }
+.admin-role { display: block; margin-top: 4px; color: #a6844d; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }
+.admin-page-content { padding: clamp(34px, 7vw, 90px) clamp(20px, 5vw, 64px); }
+.admin-dashboard { max-width: 680px; }
+
+@media (max-width: 720px) {
+  .admin-shell { display: block; }
+  .admin-sidebar { min-height: auto; padding: 20px 16px 14px; border-right: 0; border-bottom: 1px solid #ded9cf; }
+  .admin-nav { display: flex; gap: 4px; margin-top: 24px; overflow-x: auto; padding-bottom: 2px; }
+  .admin-nav a { flex: 0 0 auto; white-space: nowrap; }
+  .admin-site-link { display: none; }
+  .admin-topbar { padding: 18px 16px; }
+  .admin-page-content { padding: 42px 16px; }
+}
