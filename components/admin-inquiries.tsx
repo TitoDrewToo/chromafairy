@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import type { Inquiry, InquiryStatus } from "../lib/supabase/types";
 import { createClient } from "../lib/supabase/client";
+import { Hint } from "./studio-hint";
 
 export type AdminInquiry = Inquiry & { work: { id: string; title: string; slug: string } | null };
 const statuses: InquiryStatus[] = ["new", "replied", "closed"];
@@ -27,8 +28,8 @@ export default function InquiryAdmin({ initialInquiries }: { initialInquiries: A
       <h2>{inquiry.name} <span>· {inquiry.email}</span></h2>
       {inquiry.phone && <p className="admin-muted">{inquiry.phone}</p>}
       {inquiry.message && <p className="admin-inquiry-message">{inquiry.message}</p>}
-      <div className="admin-inquiry-meta">{inquiry.work ? <Link href={`/shop/${inquiry.work.slug}`}>Work: {inquiry.work.title}</Link> : <span>General commission</span>}<span>Source: {inquiry.source ?? "—"}</span></div>
-      <div className="admin-card-actions"><span className={`admin-status-badge status-${inquiry.status}`}>{inquiry.status}</span><a className="admin-small-button" href={`mailto:${encodeURIComponent(inquiry.email)}?subject=${encodeURIComponent(inquiry.work ? `Re: ${inquiry.work.title}` : "Re: your Chroma Fairy inquiry")}`}>Reply by email</a><button className="admin-action-button" disabled={inquiry.status === "closed"} onClick={() => void advance(inquiry)} type="button"><span className="admin-action-label">{inquiry.status === "new" ? "Mark replied" : inquiry.status === "replied" ? "Close inquiry" : "Closed"}</span></button></div>
+      <div className="admin-inquiry-meta">{inquiry.work ? <Hint id="viewWork"><Link href={`/shop/${inquiry.work.slug}`}>Work: {inquiry.work.title}</Link></Hint> : <span>General commission</span>}<span>Source: {inquiry.source ?? "—"}</span></div>
+      <div className="admin-card-actions"><span className={`admin-status-badge status-${inquiry.status}`}>{inquiry.status}</span><Hint id="replyEmail"><a className="admin-small-button" href={`mailto:${encodeURIComponent(inquiry.email)}?subject=${encodeURIComponent(inquiry.work ? `Re: ${inquiry.work.title}` : "Re: your Chroma Fairy inquiry")}`}>Reply by email</a></Hint><Hint id="closeInquiry"><button className="admin-action-button" disabled={inquiry.status === "closed"} onClick={() => void advance(inquiry)} type="button"><span className="admin-action-label">{inquiry.status === "new" ? "Mark replied" : inquiry.status === "replied" ? "Close inquiry" : "Closed"}</span></button></Hint></div>
     </article>) : <div className="admin-empty-state">No inquiries yet.</div>}
   </section>;
 }

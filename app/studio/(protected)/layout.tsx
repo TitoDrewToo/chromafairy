@@ -1,18 +1,19 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AdminSignOut from "../../../components/admin-sign-out";
+import { Hint, StudioHintsProvider, StudioTipsToggle } from "../../../components/studio-hint";
 import { createClient } from "../../../lib/supabase/server";
 import "../admin.css";
 
 const areas = [
-  ["Catalogue", "/studio/catalogue"],
-  ["Inquiries", "/studio/inquiries"],
-  ["Sales / Orders", "/studio/sales"],
-  ["Customers", "/studio/customers"],
-  ["Scheduling", "/studio/scheduling"],
-  ["Users", "/studio/users"],
-  ["Insights", "/studio/insights"],
-  ["Settings", "/studio/settings"],
+  ["Catalogue", "/studio/catalogue", "navCatalogue"],
+  ["Inquiries", "/studio/inquiries", "navInquiries"],
+  ["Sales / Orders", "/studio/sales", "navSales"],
+  ["Customers", "/studio/customers", "navCustomers"],
+  ["Scheduling", "/studio/scheduling", "navScheduling"],
+  ["Users", "/studio/users", "navUsers"],
+  ["Insights", "/studio/insights", "navInsights"],
+  ["Settings", "/studio/settings", "navSettings"],
 ] as const;
 
 export default async function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -44,21 +45,23 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   const role = profile?.role ?? "admin";
 
   return (
+    <StudioHintsProvider>
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <Link className="admin-wordmark" href="/studio">Chroma Fairy<span>Studio</span></Link>
+        <Hint id="wordmark"><Link className="admin-wordmark" href="/studio">Chroma Fairy<span>Studio</span></Link></Hint>
         <nav className="admin-nav" aria-label="Admin areas">
-          {areas.map(([label, href]) => <Link href={href} key={href}>{label}</Link>)}
+          {areas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
         </nav>
-        <Link className="admin-site-link" href="/">← View site</Link>
+        <Hint id="viewSite"><Link className="admin-site-link" href="/">← View site</Link></Hint>
       </aside>
       <section className="admin-content">
         <header className="admin-topbar">
-          <div><span className="admin-user-email">{displayName}</span><span className="admin-role">{role}</span></div>
-          <AdminSignOut />
+          <Hint id="userRole"><div><span className="admin-user-email">{displayName}</span><span className="admin-role">{role}</span></div></Hint>
+          <div className="admin-topbar-actions"><StudioTipsToggle /><AdminSignOut /></div>
         </header>
         <div className="admin-page-content">{children}</div>
       </section>
     </div>
+    </StudioHintsProvider>
   );
 }

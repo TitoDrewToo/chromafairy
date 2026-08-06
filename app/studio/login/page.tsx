@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "../../../lib/supabase/client";
+import { Hint } from "../../../components/studio-hint";
 import "../admin.css";
 
 export default function AdminLoginPage() {
@@ -48,7 +49,7 @@ export default function AdminLoginPage() {
           {error && <p className="admin-error" role="alert">{error}</p>}
           <button className="admin-action-button admin-primary-button" disabled={isSubmitting} type="submit"><span className="admin-action-label">{isSubmitting ? "Signing in…" : "Sign in"}</span></button>
         </form>
-        <Link className="admin-back-link" href="/studio/set-password?mode=forgot">Forgot password?</Link>
+        <Hint id="forgotPassword"><Link className="admin-back-link" href="/studio/set-password?mode=forgot">Forgot password?</Link></Hint>
       </div>
     </main>
   );

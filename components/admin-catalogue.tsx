@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { formatPrice } from "../lib/catalogue";
 import { createClient } from "../lib/supabase/client";
 import type { Series, Work, WorkImage, WorkStatus } from "../lib/supabase/types";
+import { Hint } from "./studio-hint";
 
 export type AdminCatalogueImage = Pick<WorkImage, "id" | "work_id" | "storage_path" | "alt" | "display_order" | "is_primary"> & { url: string };
 export type AdminCatalogueSeries = Pick<Series, "id" | "name" | "slug" | "year">;
@@ -106,16 +107,16 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
   return (
     <section className="admin-catalogue-tools">
       <div className="admin-catalogue-toolbar">
-        <label>Status<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as WorkStatus | "all")}>{statuses.map((status) => <option key={status} value={status}>{status === "all" ? "All statuses" : titleCase(status)}</option>)}</select></label>
+        <Hint id="statusFilters"><label>Status<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as WorkStatus | "all")}>{statuses.map((status) => <option key={status} value={status}>{status === "all" ? "All statuses" : titleCase(status)}</option>)}</select></label></Hint>
         <label>Series<select value={seriesFilter} onChange={(event) => setSeriesFilter(event.target.value)}><option value="all">All series</option>{initialSeries.map((series) => <option key={series.id} value={series.id}>{series.name}</option>)}</select></label>
-        <div className="admin-quick-add"><input ref={quickAddRef} accept="image/*" multiple onChange={(event: ChangeEvent<HTMLInputElement>) => void quickAdd(event.target.files)} type="file" /><button className="admin-action-button" onClick={() => quickAddRef.current?.click()} type="button"><span className="admin-action-label">Quick add drafts</span></button></div>
+        <div className="admin-quick-add"><input ref={quickAddRef} accept="image/*" multiple onChange={(event: ChangeEvent<HTMLInputElement>) => void quickAdd(event.target.files)} type="file" /><Hint id="quickAdd"><button className="admin-action-button" onClick={() => quickAddRef.current?.click()} type="button"><span className="admin-action-label">Quick add drafts</span></button></Hint></div>
       </div>
 
       {selected.size > 0 && <div className="admin-batch-bar">
         <strong>{selected.size} selected</strong>
         <select aria-label="Bulk status" value={batchStatus} onChange={(event) => setBatchStatus(event.target.value as WorkStatus | "")}><option value="">Set status…</option>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select>
         <select aria-label="Bulk series" value={batchSeries} onChange={(event) => setBatchSeries(event.target.value)}><option value="">Assign series…</option><option value="__none__">No series</option>{initialSeries.map((series) => <option key={series.id} value={series.id}>{series.name}</option>)}</select>
-        <button className="admin-action-button" disabled={busy || (!batchStatus && !batchSeries)} onClick={() => void applyBatch()} type="button"><span className="admin-action-label">Apply</span></button>
+        <Hint id="applyBulk"><button className="admin-action-button" disabled={busy || (!batchStatus && !batchSeries)} onClick={() => void applyBatch()} type="button"><span className="admin-action-label">Apply</span></button></Hint>
       </div>}
       {message && <p className="admin-inline-success" role="status">{message}</p>}
       {error && <p className="admin-error" role="alert">{error}</p>}
@@ -134,7 +135,7 @@ function WorkRow({ work, selected, onSelect, onStatus }: { work: AdminCatalogueW
     <article className="admin-work-row">
       <input aria-label={`Select ${work.title}`} checked={selected} onChange={onSelect} type="checkbox" />
       <div className="admin-work-thumb">{image ? <img alt={image.alt ?? work.title} src={image.url} /> : <span>No image</span>}</div>
-      <div className="admin-work-summary"><Link href={`/studio/catalogue/${work.id}`}>{work.title}</Link><span>{work.year}{work.month ? ` · ${monthName(work.month)}` : ""} · {work.series_name ?? "Unassigned"}</span></div>
+      <div className="admin-work-summary"><Hint id="viewWork"><Link href={`/studio/catalogue/${work.id}`}>{work.title}</Link></Hint><span>{work.year}{work.month ? ` · ${monthName(work.month)}` : ""} · {work.series_name ?? "Unassigned"}</span></div>
       <span className={`admin-status-badge status-${work.status}`}>{titleCase(work.status)}{work.is_new ? " · New" : ""}</span>
       <span className="admin-work-price">{formatPrice(work)}</span>
       <select aria-label={`Set status for ${work.title}`} className="admin-row-status" value={work.status} onChange={(event) => onStatus(event.target.value as WorkStatus)}>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select>

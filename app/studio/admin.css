@@ -85,3 +85,56 @@
   .admin-topbar { padding: 18px 16px; }
   .admin-page-content { padding: 42px 16px; }
 }
+.studio-hint-anchor {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  vertical-align: middle;
+}
+
+.studio-hint-caption {
+  display: block;
+  max-width: 260px;
+  margin-top: 0.32rem;
+  color: var(--ink, #171715);
+  font-size: 0.68rem;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.studio-hint-tooltip {
+  position: fixed;
+  z-index: 5000;
+  width: min(320px, calc(100vw - 16px));
+  padding: 0.62rem 0.72rem;
+  border: 1px solid #a6844d;
+  border-radius: 0.35rem;
+  background: var(--paper, #fbfaf7);
+  color: var(--ink, #171715);
+  box-shadow: 0 10px 26px rgb(23 23 21 / 16%);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  pointer-events: none;
+  animation: studio-hint-reveal 180ms ease-out both;
+}
+
+.studio-tips-toggle {
+  border: 1px solid rgb(166 132 77 / 55%);
+  border-radius: 999px;
+  padding: 0.38rem 0.62rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.studio-tips-toggle:hover,
+.studio-tips-toggle:focus-visible { border-color: #a6844d; color: #a6844d; }
+.studio-tips-state { opacity: 0.65; }
+.admin-topbar-actions { display: flex; align-items: center; gap: 0.7rem; }
+.studio-welcome-card { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.4rem; padding: 0.8rem 1rem; border: 1px solid rgb(166 132 77 / 45%); background: rgb(251 250 247 / 86%); color: var(--ink, #171715); box-shadow: 0 7px 18px rgb(23 23 21 / 7%); font-size: 0.85rem; }
+.studio-welcome-card button { border: 0; background: transparent; color: inherit; font-size: 1.25rem; line-height: 1; cursor: pointer; }
+@keyframes studio-hint-reveal { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .studio-hint-tooltip { animation: none; } }
+@media (max-width: 700px) { .studio-hint-caption { max-width: 220px; } .admin-topbar-actions { gap: 0.35rem; } .studio-tips-state { display: none; } }

@@ -1,6 +1,7 @@
 import { createClient } from "../../../../lib/supabase/server";
 import "../../admin.css";
 import "../../operations.css";
+import { Hint } from "../../../../components/studio-hint";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,6 @@ function aggregate(orders: Array<{ amount: number | null; work_id: string | null
   orders.forEach((order) => { const label = key(order); const current = values.get(label) ?? { revenue: 0, count: 0 }; values.set(label, { revenue: current.revenue + Number(order.amount ?? 0), count: current.count + 1 }); });
   return Array.from(values.entries()).map(([label, value]) => ({ label, ...value })).sort((a, b) => b.revenue - a.revenue);
 }
-function Metric({ label, value }: { label: string; value: string }) { return <div className="admin-metric"><span>{label}</span><strong>{value}</strong></div>; }
-function InsightTable({ title, rows }: { title: string; rows: Array<{ label: string; revenue: number; count: number }> }) { return <section className="admin-insight-section"><h2>{title}</h2>{rows.length ? <div className="admin-insight-table">{rows.map((row) => <div className="admin-insight-row" key={row.label}><span>{row.label}</span><span>{row.count} sale{row.count === 1 ? "" : "s"}</span><b>PHP {row.revenue.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</b></div>)}</div> : <p className="admin-empty-state">No paid orders yet.</p>}</section>; }
+function Metric({ label, value }: { label: string; value: string }) { const hintId = label === "Revenue" || label === "Paid orders" ? "revenue" : label === "Average ticket" ? "averageTicket" : "repeatBuyer"; return <Hint id={hintId}><div className="admin-metric"><span>{label}</span><strong>{value}</strong></div></Hint>; }
+function InsightTable({ title, rows }: { title: string; rows: Array<{ label: string; revenue: number; count: number }> }) { return <section className="admin-insight-section"><Hint id="revenue"><h2>{title}</h2></Hint>{rows.length ? <div className="admin-insight-table">{rows.map((row) => <div className="admin-insight-row" key={row.label}><span>{row.label}</span><span>{row.count} sale{row.count === 1 ? "" : "s"}</span><b>PHP {row.revenue.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</b></div>)}</div> : <p className="admin-empty-state">No paid orders yet.</p>}</section>; }
 function AdminMessage({ message }: { message: string }) { return <div className="admin-dashboard"><p className="admin-eyebrow">Studio intelligence</p><h1>Insights</h1><p className="admin-muted">{message}</p></div>; }

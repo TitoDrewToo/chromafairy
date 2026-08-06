@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "../../../../lib/supabase/server";
 import { getArtworkUrl } from "../../../../lib/catalogue";
+import { Hint } from "../../../../components/studio-hint";
 import CatalogueAdmin, { type AdminCatalogueImage, type AdminCatalogueSeries, type AdminCatalogueWork } from "../../../../components/admin-catalogue";
 import "../../admin.css";
 import "../../catalogue.css";
@@ -35,7 +36,7 @@ export default async function AdminCataloguePage() {
     <div className="admin-dashboard admin-catalogue-page">
       <div className="admin-catalogue-heading">
         <div><p className="admin-eyebrow">Studio catalogue</p><h1>Works</h1><p className="admin-muted">All works, including drafts.</p></div>
-        <Link className="admin-action-button admin-action-link" href="/studio/catalogue/new"><span className="admin-action-label">Add a work</span></Link>
+        <Hint id="addWork"><Link className="admin-action-button admin-action-link" href="/studio/catalogue/new"><span className="admin-action-label">Add a work</span></Link></Hint>
       </div>
       <CatalogueAdmin initialWorks={adminWorks} initialSeries={(series ?? []) as AdminCatalogueSeries[]} />
     </div>

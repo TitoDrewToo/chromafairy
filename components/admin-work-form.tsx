@@ -4,6 +4,7 @@ import { DragEvent, FormEvent, useEffect, useMemo, useRef, useState } from "reac
 import { useRouter } from "next/navigation";
 import { uploadArtworkImage } from "../app/actions/admin-catalogue";
 import type { Series, Work, WorkImage, WorkStatus } from "../lib/supabase/types";
+import { Hint } from "./studio-hint";
 import { createClient } from "../lib/supabase/client";
 
 type FormMode = "create" | "edit";
@@ -163,23 +164,23 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
   return (
     <form className="admin-work-form" onSubmit={submit}>
       <section className="admin-form-section"><h2>Identity</h2><div className="admin-form-grid">
-        <label className="field-wide">Title *<input required value={title} onChange={(event) => updateTitle(event.target.value)} /></label>
-        <label>Slug *<input required value={slug} onChange={(event) => { setSlugTouched(true); setSlug(slugify(event.target.value)); }} /></label>
-        <label>Year *<input required min="1900" type="number" value={year} onChange={(event) => setYear(event.target.value)} /></label>
-        <label>Month<select value={month} onChange={(event) => setMonth(event.target.value)}><option value="">Not set</option>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{new Date(2020, index, 1).toLocaleString("en", { month: "long" })}</option>)}</select></label>
-        <label>Series<select value={seriesId} onChange={(event) => { setSeriesId(event.target.value); setNewSeriesName(""); }}><option value="">Unassigned</option>{series.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
-        <label>Or create new series<input placeholder="New series name" value={newSeriesName} onChange={(event) => { setNewSeriesName(event.target.value); setSeriesId(""); }} /></label>
-        <label className="field-wide">Medium<input value={medium} onChange={(event) => setMedium(event.target.value)} /></label>
+        <Hint id="title"><label className="field-wide">Title *<input required value={title} onChange={(event) => updateTitle(event.target.value)} /></label></Hint>
+        <Hint id="slug"><label>Slug *<input required value={slug} onChange={(event) => { setSlugTouched(true); setSlug(slugify(event.target.value)); }} /></label></Hint>
+        <Hint id="year"><label>Year *<input required min="1900" type="number" value={year} onChange={(event) => setYear(event.target.value)} /></label></Hint>
+        <Hint id="month"><label>Month<select value={month} onChange={(event) => setMonth(event.target.value)}><option value="">Not set</option>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{new Date(2020, index, 1).toLocaleString("en", { month: "long" })}</option>)}</select></label></Hint>
+        <Hint id="series"><label>Series<select value={seriesId} onChange={(event) => { setSeriesId(event.target.value); setNewSeriesName(""); }}><option value="">Unassigned</option>{series.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label></Hint>
+        <Hint id="series"><label>Or create new series<input placeholder="New series name" value={newSeriesName} onChange={(event) => { setNewSeriesName(event.target.value); setSeriesId(""); }} /></label></Hint>
+        <Hint id="medium"><label className="field-wide">Medium<input value={medium} onChange={(event) => setMedium(event.target.value)} /></label></Hint>
       </div></section>
 
       <section className="admin-form-section"><h2>Dimensions & description</h2><div className="admin-form-grid">
-        <label>Width<input min="0" step="0.01" type="number" value={width} onChange={(event) => setWidth(event.target.value)} /></label><label>Height<input min="0" step="0.01" type="number" value={height} onChange={(event) => setHeight(event.target.value)} /></label><label>Depth<input min="0" step="0.01" type="number" value={depth} onChange={(event) => setDepth(event.target.value)} /></label><label>Unit<select value={unit} onChange={(event) => setUnit(event.target.value as typeof unit)}>{unitOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
-        <label className="field-wide">Description<textarea rows={6} value={description} onChange={(event) => setDescription(event.target.value)} /></label>
+        <Hint id="dimensions"><div><label>Width<input min="0" step="0.01" type="number" value={width} onChange={(event) => setWidth(event.target.value)} /></label><label>Height<input min="0" step="0.01" type="number" value={height} onChange={(event) => setHeight(event.target.value)} /></label><label>Depth<input min="0" step="0.01" type="number" value={depth} onChange={(event) => setDepth(event.target.value)} /></label><label>Unit<select value={unit} onChange={(event) => setUnit(event.target.value as typeof unit)}>{unitOptions.map((option) => <option key={option} value={option}>{option}</option>)}</select></label></div></Hint>
+        <Hint id="description"><label className="field-wide">Description<textarea rows={6} value={description} onChange={(event) => setDescription(event.target.value)} /></label></Hint>
       </div></section>
 
       <section className="admin-form-section"><h2>Pricing & status</h2><div className="admin-form-grid">
-        <label>Price PHP<input min="0" step="0.01" type="number" value={pricePhp} onChange={(event) => setPricePhp(event.target.value)} /></label><label>Price USD<input min="0" step="0.01" type="number" value={priceUsd} onChange={(event) => setPriceUsd(event.target.value)} /></label>
-        <label>Status<select value={status} onChange={(event) => setStatus(event.target.value as WorkStatus)}>{statusOptions.map((option) => <option key={option} value={option}>{titleCase(option)}</option>)}</select></label>
+        <Hint id="price"><label>Price PHP<input min="0" step="0.01" type="number" value={pricePhp} onChange={(event) => setPricePhp(event.target.value)} /></label></Hint><Hint id="price"><label>Price USD<input min="0" step="0.01" type="number" value={priceUsd} onChange={(event) => setPriceUsd(event.target.value)} /></label></Hint>
+        <Hint id="status"><label>Status<select value={status} onChange={(event) => setStatus(event.target.value as WorkStatus)}>{statusOptions.map((option) => <option key={option} value={option}>{titleCase(option)}</option>)}</select></label></Hint>
         <label className="admin-check"><input checked={priceOnRequest} onChange={(event) => setPriceOnRequest(event.target.checked)} type="checkbox" /> Price on request</label><label className="admin-check"><input checked={isNew} onChange={(event) => setIsNew(event.target.checked)} type="checkbox" /> Mark as new</label><label className="admin-check"><input checked={isFeatured} onChange={(event) => setIsFeatured(event.target.checked)} type="checkbox" /> Featured</label>
       </div></section>
 
@@ -188,7 +189,7 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
       <section className="admin-form-section"><h2>Images</h2><div className={`admin-dropzone ${dragging ? "is-dragging" : ""}`} onDragEnter={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDragOver={(event) => event.preventDefault()} onDrop={dropFiles}><strong>Drop artwork images here</strong><span>or choose files below</span><input accept="image/*" multiple onChange={(event) => event.target.files && addFiles(event.target.files)} type="file" /></div>{imageDrafts.length > 0 && <div className="admin-image-list">{imageDrafts.map((image, index) => <div className="admin-image-item" key={image.id}><img alt={image.alt ?? title} src={image.previewUrl ?? image.url} /><div><strong>{index + 1}. {image.alt || "Artwork image"}</strong><div className="admin-image-actions"><button className="admin-small-button" onClick={() => setPrimary(image.id)} type="button">{image.is_primary ? "Primary" : "Make primary"}</button><button className="admin-small-button" disabled={index === 0} onClick={() => moveImage(index, -1)} type="button">↑</button><button className="admin-small-button" disabled={index === imageDrafts.length - 1} onClick={() => moveImage(index, 1)} type="button">↓</button><button className="admin-small-button admin-danger-button" onClick={() => removeImage(image)} type="button">Remove</button></div></div></div>)}</div>}{!hasPrimary && imageDrafts.length > 0 && <p className="admin-form-note">The first image will be used as primary.</p>}</section>
 
       {error && <p className="admin-error" role="alert">{error}</p>}
-      <div className="admin-form-actions"><button className="admin-action-button" disabled={busy} type="submit"><span className="admin-action-label">{busy ? "Saving…" : mode === "create" ? "Create work" : "Save changes"}</span></button><button className="admin-secondary-button" onClick={() => router.push("/studio/catalogue")} type="button">Cancel</button></div>
+      <div className="admin-form-actions"><Hint id="save"><button className="admin-action-button" disabled={busy} type="submit"><span className="admin-action-label">{busy ? "Saving…" : mode === "create" ? "Create work" : "Save changes"}</span></button></Hint><Hint id="cancel"><button className="admin-secondary-button" onClick={() => router.push("/studio/catalogue")} type="button">Cancel</button></Hint></div>
     </form>
   );
 }
