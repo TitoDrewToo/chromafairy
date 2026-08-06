@@ -6,9 +6,11 @@ type ShopImageProps = {
   src?: string;
   alt: string;
   className?: string;
+  loading?: "lazy" | "eager";
+  fetchPriority?: "high" | "low" | "auto";
 };
 
-export default function ShopImage({ src, alt, className = "" }: ShopImageProps) {
+export default function ShopImage({ src, alt, className = "", loading = "lazy", fetchPriority = "auto" }: ShopImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const usableSrc = src && !failed ? src : undefined;
@@ -20,7 +22,8 @@ export default function ShopImage({ src, alt, className = "" }: ShopImageProps) 
         <img
           alt={alt}
           decoding="async"
-          loading="lazy"
+          fetchPriority={fetchPriority}
+          loading={loading}
           onError={() => setFailed(true)}
           onLoad={() => setLoaded(true)}
           src={usableSrc}

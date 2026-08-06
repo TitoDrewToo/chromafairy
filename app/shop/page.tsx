@@ -1,12 +1,21 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "../../lib/supabase/server";
 import { getArtworkUrl } from "../../lib/catalogue";
 import ShopCatalogue, { type CatalogueImage, type CatalogueWork } from "../../components/shop-catalogue";
 import ShopSkeleton from "../../components/shop-skeleton";
+import { absoluteUrl } from "../../lib/site";
 import "./shop.css";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "Original Fluid Art",
+  description: "Browse original fluid abstract paintings by Samantha Ty, including available, reserved, and sold works.",
+  alternates: { canonical: "/shop" },
+  openGraph: { title: "Original Fluid Art · Chroma Fairy", description: "Browse Samantha Ty’s original fluid abstract paintings.", url: absoluteUrl("/shop"), images: [{ url: absoluteUrl("/fairy-logo.png"), alt: "Chroma Fairy" }] },
+  twitter: { card: "summary_large_image", title: "Original Fluid Art · Chroma Fairy", description: "Browse Samantha Ty’s original fluid abstract paintings.", images: [absoluteUrl("/fairy-logo.png")] },
+};
 
 export default function ShopPage() {
   return (

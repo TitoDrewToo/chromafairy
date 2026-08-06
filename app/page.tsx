@@ -1,6 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
+import type { Metadata } from "next";
 import HomeClient from "../components/home-client";
+import { absoluteUrl } from "../lib/site";
+
+export const metadata: Metadata = {
+  title: "Fluid Abstract Artist Samantha Ty",
+  description: "Discover Samantha Ty’s fluid abstract paintings, commissions, exhibitions, and original works from the Philippines.",
+  alternates: { canonical: "/" },
+  openGraph: { title: "Fluid Abstract Artist Samantha Ty", description: "Fluid abstract paintings shaped by water, movement, and nature.", url: absoluteUrl("/"), images: [{ url: absoluteUrl("/fairy-logo.png"), alt: "Chroma Fairy" }] },
+  twitter: { card: "summary_large_image", title: "Fluid Abstract Artist Samantha Ty", description: "Fluid abstract paintings shaped by water, movement, and nature.", images: [absoluteUrl("/fairy-logo.png")] },
+};
 
 function getHomeSource() {
   const source = fs.readFileSync(path.join(process.cwd(), "index.html"), "utf8");
