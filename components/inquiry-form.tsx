@@ -1,9 +1,8 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
-import { notifyInquiry } from "../app/actions/inquiries";
+import { FormEvent, useState } from "react";
+import { submitInquiry } from "../app/actions/inquiries";
 import { validateInquiry, type InquiryFormValues } from "../lib/inquiry";
-import { createClient } from "../lib/supabase/client";
 
 type PieceInquiryFormProps = {
   kind: "piece";
@@ -24,7 +23,7 @@ export default function InquiryForm(props: InquiryFormProps) {
   const [honeypot, setHoneypot] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [error, setError] = useState("");
-  const startedAt = useRef(Date.now());
+  const [startedAt] = useState(() => Date.now());
   const isPiece = props.kind === "piece";
 
   const update = (field: keyof InquiryFormValues, value: string) => {
@@ -34,7 +33,7 @@ export default function InquiryForm(props: InquiryFormProps) {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (honeypot || Date.now() - startedAt.current < 1200) {
+    if (honeypot || Date.now() - startedAt < 1200) {
       setStatus("success");
       return;
     }
@@ -46,42 +45,14 @@ export default function InquiryForm(props: InquiryFormProps) {
       return;
     }
 
-    const supabase = createClient();
-    if (!supabase) {
-      setError("The inquiry form is temporarily unavailable. Please try again soon.");
-      setStatus("error");
-      return;
-    }
-
     setStatus("sending");
     setError("");
-    const inquiryId = crypto.randomUUID();
-    const { error: insertError } = await supabase.from("inquiries").insert({
-      id: inquiryId,
-      type: props.kind,
-      work_id: isPiece ? props.workId : null,
-      work_title_snapshot: isPiece ? props.workTitle : null,
-      name: values.name.trim(),
-      email: values.email.trim(),
-      phone: values.phone.trim() || null,
-      message: values.message.trim() || null,
-      size_pref: null,
-      palette_pref: null,
-      space_for: null,
-      budget_range: null,
-      timeline: null,
-      source: isPiece ? "shop" : "home",
-      status: "new",
-      notified_at: null,
-    });
-
-    if (insertError) {
-      setError("We couldn’t send that just now. Please try again, or contact Samantha directly.");
+    const result = await submitInquiry({ kind: props.kind, workId: isPiece ? props.workId : undefined, name: values.name, email: values.email, phone: values.phone, message: values.message, honeypot, startedAt });
+    if (!result.ok) {
+      setError(result.error ?? "We couldn’t send that just now. Please try again.");
       setStatus("error");
       return;
     }
-
-    await notifyInquiry(inquiryId);
     setStatus("success");
     setValues(initialValues);
   }

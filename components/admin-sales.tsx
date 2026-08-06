@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { recordSale } from "../lib/admin-sales";
-import { createClient } from "../lib/supabase/client";
+import { recordSale, updateOrderStatus } from "../app/actions/admin-sales";
 import type { Customer, Inquiry, Order, OrderStatus, PackageType, Work } from "../lib/supabase/types";
 
 export type SaleWork = Pick<Work, "id" | "title" | "slug" | "status" | "price_php" | "price_usd">;
@@ -40,22 +39,20 @@ export default function SalesAdmin({ works, customers: initialCustomers, inquiri
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(""); setMessage("");
     if (!customerName.trim() || !customerEmail.trim() || !workId || !amount || Number(amount) < 0) return setError("Customer name, email, work, and a valid amount are required.");
-    const supabase = createClient(); if (!supabase) return setError("Supabase is not configured.");
     setBusy(true);
     try {
-      const result = await recordSale(supabase, { customerId: customerId || undefined, customerName: customerName.trim(), customerEmail: customerEmail.trim(), customerPhone: customerPhone.trim(), workId, inquiryId: inquiryId || undefined, amount: Number(amount), currency, saleDate, channel, notes, shipment: showShipment ? { carrier, trackingNumber, packageType } : undefined });
+      const result = await recordSale({ customerId: customerId || undefined, customerName: customerName.trim(), customerEmail: customerEmail.trim(), customerPhone: customerPhone.trim(), workId, inquiryId: inquiryId || undefined, amount: Number(amount), currency, saleDate, channel, notes, shipment: showShipment ? { carrier, trackingNumber, packageType } : undefined });
       const customer = customers.find((item) => item.id === result.customerId) ?? { id: result.customerId, name: customerName, email: customerEmail, phone: customerPhone, notes: null, created_at: null, updated_at: null };
       const work = works.find((item) => item.id === workId) ?? null;
       setCustomers((current) => current.some((item) => item.id === customer.id) ? current.map((item) => item.id === customer.id ? customer : item) : [...current, customer]);
-      setOrders((current) => [{ id: result.orderId, work_id: workId, inquiry_id: inquiryId || null, customer_id: result.customerId, buyer_name: customerName, buyer_email: customerEmail, buyer_phone: customerPhone || null, amount: Number(amount), currency, payment_status: "paid", payment_provider: "manual", payment_ref: null, order_status: "paid", sale_date: saleDate, channel, notes: notes || null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), work, customer }, ...current]);
+      setOrders((current) => [{ id: result.orderId, work_id: workId, inquiry_id: inquiryId || null, customer_id: result.customerId, buyer_name: customerName, buyer_email: customerEmail, buyer_phone: customerPhone || null, amount: Number(amount), currency, payment_status: "paid", payment_provider: "manual", payment_ref: null, order_status: "paid", work_status_before_sale: null, sale_date: saleDate, channel, notes: notes || null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), work, customer }, ...current]);
       setMessage("Sale recorded and work marked sold."); setCustomerId(""); setCustomerName(""); setCustomerEmail(""); setCustomerPhone(""); setWorkId(""); setInquiryId(""); setAmount(""); setNotes(""); setCarrier(""); setTrackingNumber("");
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Could not record sale."); }
     setBusy(false);
   }
   async function updateOrder(id: string, orderStatus: OrderStatus) {
-    const supabase = createClient(); if (!supabase) return setError("Supabase is not configured.");
-    const { error: updateError } = await supabase.from("orders").update({ order_status: orderStatus }).eq("id", id);
-    if (updateError) setError("Could not update order status."); else setOrders((current) => current.map((order) => order.id === id ? { ...order, order_status: orderStatus } : order));
+    const result = await updateOrderStatus(id, orderStatus);
+    if (!result.ok) setError(result.error ?? "Could not update order status."); else setOrders((current) => current.map((order) => order.id === id ? { ...order, order_status: orderStatus } : order));
   }
   return <section className="admin-sales-layout">
     <form className="admin-operation-form" onSubmit={submit}><h2>Record a sale</h2>

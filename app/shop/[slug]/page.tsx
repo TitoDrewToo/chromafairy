@@ -41,7 +41,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
     "@context": "https://schema.org",
     "@graph": [
       { "@type": "VisualArtwork", name: work.title, creator: { "@type": "Person", name: "Samantha Ty" }, artMedium: work.medium || "Fluid abstract painting", dateCreated: String(work.year), image: gallery.map((image) => image.storage_path), description: work.description || undefined },
-      { "@type": "Product", name: work.title, description: work.description || "Original fluid abstract painting by Samantha Ty.", image: gallery.map((image) => image.storage_path), sku: work.slug, offers: { "@type": "Offer", availability: work.status === "sold" ? "https://schema.org/OutOfStock" : "https://schema.org/InStock", priceCurrency: "PHP", price: work.price_php ?? undefined, url: absoluteUrl(`/shop/${work.slug}`) } },
+      { "@type": "Product", name: work.title, description: work.description || "Original fluid abstract painting by Samantha Ty.", image: gallery.map((image) => image.storage_path), sku: work.slug, offers: work.price_php !== null ? { "@type": "Offer", availability: work.status === "sold" ? "https://schema.org/OutOfStock" : "https://schema.org/InStock", priceCurrency: "PHP", price: work.price_php, url: absoluteUrl(`/shop/${work.slug}`) } : undefined },
     ],
   };
 

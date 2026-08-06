@@ -1,7 +1,8 @@
 "use client";
 
-import { DragEvent, FormEvent, useMemo, useState } from "react";
+import { DragEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { uploadArtworkImage } from "../app/actions/admin-catalogue";
 import type { Series, Work, WorkImage, WorkStatus } from "../lib/supabase/types";
 import { createClient } from "../lib/supabase/client";
 
@@ -12,6 +13,8 @@ type ImageDraft = ExistingImage & { file?: File; previewUrl?: string };
 
 const statusOptions: WorkStatus[] = ["draft", "available", "reserved", "sold"];
 const unitOptions = ["cm", "in"] as const;
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const imageTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
 export default function WorkForm({ mode, work, images = [], series }: { mode: FormMode; work?: Work; images?: ExistingImage[]; series: SeriesOption[] }) {
   const router = useRouter();
@@ -44,8 +47,19 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
   const [dragging, setDragging] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const imageDraftsRef = useRef(imageDrafts);
 
   const hasPrimary = useMemo(() => imageDrafts.some((image) => image.is_primary), [imageDrafts]);
+
+  useEffect(() => () => {
+    imageDraftsRef.current.forEach((image) => {
+      if (image.previewUrl) URL.revokeObjectURL(image.previewUrl);
+      if (image.url !== image.previewUrl && image.file) URL.revokeObjectURL(image.url);
+    });
+  }, []);
+  useEffect(() => {
+    imageDraftsRef.current = imageDrafts;
+  }, [imageDrafts]);
 
   function updateTitle(value: string) {
     setTitle(value);
@@ -53,7 +67,10 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
   }
 
   function addFiles(files: FileList | File[]) {
-    const additions = Array.from(files).filter((file) => file.type.startsWith("image/")).map((file, index) => ({
+    const additions = Array.from(files).filter((file) => {
+      const extension = file.name.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1];
+      return imageTypes.has(file.type) && ["jpg", "jpeg", "png", "webp", "gif"].includes(extension ?? "") && file.size <= MAX_IMAGE_BYTES;
+    }).map((file, index) => ({
       id: `new-${crypto.randomUUID()}`,
       work_id: work?.id ?? "",
       storage_path: "",
@@ -64,6 +81,7 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
       file,
       previewUrl: URL.createObjectURL(file),
     }));
+    if (additions.length < Array.from(files).length) setError("Only JPG, PNG, WebP, or GIF images up to 10 MB are accepted.");
     setImageDrafts((current) => [...current, ...additions]);
   }
 
@@ -82,6 +100,8 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
   }
   function removeImage(image: ImageDraft) {
     if (image.file || window.confirm("Remove this image from the work?")) {
+      if (image.previewUrl) URL.revokeObjectURL(image.previewUrl);
+      if (image.file && image.url !== image.previewUrl) URL.revokeObjectURL(image.url);
       setImageDrafts((current) => current.filter((item) => item.id !== image.id));
       if (!image.file) setRemovedImageIds((current) => [...current, image.id]);
     }
@@ -122,11 +142,8 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
     const savedImages = imageDrafts.map((image, order) => ({ ...image, display_order: order, is_primary: hasPrimary ? image.is_primary : order === 0 }));
     for (const image of savedImages) {
       if (image.file) {
-        const path = `works/${workId}/${crypto.randomUUID()}.${extension(image.file.name)}`;
-        const upload = await supabase.storage.from("artwork").upload(path, image.file, { contentType: image.file.type || "image/jpeg", upsert: false });
-        if (upload.error) { imageErrors.push(image.file.name); continue; }
-        const row = await supabase.from("work_images").insert({ id: image.id.replace("new-", ""), work_id: workId, storage_path: path, alt: image.alt || title, display_order: image.display_order, is_primary: image.is_primary });
-        if (row.error) imageErrors.push(image.file.name);
+        const upload = await uploadArtworkImage({ workId, file: image.file, alt: image.alt || title, displayOrder: image.display_order, isPrimary: Boolean(image.is_primary) });
+        if (!upload.ok) imageErrors.push(image.file.name);
       } else {
         const row = await supabase.from("work_images").update({ display_order: image.display_order, is_primary: image.is_primary, alt: image.alt }).eq("id", image.id);
         if (row.error) imageErrors.push(image.id);
@@ -179,5 +196,4 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
 function numberValue(value: number | null | undefined) { return value === null || value === undefined ? "" : String(value); }
 function numberOrNull(value: string) { return value.trim() ? Number(value) : null; }
 function slugify(value: string) { return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
-function extension(value: string) { return value.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif)$/)?.[1] ?? "jpg"; }
 function titleCase(value: string) { return value.charAt(0).toUpperCase() + value.slice(1); }

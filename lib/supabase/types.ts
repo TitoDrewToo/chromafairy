@@ -119,6 +119,7 @@ export type Order = {
   payment_provider: string | null;
   payment_ref: string | null;
   order_status: OrderStatus | null;
+  work_status_before_sale: WorkStatus | null;
   sale_date: string | null;
   channel: string | null;
   notes: string | null;
@@ -264,6 +265,35 @@ export type Database = {
       is_admin: {
         Args: Record<string, never>;
         Returns: boolean;
+      };
+      is_owner_or_developer: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      record_sale: {
+        Args: {
+          p_customer_id: string | null;
+          p_customer_name: string;
+          p_customer_email: string;
+          p_customer_phone: string | null;
+          p_work_id: string;
+          p_inquiry_id: string | null;
+          p_amount: number;
+          p_currency: string;
+          p_sale_date: string;
+          p_channel: string | null;
+          p_notes: string | null;
+          p_shipment: Record<string, string> | null;
+        };
+        Returns: { order_id: string; customer_id: string };
+      };
+      cancel_order: {
+        Args: { p_order_id: string };
+        Returns: boolean;
+      };
+      request_public_booking: {
+        Args: { p_name: string; p_email: string; p_slot_start: string; p_message: string };
+        Returns: string;
       };
     };
     Enums: {

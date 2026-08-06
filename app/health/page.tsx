@@ -9,6 +9,7 @@ export default async function HealthPage() {
     return <HealthMessage message="Supabase unavailable — environment variables are missing." />;
   }
 
+  let message: string;
   try {
     const [{ count: works, error: worksError }, { count: series, error: seriesError }] = await Promise.all([
       supabase.from("works").select("id", { count: "exact", head: true }).neq("status", "draft"),
@@ -17,14 +18,15 @@ export default async function HealthPage() {
 
     const error = worksError ?? seriesError;
     if (error) {
-      return <HealthMessage message={`Supabase error — ${error.message}`} />;
+      message = `Supabase error — ${error.message}`;
+    } else {
+      message = `Supabase OK — ${works ?? 0} works, ${series ?? 0} series`;
     }
-
-    return <HealthMessage message={`Supabase OK — ${works ?? 0} works, ${series ?? 0} series`} />;
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown Supabase error";
-    return <HealthMessage message={`Supabase error — ${message}`} />;
+    const detail = error instanceof Error ? error.message : "Unknown Supabase error";
+    message = `Supabase error — ${detail}`;
   }
+  return <HealthMessage message={message} />;
 }
 
 function HealthMessage({ message }: { message: string }) {

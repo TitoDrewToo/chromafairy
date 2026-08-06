@@ -11,8 +11,8 @@ export async function inviteAdminUser(emailInput: string, role: UserRole) {
   if (!/^\S+@\S+\.\S+$/.test(email) || !roles.includes(role)) return { ok: false, error: "Enter a valid email and role." };
   const caller = await createClient();
   if (!caller) return { ok: false, error: "Supabase is not configured." };
-  const { data: isAdmin } = await caller.rpc("is_admin");
-  if (!isAdmin) return { ok: false, error: "Not authorized." };
+  const { data: canManageUsers } = await caller.rpc("is_owner_or_developer");
+  if (!canManageUsers) return { ok: false, error: "Only owners and developers can manage users." };
   const admin = createAdminClient();
   if (!admin) return { ok: false, error: "The server invitation service is not configured." };
   const { data, error } = await admin.auth.admin.inviteUserByEmail(email);
