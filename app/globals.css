@@ -6,6 +6,43 @@
   --chroma-gradient: linear-gradient(105deg, #e4b84f 0%, #ff66c4 22%, #57e8ff 44%, #9cff57 63%, #ffd75c 80%, #ff66c4 100%);
   --chroma-size: 300% 100%;
   --chroma-duration: 4.8s;
+  --fairy-buffer-duration: 980ms;
+  --page-transition-duration: 360ms;
+}
+
+.global-page-frame {
+  min-height: 100vh;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--page-transition-duration) cubic-bezier(.2, .7, .2, 1), transform var(--page-transition-duration) cubic-bezier(.2, .7, .2, 1);
+}
+
+.global-page-frame.is-buffering {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.global-page-frame.is-route-transitioning {
+  animation: page-route-reveal var(--page-transition-duration) cubic-bezier(.2, .7, .2, 1) both;
+}
+
+.global-fairy-buffer {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  background: #fbfaf7;
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity calc(var(--fairy-buffer-duration) * .32) ease;
+}
+
+.global-fairy-buffer.is-leaving { opacity: 0; }
+
+@keyframes page-route-reveal {
+  from { opacity: .45; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .chroma-text:hover,
@@ -179,6 +216,13 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+.global-page-frame.is-buffering {
+  opacity: 1;
+  transform: none;
+}
+
+.global-fairy-buffer { display: none; }
+
 .animated-fairy-art,
 .animated-fairy-shimmer { animation: none; }
 }

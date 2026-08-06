@@ -4,16 +4,14 @@ import { createClient } from "../../lib/supabase/server";
 import { getArtworkUrl } from "../../lib/catalogue";
 import ShopCatalogue, { type CatalogueImage, type CatalogueWork } from "../../components/shop-catalogue";
 import ShopSkeleton from "../../components/shop-skeleton";
-import FairyLaunch from "../../components/fairy-launch";
 import "./shop.css";
 
 export const dynamic = "force-dynamic";
 
 export default function ShopPage() {
   return (
-    <FairyLaunch>
-      <main className="shop-shell">
-        <div className="shop-frame">
+    <main className="shop-shell">
+      <div className="shop-frame">
           <header className="shop-header">
             <Link className="shop-back chroma-text" href="/">← Back home</Link>
             <Link aria-label="Chroma Fairy home" className="shop-brand chroma-text" href="/">
@@ -29,9 +27,8 @@ export default function ShopPage() {
             <ShopData />
           </Suspense>
           <footer className="shop-footer">Chroma Fairy · Fluid abstract artist · Philippines</footer>
-        </div>
-      </main>
-    </FairyLaunch>
+      </div>
+    </main>
   );
 }
 

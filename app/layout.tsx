@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import GlobalPageTransition from "../components/global-page-transition";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body><GlobalPageTransition>{children}</GlobalPageTransition></body>
     </html>
   );
 }
