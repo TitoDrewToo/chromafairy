@@ -7,8 +7,8 @@ import AnimatedFairy from "./animated-fairy";
 
 type BufferPhase = "loading" | "leaving" | "ready";
 
-const BUFFER_LEAVE_MS = 680;
-const BUFFER_TOTAL_MS = 980;
+const BUFFER_LEAVE_MS = 1340;
+const BUFFER_TOTAL_MS = 1640;
 const ROUTE_TRANSITION_MS = 360;
 
 export default function GlobalPageTransition({ children }: { children: ReactNode }) {
