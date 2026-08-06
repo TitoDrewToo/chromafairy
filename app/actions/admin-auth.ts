@@ -9,5 +9,5 @@ export async function signOutAdmin() {
     const { error } = await supabase.auth.signOut();
     if (error) console.warn("Admin sign-out failed server-side:", error.message);
   }
-  redirect("/admin/login");
+  redirect("/studio/login");
 }

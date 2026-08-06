@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
       return;
     }
 
-    router.replace("/admin");
+    router.replace("/studio");
     router.refresh();
   }
 
@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
           {error && <p className="admin-error" role="alert">{error}</p>}
           <button className="admin-action-button admin-primary-button" disabled={isSubmitting} type="submit"><span className="admin-action-label">{isSubmitting ? "Signing in…" : "Sign in"}</span></button>
         </form>
-        <Link className="admin-back-link" href="/admin/set-password?mode=forgot">Forgot password?</Link>
+        <Link className="admin-back-link" href="/studio/set-password?mode=forgot">Forgot password?</Link>
       </div>
     </main>
   );

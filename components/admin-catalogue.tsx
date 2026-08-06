@@ -134,7 +134,7 @@ function WorkRow({ work, selected, onSelect, onStatus }: { work: AdminCatalogueW
     <article className="admin-work-row">
       <input aria-label={`Select ${work.title}`} checked={selected} onChange={onSelect} type="checkbox" />
       <div className="admin-work-thumb">{image ? <img alt={image.alt ?? work.title} src={image.url} /> : <span>No image</span>}</div>
-      <div className="admin-work-summary"><Link href={`/admin/catalogue/${work.id}`}>{work.title}</Link><span>{work.year}{work.month ? ` · ${monthName(work.month)}` : ""} · {work.series_name ?? "Unassigned"}</span></div>
+      <div className="admin-work-summary"><Link href={`/studio/catalogue/${work.id}`}>{work.title}</Link><span>{work.year}{work.month ? ` · ${monthName(work.month)}` : ""} · {work.series_name ?? "Unassigned"}</span></div>
       <span className={`admin-status-badge status-${work.status}`}>{titleCase(work.status)}{work.is_new ? " · New" : ""}</span>
       <span className="admin-work-price">{formatPrice(work)}</span>
       <select aria-label={`Set status for ${work.title}`} className="admin-row-status" value={work.status} onChange={(event) => onStatus(event.target.value as WorkStatus)}>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select>

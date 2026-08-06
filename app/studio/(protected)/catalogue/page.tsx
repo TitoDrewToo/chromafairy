@@ -35,7 +35,7 @@ export default async function AdminCataloguePage() {
     <div className="admin-dashboard admin-catalogue-page">
       <div className="admin-catalogue-heading">
         <div><p className="admin-eyebrow">Studio catalogue</p><h1>Works</h1><p className="admin-muted">All works, including drafts.</p></div>
-        <Link className="admin-action-button admin-action-link" href="/admin/catalogue/new"><span className="admin-action-label">Add a work</span></Link>
+        <Link className="admin-action-button admin-action-link" href="/studio/catalogue/new"><span className="admin-action-label">Add a work</span></Link>
       </div>
       <CatalogueAdmin initialWorks={adminWorks} initialSeries={(series ?? []) as AdminCatalogueSeries[]} />
     </div>

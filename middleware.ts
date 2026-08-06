@@ -5,11 +5,16 @@ export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const pathname = request.nextUrl.pathname;
-  const isLogin = pathname === "/admin/login";
-  const isAuthHandoff = isLogin || pathname === "/admin/set-password";
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = `/studio${pathname.slice("/admin".length)}`;
+    return NextResponse.redirect(redirectUrl);
+  }
+  const isLogin = pathname === "/studio/login";
+  const isAuthHandoff = isLogin || pathname === "/studio/set-password";
 
   if (!url || !anonKey) {
-    if (!isAuthHandoff) return NextResponse.redirect(new URL("/admin/login", request.url));
+    if (!isAuthHandoff) return NextResponse.redirect(new URL("/studio/login", request.url));
     return NextResponse.next();
   }
 
@@ -28,11 +33,11 @@ export async function middleware(request: NextRequest) {
   });
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user && !isAuthHandoff) return NextResponse.redirect(new URL("/admin/login", request.url));
-  if (user && isLogin) return NextResponse.redirect(new URL("/admin", request.url));
+  if (!user && !isAuthHandoff) return NextResponse.redirect(new URL("/studio/login", request.url));
+  if (user && isLogin) return NextResponse.redirect(new URL("/studio", request.url));
   return response;
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/studio/:path*"],
 };

@@ -17,7 +17,7 @@ export async function inviteAdminUser(emailInput: string, role: UserRole) {
   const admin = createAdminClient();
   if (!admin) return { ok: false, error: "The server invitation service is not configured." };
   const { absoluteUrl } = await import("../../lib/site");
-  const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo: absoluteUrl("/admin/set-password?mode=invite") });
+  const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo: absoluteUrl("/studio/set-password?mode=invite") });
   if (error || !data.user) return { ok: false, error: "Could not send the invitation." };
   const { error: profileError } = await admin.from("profiles").upsert({ id: data.user.id, email, full_name: null, role });
   if (profileError) return { ok: false, error: "Invitation sent, but the profile role could not be saved." };

@@ -157,7 +157,7 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
     if (finalUpdate.error) imageErrors.push("status");
     setBusy(false);
     if (imageErrors.length) return setError("The work was saved as a draft, but some image changes need attention.");
-    router.push("/admin/catalogue"); router.refresh();
+    router.push("/studio/catalogue"); router.refresh();
   }
 
   return (
@@ -188,7 +188,7 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
       <section className="admin-form-section"><h2>Images</h2><div className={`admin-dropzone ${dragging ? "is-dragging" : ""}`} onDragEnter={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDragOver={(event) => event.preventDefault()} onDrop={dropFiles}><strong>Drop artwork images here</strong><span>or choose files below</span><input accept="image/*" multiple onChange={(event) => event.target.files && addFiles(event.target.files)} type="file" /></div>{imageDrafts.length > 0 && <div className="admin-image-list">{imageDrafts.map((image, index) => <div className="admin-image-item" key={image.id}><img alt={image.alt ?? title} src={image.previewUrl ?? image.url} /><div><strong>{index + 1}. {image.alt || "Artwork image"}</strong><div className="admin-image-actions"><button className="admin-small-button" onClick={() => setPrimary(image.id)} type="button">{image.is_primary ? "Primary" : "Make primary"}</button><button className="admin-small-button" disabled={index === 0} onClick={() => moveImage(index, -1)} type="button">↑</button><button className="admin-small-button" disabled={index === imageDrafts.length - 1} onClick={() => moveImage(index, 1)} type="button">↓</button><button className="admin-small-button admin-danger-button" onClick={() => removeImage(image)} type="button">Remove</button></div></div></div>)}</div>}{!hasPrimary && imageDrafts.length > 0 && <p className="admin-form-note">The first image will be used as primary.</p>}</section>
 
       {error && <p className="admin-error" role="alert">{error}</p>}
-      <div className="admin-form-actions"><button className="admin-action-button" disabled={busy} type="submit"><span className="admin-action-label">{busy ? "Saving…" : mode === "create" ? "Create work" : "Save changes"}</span></button><button className="admin-secondary-button" onClick={() => router.push("/admin/catalogue")} type="button">Cancel</button></div>
+      <div className="admin-form-actions"><button className="admin-action-button" disabled={busy} type="submit"><span className="admin-action-label">{busy ? "Saving…" : mode === "create" ? "Create work" : "Save changes"}</span></button><button className="admin-secondary-button" onClick={() => router.push("/studio/catalogue")} type="button">Cancel</button></div>
     </form>
   );
 }

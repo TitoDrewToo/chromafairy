@@ -30,7 +30,7 @@ export default function SetPasswordForm({ mode }: { mode: "forgot" | "set" }) {
     if (!supabase) return setError("Password recovery is temporarily unavailable.");
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) return setError("Enter a valid email address.");
     setBusy(true); setError(""); setMessage("");
-    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: absoluteUrl("/admin/set-password?mode=reset") });
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: absoluteUrl("/studio/set-password?mode=reset") });
     setBusy(false);
     if (resetError) return setError("Could not send the reset link. Please try again.");
     setMessage("If that account exists, a password-reset link is on its way.");
@@ -47,9 +47,9 @@ export default function SetPasswordForm({ mode }: { mode: "forgot" | "set" }) {
     const { error: updateError } = await supabase.auth.updateUser({ password });
     setBusy(false);
     if (updateError) return setError("Could not set that password. Please use a fresh email link.");
-    router.replace("/admin");
+    router.replace("/studio");
     router.refresh();
   }
 
-  return mode === "forgot" ? <form className="admin-login-form" onSubmit={requestReset}><label>Email<input autoComplete="email" required type="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>{error && <p className="admin-error" role="alert">{error}</p>}{message && <p className="admin-inline-success" role="status">{message}</p>}<button className="admin-action-button admin-primary-button" disabled={busy} type="submit"><span className="admin-action-label">{busy ? "Sending…" : "Send reset link"}</span></button><Link className="admin-back-link" href="/admin/login">Back to sign in</Link></form> : <form className="admin-login-form" onSubmit={setNewPassword}><label>New password<input autoComplete="new-password" minLength={8} required type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label><label>Confirm password<input autoComplete="new-password" minLength={8} required type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></label>{error && <p className="admin-error" role="alert">{error}</p>}<button className="admin-action-button admin-primary-button" disabled={busy} type="submit"><span className="admin-action-label">{busy ? "Saving…" : "Set password"}</span></button><Link className="admin-back-link" href="/admin/login">Back to sign in</Link></form>;
+  return mode === "forgot" ? <form className="admin-login-form" onSubmit={requestReset}><label>Email<input autoComplete="email" required type="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>{error && <p className="admin-error" role="alert">{error}</p>}{message && <p className="admin-inline-success" role="status">{message}</p>}<button className="admin-action-button admin-primary-button" disabled={busy} type="submit"><span className="admin-action-label">{busy ? "Sending…" : "Send reset link"}</span></button><Link className="admin-back-link" href="/studio/login">Back to sign in</Link></form> : <form className="admin-login-form" onSubmit={setNewPassword}><label>New password<input autoComplete="new-password" minLength={8} required type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label><label>Confirm password<input autoComplete="new-password" minLength={8} required type="password" value={confirmation} onChange={(event) => setConfirmation(event.target.value)} /></label>{error && <p className="admin-error" role="alert">{error}</p>}<button className="admin-action-button admin-primary-button" disabled={busy} type="submit"><span className="admin-action-label">{busy ? "Saving…" : "Set password"}</span></button><Link className="admin-back-link" href="/studio/login">Back to sign in</Link></form>;
 }

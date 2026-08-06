@@ -21,7 +21,7 @@ export default async function EditWorkPage({ params }: { params: Promise<{ id: s
   const existingImages = (images ?? []).map((image) => ({ ...image, url: getArtworkUrl(supabase, image.storage_path) }));
   return (
     <div className="admin-dashboard admin-catalogue-page">
-      <Link className="admin-back-link" href="/admin/catalogue">← Back to works</Link>
+      <Link className="admin-back-link" href="/studio/catalogue">← Back to works</Link>
       <p className="admin-eyebrow admin-form-eyebrow">Studio catalogue</p>
       <h1>Edit work</h1>
       <WorkForm mode="edit" work={work} images={existingImages} series={(series ?? [])} />

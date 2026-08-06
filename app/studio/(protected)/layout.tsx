@@ -5,22 +5,22 @@ import { createClient } from "../../../lib/supabase/server";
 import "../admin.css";
 
 const areas = [
-  ["Catalogue", "/admin/catalogue"],
-  ["Inquiries", "/admin/inquiries"],
-  ["Sales / Orders", "/admin/sales"],
-  ["Customers", "/admin/customers"],
-  ["Scheduling", "/admin/scheduling"],
-  ["Users", "/admin/users"],
-  ["Insights", "/admin/insights"],
-  ["Settings", "/admin/settings"],
+  ["Catalogue", "/studio/catalogue"],
+  ["Inquiries", "/studio/inquiries"],
+  ["Sales / Orders", "/studio/sales"],
+  ["Customers", "/studio/customers"],
+  ["Scheduling", "/studio/scheduling"],
+  ["Users", "/studio/users"],
+  ["Insights", "/studio/insights"],
+  ["Settings", "/studio/settings"],
 ] as const;
 
 export default async function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const supabase = await createClient();
-  if (!supabase) redirect("/admin/login");
+  if (!supabase) redirect("/studio/login");
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect("/studio/login");
 
   const [{ data: isAdmin }, { data: profile }] = await Promise.all([
     supabase.rpc("is_admin"),
@@ -46,7 +46,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <Link className="admin-wordmark" href="/admin">Chroma Fairy<span>Studio</span></Link>
+        <Link className="admin-wordmark" href="/studio">Chroma Fairy<span>Studio</span></Link>
         <nav className="admin-nav" aria-label="Admin areas">
           {areas.map(([label, href]) => <Link href={href} key={href}>{label}</Link>)}
         </nav>
