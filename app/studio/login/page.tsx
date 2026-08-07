@@ -41,7 +41,6 @@ export default function AdminLoginPage() {
       <div className="admin-login-card">
         <Link className="admin-back-link" href="/">← Back to site</Link>
         <p className="admin-eyebrow">Chroma Fairy · Studio</p>
-        <h1>Admin sign in</h1>
         <p className="admin-muted">Use your existing studio account to continue.</p>
         <form className="admin-login-form" onSubmit={submit}>
           <label>Email<input autoComplete="email" required type="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>
