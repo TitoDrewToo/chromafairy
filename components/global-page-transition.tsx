@@ -15,6 +15,9 @@ export default function GlobalPageTransition({ children }: { children: ReactNode
   const pathname = usePathname();
   const previousPathname = useRef(pathname);
   const hasMounted = useRef(false);
+  const bufferLeaveTimer = useRef<number | null>(null);
+  const bufferReadyTimer = useRef<number | null>(null);
+  const routeTimer = useRef<number | null>(null);
   const [bufferPhase, setBufferPhase] = useState<BufferPhase>("loading");
   const [routeTransitioning, setRouteTransitioning] = useState(false);
 
@@ -25,11 +28,11 @@ export default function GlobalPageTransition({ children }: { children: ReactNode
       return;
     }
 
-    const leaveTimer = window.setTimeout(() => setBufferPhase("leaving"), BUFFER_LEAVE_MS);
-    const readyTimer = window.setTimeout(() => setBufferPhase("ready"), BUFFER_TOTAL_MS);
+    bufferLeaveTimer.current = window.setTimeout(() => setBufferPhase("leaving"), BUFFER_LEAVE_MS);
+    bufferReadyTimer.current = window.setTimeout(() => setBufferPhase("ready"), BUFFER_TOTAL_MS);
     return () => {
-      window.clearTimeout(leaveTimer);
-      window.clearTimeout(readyTimer);
+      if (bufferLeaveTimer.current !== null) window.clearTimeout(bufferLeaveTimer.current);
+      if (bufferReadyTimer.current !== null) window.clearTimeout(bufferReadyTimer.current);
     };
   }, []);
 
@@ -42,9 +45,22 @@ export default function GlobalPageTransition({ children }: { children: ReactNode
     if (previousPathname.current === pathname || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     previousPathname.current = pathname;
+
+    if (bufferLeaveTimer.current !== null) window.clearTimeout(bufferLeaveTimer.current);
+    if (bufferReadyTimer.current !== null) window.clearTimeout(bufferReadyTimer.current);
+    if (routeTimer.current !== null) window.clearTimeout(routeTimer.current);
+
+    if (pathname === "/") {
+      setRouteTransitioning(false);
+      setBufferPhase("loading");
+      bufferLeaveTimer.current = window.setTimeout(() => setBufferPhase("leaving"), BUFFER_LEAVE_MS);
+      bufferReadyTimer.current = window.setTimeout(() => setBufferPhase("ready"), BUFFER_TOTAL_MS);
+      return;
+    }
+
+    setBufferPhase("ready");
     setRouteTransitioning(true);
-    const timer = window.setTimeout(() => setRouteTransitioning(false), ROUTE_TRANSITION_MS);
-    return () => window.clearTimeout(timer);
+    routeTimer.current = window.setTimeout(() => setRouteTransitioning(false), ROUTE_TRANSITION_MS);
   }, [pathname]);
 
   const showBuffer = bufferPhase !== "ready";
