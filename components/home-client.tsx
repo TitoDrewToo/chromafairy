@@ -56,23 +56,26 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       if (!target) return;
 
       event.preventDefault();
-      const destination = Math.max(0, target.getBoundingClientRect().top + window.scrollY);
+      const destination = Math.max(0, target.getBoundingClientRect().top + window.scrollY - 72);
       const start = window.scrollY;
       const distance = destination - start;
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       if (reduceMotion || Math.abs(distance) < 2) {
-        window.scrollTo(0, destination);
+        window.scrollTo({ top: destination, behavior: "auto" });
         window.history.pushState(null, "", href);
         return;
       }
 
-      const duration = Math.min(1500, Math.max(1080, Math.abs(distance) * 0.34));
+      const duration = Math.min(900, Math.max(450, Math.abs(distance) * 0.28));
       const startedAt = performance.now();
       if (activeScrollFrame) window.cancelAnimationFrame(activeScrollFrame);
       const animateScroll = (now: number) => {
         const progress = Math.min(1, (now - startedAt) / duration);
         const eased = (1 - Math.cos(Math.PI * progress)) / 2;
-        window.scrollTo(0, start + distance * eased);
+        window.scrollTo({
+          top: progress === 1 ? destination : start + distance * eased,
+          behavior: "auto",
+        });
         if (progress < 1) {
           activeScrollFrame = window.requestAnimationFrame(animateScroll);
         } else {
