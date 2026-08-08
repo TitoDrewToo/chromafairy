@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { captureError } from "../lib/client-error-capture";
+import { captureError, isBenignError } from "../lib/client-error-capture";
 
 function toolForPath(pathname: string) {
   if (pathname.startsWith("/studio/catalogue")) return "studio-catalogue";
@@ -16,8 +16,8 @@ function toolForPath(pathname: string) {
 
 export default function ClientErrorMonitor() {
   useEffect(() => {
-    const handleError = (event: ErrorEvent) => captureError(toolForPath(window.location.pathname), "window.error", "uncaught-error", event.error ?? event.message, { source: "window" });
-    const handleRejection = (event: PromiseRejectionEvent) => captureError(toolForPath(window.location.pathname), "window.unhandledrejection", "unhandled-rejection", event.reason, { source: "promise" });
+    const handleError = (event: ErrorEvent) => { const error = event.error ?? event.message; if (isBenignError(error)) return; captureError(toolForPath(window.location.pathname), "window.error", "uncaught-error", error, { source: "window" }); };
+    const handleRejection = (event: PromiseRejectionEvent) => { if (isBenignError(event.reason)) return; captureError(toolForPath(window.location.pathname), "window.unhandledrejection", "unhandled-rejection", event.reason, { source: "promise" }); };
     window.addEventListener("error", handleError);
     window.addEventListener("unhandledrejection", handleRejection);
     return () => { window.removeEventListener("error", handleError); window.removeEventListener("unhandledrejection", handleRejection); };

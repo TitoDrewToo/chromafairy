@@ -4,15 +4,28 @@ import { createClient } from "./supabase/client";
 import { createErrorFingerprint } from "./error-fingerprint";
 import { sanitizeErrorContext, sanitizeErrorString } from "./error-sanitize";
 
+export const BENIGN_ERROR_PATTERNS: RegExp[] = [
+  /ResizeObserver loop (completed with undelivered notifications|limit exceeded)/i,
+  /Non-Error promise rejection captured/i,
+  /chrome-extension:\/\//i,
+  /moz-extension:\/\//i,
+];
+
 function errorParts(error: unknown) {
   if (error instanceof Error) return { message: error.message, stack: error.stack ?? null };
   if (typeof error === "string") return { message: error, stack: null };
   try { return { message: JSON.stringify(error), stack: null }; } catch { return { message: String(error), stack: null }; }
 }
 
+export function isBenignError(error: unknown) {
+  const { message } = errorParts(error);
+  return BENIGN_ERROR_PATTERNS.some((pattern) => pattern.test(message));
+}
+
 export function captureError(tool: string, fn: string, action: string, error: unknown, context?: unknown) {
   try {
     const parts = errorParts(error);
+    if (isBenignError(error)) return;
     const message = sanitizeErrorString(parts.message || "Unknown client error");
     const safeTool = sanitizeErrorString(tool, 120);
     const safeFn = sanitizeErrorString(fn, 160);
