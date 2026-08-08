@@ -1,0 +1,4 @@
+[functions.diagnose-error]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/diagnose-error/index.ts"
