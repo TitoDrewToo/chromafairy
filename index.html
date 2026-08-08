@@ -37,6 +37,7 @@
     text-shadow:0 1px 10px rgba(0,0,0,.45);transition:color .5s,opacity .3s}
   header.solid nav a{color:var(--ink);text-shadow:none;opacity:.7}
   header.solid nav a:hover{opacity:1;color:var(--teal)}
+  .menu-toggle{display:none}
 
   main{position:relative;z-index:10}
   section{position:relative}
@@ -208,9 +209,35 @@
   footer .brand2{font-family:var(--script);font-size:26px;color:#fff}
 
   @media(max-width:860px){
-    nav{display:none}
+    header{position:fixed;overflow:visible}
+    .menu-toggle{display:grid;place-items:center;position:relative;width:42px;height:42px;padding:0;
+      border:1px solid currentColor;border-radius:999px;background:transparent;color:#fff;cursor:pointer;
+      transition:border-color .3s,color .3s,background-color .3s}
+    header.solid .menu-toggle{color:var(--ink)}
+    .menu-toggle span{display:block;width:16px;height:1px;background:currentColor;transition:transform .3s,opacity .2s,background-color .3s}
+    .menu-toggle span+span{margin-top:-5px}
+    header.open .menu-toggle{border-color:transparent;background:var(--chroma-gradient);background-size:var(--chroma-size);
+      animation:chroma-shimmer var(--chroma-duration) linear infinite;color:#fff}
+    header.open .menu-toggle span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+    header.open .menu-toggle span:nth-child(2){opacity:0}
+    header.open .menu-toggle span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+    #home-nav{display:flex;position:absolute;top:calc(100% + 10px);left:20px;right:20px;flex-direction:column;
+      align-items:stretch;gap:0;padding:8px;border:1px solid rgba(255,255,255,.22);border-radius:3px;
+      background:rgba(10,18,28,.92);box-shadow:0 18px 45px rgba(0,0,0,.24);opacity:0;visibility:hidden;
+      pointer-events:none;transform:translateY(-10px);transition:opacity .25s ease,transform .25s ease,visibility 0s linear .25s}
+    header.solid #home-nav{border-color:var(--line);background:rgba(246,243,236,.97)}
+    header.open #home-nav{opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0);transition-delay:0s}
+    #home-nav a{display:block;padding:14px 12px;color:#fff;opacity:1;text-shadow:none;border-bottom:1px solid rgba(255,255,255,.12)}
+    #home-nav a:last-child{border-bottom:0}
+    header.solid #home-nav a{color:var(--ink);border-bottom-color:var(--line)}
+    #home-nav a:hover,#home-nav a:focus-visible{background-image:var(--chroma-gradient);background-size:var(--chroma-size);
+      -webkit-background-clip:text;background-clip:text;color:transparent;animation:chroma-shimmer var(--chroma-duration) linear infinite}
+    #home-nav a:focus-visible{outline:1px solid var(--teal);outline-offset:-2px}
     #about .wrap,.steps,.press-row,.duo{grid-template-columns:1fr;gap:24px}
     .wallrow{gap:20px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .menu-toggle,.menu-toggle span,#home-nav,#home-nav a{animation:none!important;transition:none!important}
   }
 </style>
 </head>
@@ -220,7 +247,10 @@
 
   <header id="hdr">
     <a href="#home" class="brand">Samantha&nbsp;Ty</a>
-    <nav>
+    <button id="home-menu-toggle" class="menu-toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="home-nav">
+      <span></span><span></span><span></span>
+    </button>
+    <nav id="home-nav">
       <a href="#collections">Collections</a>
       <a href="#exhibitions">Exhibitions</a>
       <a href="#gallery">Gallery</a>

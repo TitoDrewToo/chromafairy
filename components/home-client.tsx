@@ -26,6 +26,52 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
 
   useEffect(() => {
     const root = rootRef.current;
+    const header = root?.querySelector<HTMLElement>("#hdr");
+    const toggle = root?.querySelector<HTMLButtonElement>("#home-menu-toggle");
+    const nav = root?.querySelector<HTMLElement>("#home-nav");
+    if (!header || !toggle || !nav) return;
+
+    const setOpen = (open: boolean) => {
+      header.classList.toggle("open", open);
+      nav.classList.toggle("open", open);
+      toggle.setAttribute("aria-expanded", String(open));
+    };
+    const onToggle = (event: MouseEvent) => {
+      event.stopPropagation();
+      setOpen(toggle.getAttribute("aria-expanded") !== "true");
+    };
+    const onNavClick = (event: MouseEvent) => {
+      if ((event.target as Element).closest("a")) setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") {
+        setOpen(false);
+        toggle.focus();
+      }
+    };
+    const onOutsidePointer = (event: PointerEvent) => {
+      if (!header.contains(event.target as Node)) setOpen(false);
+    };
+    const onResize = () => {
+      if (window.innerWidth > 860) setOpen(false);
+    };
+
+    toggle.addEventListener("click", onToggle);
+    nav.addEventListener("click", onNavClick);
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onOutsidePointer);
+    window.addEventListener("resize", onResize);
+    return () => {
+      toggle.removeEventListener("click", onToggle);
+      nav.removeEventListener("click", onNavClick);
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onOutsidePointer);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [markup]);
+
+  useEffect(() => {
+    const root = rootRef.current;
     const canvas = backgroundMount?.querySelector<HTMLCanvasElement>("#art");
     const fallback = backgroundMount?.querySelector<HTMLElement>("#artFallback");
     if (!root || !canvas || !fallback) return;
@@ -198,7 +244,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       { threshold: 0.14 },
     );
     root.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
-    root.querySelectorAll<HTMLElement>("a, button").forEach((element) => {
+    root.querySelectorAll<HTMLElement>("a, button:not(.menu-toggle)").forEach((element) => {
       if (element.classList.contains("btn")) {
         element.classList.add("chroma-cta");
         const label = document.createElement("span");
