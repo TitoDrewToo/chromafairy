@@ -10,6 +10,9 @@ export type PackageType = "rolled_tube" | "flat" | "crate";
 export type AvailabilityRepeat = "none" | "daily" | "weekly" | "monthly";
 export type AppointmentStatus = "requested" | "confirmed" | "completed" | "cancelled" | "no_show";
 export type AppointmentMode = "video" | "call" | "in_person";
+export type ErrorLevel = "error" | "warn" | "info";
+export type ErrorGroupStatus = "new" | "triaged" | "resolved";
+export type ReviewVerdict = "matched" | "partial" | "wrong";
 
 export type Work = {
   id: string;
@@ -184,6 +187,43 @@ export type Appointment = {
   updated_at: string | null;
 };
 
+export type ErrorEvent = {
+  id: string;
+  occurred_at: string;
+  occurred_at_manila: string;
+  user_id: string | null;
+  tool: string;
+  fn: string;
+  action: string | null;
+  route: string | null;
+  level: ErrorLevel;
+  message: string;
+  stack: string | null;
+  fingerprint: string;
+  context: Record<string, unknown>;
+  release: string | null;
+  environment: string | null;
+};
+
+export type ErrorGroup = {
+  fingerprint: string;
+  title: string;
+  first_seen: string;
+  last_seen: string;
+  count: number;
+  status: ErrorGroupStatus | string;
+  ai_analysis: string | null;
+  proposed_fix: string | null;
+  risk_level: string | null;
+  confidence: number | null;
+  severity: string | null;
+  diagnosed_at: string | null;
+  ai_model: string | null;
+  review_verdict: ReviewVerdict | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -259,6 +299,18 @@ export type Database = {
         Update: Partial<Appointment>;
         Relationships: [];
       };
+      error_events: {
+        Row: ErrorEvent;
+        Insert: Partial<ErrorEvent>;
+        Update: Partial<ErrorEvent>;
+        Relationships: [];
+      };
+      error_groups: {
+        Row: ErrorGroup;
+        Insert: Partial<ErrorGroup>;
+        Update: Partial<ErrorGroup>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -298,6 +350,24 @@ export type Database = {
       request_public_booking: {
         Args: { p_name: string; p_email: string; p_slot_start: string; p_message: string };
         Returns: string;
+      };
+      record_error_event: {
+        Args: {
+          p_occurred_at?: string;
+          p_user_id?: string | null;
+          p_tool?: string | null;
+          p_fn?: string | null;
+          p_action?: string | null;
+          p_route?: string | null;
+          p_level?: ErrorLevel;
+          p_message?: string;
+          p_stack?: string | null;
+          p_fingerprint?: string | null;
+          p_context?: Record<string, unknown>;
+          p_release?: string | null;
+          p_environment?: string | null;
+        };
+        Returns: ErrorEvent;
       };
     };
     Enums: {
