@@ -71,6 +71,12 @@ export const studioHints = {
   calendarSync: "Two-way Google Calendar sync. Needs you to connect your Google account.",
   forgotPassword: "Emails you a link to set a new password.",
   password: "Choose a password to finish setting up your account.",
+  systemsDiagnose: "Run AI triage on this error group. One diagnosis is cached per group — use Re-run to force a fresh pass.",
+  systemsExecute: "Disabled in observation mode. When enabled, opens a PR with the proposed fix and runs tests before merge.",
+  systemsRollback: "Re-promote the last known-good production deployment. Reverts code, not the database.",
+  systemsReview: "Rate the AI's proposed fix vs. what you'd actually do — tracks agreement before Execute is enabled.",
+  systemsStatus: "Lifecycle state of this error group.",
+  systemsRefresh: "Reload the latest error groups and counts.",
 } as const;
 
 export type StudioHintId = keyof typeof studioHints;

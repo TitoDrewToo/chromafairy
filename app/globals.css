@@ -44,6 +44,11 @@ textarea:focus-visible {
   will-change: auto;
 }
 
+.global-page-frame.is-ready:not(.is-buffering):not(.is-route-transitioning) {
+  transform: none;
+  will-change: auto;
+}
+
 .global-page-frame.is-route-transitioning {
   animation: page-route-reveal var(--page-transition-duration) cubic-bezier(.2, .7, .2, 1) both;
   will-change: opacity, transform;
