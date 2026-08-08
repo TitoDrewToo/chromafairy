@@ -8,6 +8,7 @@ export const studioHints = {
   navUsers: "Invite teammates and control who can access the Studio.",
   navInsights: "Your numbers — revenue, best sellers, and repeat buyers.",
   navSettings: "Switch on upgrade features (payments, booking) when you're ready.",
+  navSystems: "See grouped Studio errors and their recent occurrences.",
   viewSite: "Open your public website to see what visitors see.",
   signOut: "Securely log out of the Studio.",
   userRole: "You're signed in here — the tag shows your access level.",
