@@ -1,4 +1,5 @@
 import { createClient } from "../../../../lib/supabase/server";
+import { redirect } from "next/navigation";
 import "../../admin.css";
 import "../../operations.css";
 import { Hint } from "../../../../components/studio-hint";
@@ -8,6 +9,8 @@ export const dynamic = "force-dynamic";
 export default async function AdminInsightsPage() {
   const supabase = await createClient();
   if (!supabase) return <AdminMessage message="Supabase is not configured." />;
+  const { data: canViewInsights } = await supabase.rpc("is_user_manager");
+  if (!canViewInsights) redirect("/studio");
   const [{ data: orders, error }, { data: works }, { data: series }, { data: customers }] = await Promise.all([
     supabase.from("orders").select("id, customer_id, work_id, amount, currency, sale_date, payment_status"),
     supabase.from("works").select("id, title, year, series_id"),

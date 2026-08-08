@@ -5,12 +5,15 @@ import { Hint } from "../../../components/studio-hint";
 import { createClient } from "../../../lib/supabase/server";
 import "../admin.css";
 
-const areas = [
+const staffAreas = [
   ["Catalogue", "/studio/catalogue", "navCatalogue"],
   ["Inquiries", "/studio/inquiries", "navInquiries"],
   ["Sales / Orders", "/studio/sales", "navSales"],
   ["Customers", "/studio/customers", "navCustomers"],
   ["Scheduling", "/studio/scheduling", "navScheduling"],
+] as const;
+
+const managerAreas = [
   ["Users", "/studio/users", "navUsers"],
   ["Insights", "/studio/insights", "navInsights"],
   ["Settings", "/studio/settings", "navSettings"],
@@ -50,8 +53,8 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
       <aside className="admin-sidebar">
         <Hint id="wordmark"><Link className="admin-wordmark" href="/studio">Chroma Fairy<span>Studio</span></Link></Hint>
         <nav className="admin-nav" aria-label="Admin areas">
-          {areas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
-          {canViewSystems && <Hint id="navSystems"><Link href="/studio/systems">Systems</Link></Hint>}
+          {staffAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
+          {canViewSystems && <>{managerAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}<Hint id="navSystems"><Link href="/studio/systems">Systems</Link></Hint></>}
         </nav>
         <Hint id="viewSite"><Link className="admin-site-link" href="/">← View site</Link></Hint>
       </aside>
