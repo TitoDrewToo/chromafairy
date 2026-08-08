@@ -77,6 +77,10 @@ export const studioHints = {
   systemsReview: "Rate the AI's proposed fix vs. what you'd actually do — tracks agreement before Execute is enabled.",
   systemsStatus: "Lifecycle state of this error group.",
   systemsRefresh: "Reload the latest error groups and counts.",
+  notesAdd: "Add a private notes page for a fresh thought stream.",
+  notesRename: "Rename this page inline — press Enter or click away to save.",
+  notesDelete: "Delete this page. Your last remaining page is always kept.",
+  notesBoardToggle: "Open the shared team board once the Studio has more than one member.",
 } as const;
 
 export type StudioHintId = keyof typeof studioHints;

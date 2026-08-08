@@ -124,3 +124,89 @@
 @keyframes studio-hint-reveal { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .studio-hint-tooltip, .daily-verse.is-sized { animation: none; transition: none; } }
 @media (max-width: 700px) { .admin-topbar-actions { gap: 0.35rem; } }
+
+/* Studio notes — a quiet editorial notepad with a single chroma save flourish. */
+.admin-overview-verse-space {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, .72fr);
+  gap: clamp(22px, 4vw, 56px);
+  align-items: stretch;
+}
+.studio-notes {
+  --notes-ink: #0e1a24;
+  --notes-paper: #f6f3ec;
+  --notes-bronze: #a97c3f;
+  --notes-teal: #1f8fa3;
+  --notes-line: rgb(14 26 36 / 16%);
+  min-width: 0;
+  color: var(--notes-ink);
+  font-family: "Jost", sans-serif;
+}
+.studio-notes-inline {
+  align-self: stretch;
+  min-height: 290px;
+  padding: clamp(18px, 2.4vw, 28px);
+  border: 1px solid var(--notes-line);
+  background: rgb(246 243 236 / 74%);
+  box-shadow: 0 14px 30px rgb(14 26 36 / 6%);
+}
+.studio-notes-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.studio-notes-kicker { margin: 0 0 3px; color: var(--notes-bronze); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; }
+.studio-notes h2 { margin: 0; font: 500 clamp(25px, 3vw, 36px)/1 "Cormorant Garamond", Georgia, serif; }
+.studio-notes-tabs { display: flex; align-items: center; gap: 3px; min-width: 0; margin: 24px 0 0; overflow-x: auto; border-bottom: 1px solid var(--notes-line); scrollbar-width: thin; }
+.studio-notes-tab,
+.studio-notes-icon { position: relative; flex: 0 0 auto; border: 0; background: transparent; color: rgb(14 26 36 / 62%); cursor: pointer; font: 11px "Jost", sans-serif; }
+.studio-notes-tab { padding: 9px 10px 11px; }
+.studio-notes-tab::after { position: absolute; right: 10px; bottom: -1px; left: 10px; height: 2px; background: var(--notes-bronze); content: ""; opacity: 0; transform: scaleX(0); transition: opacity 220ms ease, transform 220ms ease; }
+.studio-notes-tab.is-active { color: var(--notes-ink); }
+.studio-notes-tab.is-active::after { opacity: 1; transform: scaleX(1); }
+.studio-notes-board-tab { margin-left: auto; }
+.studio-notes-icon { display: inline-grid; width: 30px; height: 30px; place-items: center; padding: 0; color: var(--notes-bronze); font-size: 20px; line-height: 1; }
+.studio-notes-icon:hover, .studio-notes-icon:focus-visible { color: var(--notes-teal); }
+.studio-notes-icon.is-danger { color: #9c3d32; font-size: 23px; }
+.studio-notes-icon:disabled { cursor: not-allowed; opacity: .3; }
+.studio-notes-page-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; }
+.studio-notes-page-heading h3 { min-width: 0; margin: 0; overflow: hidden; color: var(--notes-ink); font: 500 25px/1.1 "Cormorant Garamond", Georgia, serif; text-overflow: ellipsis; white-space: nowrap; }
+.studio-notes-page-heading input { min-width: 0; width: 100%; padding: 5px 7px; border: 1px solid var(--notes-bronze); background: transparent; color: var(--notes-ink); font: 500 24px "Cormorant Garamond", Georgia, serif; }
+.studio-notes-page-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 3px; }
+.studio-notes-textarea { display: block; width: 100%; min-height: 190px; margin-top: 14px; resize: vertical; border: 0; outline: 0; background: transparent; color: var(--notes-ink); font: 400 16px/1.65 "Cormorant Garamond", Georgia, serif; }
+.studio-notes-textarea::placeholder { color: rgb(14 26 36 / 36%); }
+.studio-notes-footer { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: rgb(14 26 36 / 48%); font-size: 10px; letter-spacing: .04em; }
+.studio-notes-save { display: inline-block; white-space: nowrap; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.studio-notes-save.is-saving { color: var(--notes-teal); }
+.studio-notes-save.is-saved { background: var(--chroma-gradient); background-size: var(--chroma-size); background-position: 0 50%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: studio-notes-save-shimmer 1200ms ease-out both; }
+.studio-notes-save.is-error, .studio-notes-error { color: #9c3d32; }
+.studio-notes-error { margin: 12px 0 0; font-size: 12px; }
+.studio-notes-loading { display: grid; min-height: 230px; place-items: center; }
+.studio-notes-loading span { width: 32px; height: 32px; border: 1px solid var(--notes-bronze); border-top-color: var(--notes-teal); border-radius: 50%; animation: studio-notes-spin 900ms linear infinite; }
+.studio-notes-mark { color: var(--notes-bronze); font-size: 21px; }
+.studio-board-empty { display: grid; min-height: 240px; place-items: center; align-content: center; padding: 30px 16px; text-align: center; }
+.studio-board-empty h3 { margin: 12px 0 4px; font: 500 25px/1.1 "Cormorant Garamond", Georgia, serif; }
+.studio-board-empty p { max-width: 280px; margin: 0; color: rgb(14 26 36 / 58%); font-size: 12px; line-height: 1.6; }
+.studio-board-feed { display: grid; gap: 10px; max-height: 330px; margin-top: 18px; overflow: auto; }
+.studio-board-post { padding: 12px 0; border-bottom: 1px solid var(--notes-line); }
+.studio-board-post p { margin: 0; white-space: pre-wrap; font: 16px/1.5 "Cormorant Garamond", Georgia, serif; }
+.studio-board-post small, .studio-board-muted { color: rgb(14 26 36 / 50%); font-size: 10px; }
+.studio-board-composer { display: grid; gap: 10px; margin-top: 18px; }
+.studio-board-composer label { display: grid; gap: 6px; color: rgb(14 26 36 / 64%); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.studio-board-composer textarea { padding: 9px; resize: vertical; border: 1px solid var(--notes-line); background: transparent; color: var(--notes-ink); font: 14px/1.5 "Jost", sans-serif; letter-spacing: normal; text-transform: none; }
+.studio-notes-submit { justify-self: start; padding: 9px 13px; border: 1px solid var(--notes-ink); background: transparent; color: var(--notes-ink); cursor: pointer; font: 10px "Jost", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+.studio-notes-submit:hover, .studio-notes-submit:focus-visible { border-color: var(--notes-teal); color: var(--notes-teal); }
+.studio-notes-submit:disabled { cursor: not-allowed; opacity: .35; }
+.studio-notes-drawer-layer { --notes-ink: #0e1a24; --notes-paper: #f6f3ec; --notes-bronze: #a97c3f; --notes-teal: #1f8fa3; --notes-line: rgb(14 26 36 / 16%); position: fixed; z-index: 1200; inset: 0; pointer-events: none; }
+.studio-notes-drawer-tab { position: absolute; top: 50%; right: 0; width: 34px; height: 92px; padding: 8px 5px; transform: translateY(-50%); border: 1px solid var(--notes-line); border-right: 0; border-radius: 3px 0 0 3px; background: #f6f3ec; color: #0e1a24; cursor: pointer; box-shadow: 0 8px 24px rgb(14 26 36 / 12%); font: 10px "Jost", sans-serif; letter-spacing: .12em; text-transform: uppercase; writing-mode: vertical-rl; }
+.studio-notes-drawer-tab:hover, .studio-notes-drawer-tab:focus-visible { color: var(--notes-teal); }
+.studio-notes-drawer-panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(450px, calc(100vw - 34px)); overflow-y: auto; visibility: hidden; pointer-events: none; transform: translateX(100%); border-left: 1px solid var(--notes-line); background: #f6f3ec; box-shadow: -18px 0 46px rgb(14 26 36 / 10%); transition: transform 300ms cubic-bezier(.2,.7,.2,1), visibility 0s linear 300ms; }
+.studio-notes-drawer-layer.is-open .studio-notes-drawer-panel { visibility: visible; pointer-events: auto; transform: translateX(0); transition-delay: 0s; }
+.studio-notes-drawer-panel .studio-notes { min-height: 100%; padding: 34px clamp(20px, 4vw, 38px); }
+.studio-notes-drawer-panel .studio-notes-tabs { margin-top: 30px; }
+.studio-notes-drawer-panel .studio-notes-textarea { min-height: min(58vh, 560px); }
+@keyframes studio-notes-save-shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+@keyframes studio-notes-spin { to { transform: rotate(360deg); } }
+@media (max-width: 900px) {
+  .admin-overview-verse-space { grid-template-columns: 1fr; }
+  .studio-notes-inline { min-height: 260px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-notes-tab::after, .studio-notes-drawer-panel { transition: none; }
+  .studio-notes-save.is-saved, .studio-notes-loading span { animation: none; }
+}

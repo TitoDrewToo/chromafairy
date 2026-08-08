@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import AdminSignOut from "../../../components/admin-sign-out";
 import { Hint } from "../../../components/studio-hint";
+import StudioNotes from "../../../components/studio-notes";
 import { createClient } from "../../../lib/supabase/server";
 import "../admin.css";
 
@@ -65,6 +66,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
         </header>
         <div className="admin-page-content">{children}</div>
       </section>
+      <StudioNotes variant="drawer" />
     </div>
   );
 }

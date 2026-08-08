@@ -224,6 +224,23 @@ export type ErrorGroup = {
   reviewed_by: string | null;
 };
 
+export type StudioNote = {
+  id: string;
+  user_id: string;
+  title: string;
+  body: string;
+  position: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type StudioBoardPost = {
+  id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -309,6 +326,20 @@ export type Database = {
         Row: ErrorGroup;
         Insert: Partial<ErrorGroup>;
         Update: Partial<ErrorGroup>;
+        Relationships: [];
+      };
+      studio_notes: {
+        Row: StudioNote;
+        Insert: Partial<Omit<StudioNote, "id" | "created_at" | "updated_at">> &
+          Partial<Pick<StudioNote, "id" | "created_at" | "updated_at">>;
+        Update: Partial<StudioNote>;
+        Relationships: [];
+      };
+      studio_board: {
+        Row: StudioBoardPost;
+        Insert: Partial<Omit<StudioBoardPost, "id" | "created_at">> &
+          Partial<Pick<StudioBoardPost, "id" | "created_at">>;
+        Update: Partial<StudioBoardPost>;
         Relationships: [];
       };
     };

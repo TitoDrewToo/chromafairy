@@ -41,9 +41,15 @@
 ## systems — error monitoring (this feature)
 - `error_events`/`error_groups` + capture (self-safe, fire-and-forget) + studio **Systems** page (owner/dev/admin) + `diagnose-error` edge function (Anthropic-only on `ANTHROPIC_SYSTEMS_API_KEY`, internal auth via `SYSTEMS_INTERNAL_SECRET`). Observation mode — Execute disabled. Dual **UTC + Asia/Manila** timestamps. Diagnose button uses the chroma style (black idle → chroma gradient while diagnosing).
 
+## studio-notes
+- Studio Notes is a client-side Supabase feature in `components/studio-notes.tsx` and `lib/use-studio-notes.ts`. Personal `studio_notes` rows are fetched and autosaved only for the signed-in user; RLS remains the privacy boundary and enforces the 120-character title / 50,000-character body checks.
+- The Overview renders the notes panel beside the daily verse. Other Studio pages render a portal-based right-edge drawer so it is not clipped by the shell or page-transition frame. Drawer open state, active note page, and Notes/Team board view persist in localStorage.
+- `studio_board` stays an invitation-only empty state while there is one Studio member. With more than one member, the client reads the RLS-protected feed and can post with the authenticated user's `author_id`. No service-role client path is used.
+
 ---
 
 ## TIMELINE
+- 2026-08-08 · feature · studio · Added private per-user Studio Notes with debounced autosave, page management, persistent drawer/overview panel, and a member-gated Team board.
 - 2026-08-08 · monitoring triage · systems · Added two-axis journal retrieval design: time windows and topic scopes remain independently selectable.
 - 2026-08-08 · deployment · systems · Studio diagnosis remains Anthropic-only, internally authenticated, and observation-only.
 - 2026-08-08 · feature · studio · Added Systems refresh, tooltips, sticky shell scrolling, and invite-list refresh after successful invites.
