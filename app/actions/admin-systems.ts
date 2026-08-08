@@ -5,11 +5,12 @@ import { createClient } from "../../lib/supabase/server";
 import type { ErrorGroup, ReviewVerdict } from "../../lib/supabase/types";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { nextTimeWindow, nextTopicScope, selectJournalContext, shouldEscalateDiagnosis, loadSystemJournal, type JournalContext } from "../../lib/system-journal";
 
 const statuses = ["new", "triaged", "resolved"] as const;
 const verdicts: ReviewVerdict[] = ["matched", "partial", "wrong"];
 
-type Diagnosis = { root_cause: string; affected_area: string; proposed_fix: string; risk_level: "low" | "medium" | "high"; confidence: number; severity: string; ai_model?: string };
+type Diagnosis = { root_cause: string; affected_area: string; proposed_fix: string; risk_level: "low" | "medium" | "high"; confidence: number; severity: string; needs_more?: { time?: boolean; topic?: boolean }; ai_model?: string };
 
 async function canManage() {
   const caller = await createClient();
@@ -71,16 +72,32 @@ export async function diagnoseError(fingerprint: string, force = false) {
   const secret = process.env.SYSTEMS_INTERNAL_SECRET;
   if (!url || !secret) return { ok: false, error: "Systems diagnosis is not configured." };
   try {
-    const response = await fetch(`${url}/functions/v1/diagnose-error`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
-      body: JSON.stringify({ fingerprint, journal_section: await journalSection(first?.tool ?? "systems"), error: { ...first, context: first?.context ?? {} } }),
-      signal: AbortSignal.timeout(35_000),
-    });
-    const result = await response.json().catch(() => null);
-    if (!response.ok || !validDiagnosis(result)) return { ok: false, error: result?.error || "Diagnosis failed." };
+    const error = { ...first, severity: first?.level ?? group.severity ?? null, occurred_at: first?.occurred_at ?? group.last_seen, context: first?.context ?? {} };
+    const journal = await loadSystemJournal();
+    let context = selectJournalContext(error, group, journal, force);
+    const call = async (selectedContext: JournalContext) => {
+      const response = await fetch(`${url}/functions/v1/diagnose-error`, {
+        method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
+        body: JSON.stringify({ fingerprint, journal_section: selectedContext.text, error }), signal: AbortSignal.timeout(35_000),
+      });
+      const result = await response.json().catch(() => null);
+      return { response, result };
+    };
+    let attempt = await call(context);
+    if (!attempt.response.ok || !validDiagnosis(attempt.result)) return { ok: false, error: attempt.result?.error || "Diagnosis failed." };
+    if (shouldEscalateDiagnosis(attempt.result)) {
+      const lowConfidence = attempt.result.confidence < 0.5;
+      context = selectJournalContext(error, group, journal, force, {
+        timeWindow: attempt.result.needs_more?.time || lowConfidence ? nextTimeWindow(context.timeWindow) : context.timeWindow,
+        topicScope: attempt.result.needs_more?.topic || lowConfidence ? nextTopicScope(context.topicScope) : context.topicScope,
+      });
+      attempt = await call(context);
+      if (!attempt.response.ok || !validDiagnosis(attempt.result)) return { ok: false, error: attempt.result?.error || "Diagnosis escalation failed." };
+    }
+    const result = attempt.result;
     const now = new Date().toISOString();
-    const { data: updated, error: updateError } = await admin.from("error_groups").update({ ai_analysis: `Root cause: ${result.root_cause}\nAffected area: ${result.affected_area}`, proposed_fix: result.proposed_fix, risk_level: result.risk_level, confidence: result.confidence, severity: result.severity, diagnosed_at: now, ai_model: result.ai_model || process.env.ANTHROPIC_SYSTEMS_MODEL || "claude-haiku-4-5-20251001", status: group.status === "new" ? "triaged" : group.status }).eq("fingerprint", fingerprint).select("*").single();
+    const diagnosisUpdate = { ai_analysis: `Root cause: ${result.root_cause}\nAffected area: ${result.affected_area}`, proposed_fix: result.proposed_fix, risk_level: result.risk_level, confidence: result.confidence, severity: result.severity, diagnosed_at: now, ai_model: result.ai_model || process.env.ANTHROPIC_SYSTEMS_MODEL || "claude-haiku-4-5-20251001", context_scope: `${context.timeWindow}/${context.topicScope}`, status: group.status === "new" ? "triaged" : group.status };
+    const { data: updated, error: updateError } = await admin.from("error_groups").update(diagnosisUpdate as never).eq("fingerprint", fingerprint).select("*").single();
     if (updateError || !updated) return { ok: false, error: "Diagnosis returned, but could not be saved." };
     return { ok: true, cached: false, group: updated as ErrorGroup };
   } catch { return { ok: false, error: "Diagnosis timed out or was unavailable." }; }

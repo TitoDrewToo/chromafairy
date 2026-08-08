@@ -15,7 +15,8 @@ Return ONLY strict JSON with exactly these fields:
   "proposed_fix": "...",
   "risk_level": "low" | "medium" | "high",
   "confidence": 0.0,
-  "severity": "..."
+  "severity": "...",
+  "needs_more": { "time": false, "topic": false }
 }
 Confidence must be a number from 0 to 1. If evidence is incomplete, say so and lower confidence.`
 
@@ -55,9 +56,10 @@ function parseDiagnosis(text: string) {
   const riskLevel = parsed.risk_level
   const confidence = parsed.confidence
   const severity = safeString(parsed.severity, 80)
+  const needsMore = parsed.needs_more && typeof parsed.needs_more === "object" ? parsed.needs_more as Record<string, unknown> : {}
   if (!rootCause || !affectedArea || !proposedFix || !severity || !["low", "medium", "high"].includes(String(riskLevel))) throw new Error("Diagnosis failed schema validation")
   if (typeof confidence !== "number" || !Number.isFinite(confidence) || confidence < 0 || confidence > 1) throw new Error("Diagnosis confidence is invalid")
-  return { root_cause: rootCause, affected_area: affectedArea, proposed_fix: proposedFix, risk_level: riskLevel, confidence, severity }
+  return { root_cause: rootCause, affected_area: affectedArea, proposed_fix: proposedFix, risk_level: riskLevel, confidence, severity, needs_more: { time: needsMore.time === true, topic: needsMore.topic === true } }
 }
 
 Deno.serve(async (request) => {

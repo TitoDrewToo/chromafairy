@@ -43,6 +43,12 @@
 
 ---
 
+## TIMELINE
+- 2026-08-08 · monitoring triage · systems · Added two-axis journal retrieval design: time windows and topic scopes remain independently selectable.
+- 2026-08-08 · deployment · systems · Studio diagnosis remains Anthropic-only, internally authenticated, and observation-only.
+- 2026-08-08 · feature · studio · Added Systems refresh, tooltips, sticky shell scrolling, and invite-list refresh after successful invites.
+- 2026-08-07 · security fix · prescan · Benign PDF OpenAction view actions no longer trigger the active-content block.
+
 ## CHANGELOG
 - **2026-08-08** — Error monitoring + AI triage (studio, observation mode).
 - **2026-08** — Studio hover-hints tutorial + KJV daily verse; header + fairy-splash fixes; security hardening (inquiry binding, atomic sale/booking RPCs, owner/dev/admin authz, upload limits); `/admin`→`/studio` rename; settings feature-flag grouping.
