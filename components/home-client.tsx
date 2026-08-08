@@ -29,7 +29,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     const header = root?.querySelector<HTMLElement>("#hdr");
     const toggle = root?.querySelector<HTMLButtonElement>("#home-menu-toggle");
     const nav = root?.querySelector<HTMLElement>("#home-nav");
-    if (!header || !toggle || !nav) return;
+    if (!root || !header || !toggle || !nav) return;
 
     const setOpen = (open: boolean) => {
       header.classList.toggle("open", open);
@@ -41,7 +41,44 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       setOpen(toggle.getAttribute("aria-expanded") !== "true");
     };
     const onNavClick = (event: MouseEvent) => {
-      if ((event.target as Element).closest("a")) setOpen(false);
+      const anchor = (event.target as Element).closest<HTMLAnchorElement>("a");
+      if (!anchor) return;
+
+      setOpen(false);
+      const href = anchor.getAttribute("href");
+      if (!href?.startsWith("#")) return;
+
+      const target = root.querySelector<HTMLElement>(href);
+      if (!target) return;
+
+      event.preventDefault();
+      const destination = Math.max(0, target.getBoundingClientRect().top + window.scrollY);
+      const start = window.scrollY;
+      const distance = destination - start;
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduceMotion || Math.abs(distance) < 2) {
+        window.scrollTo(0, destination);
+        window.history.pushState(null, "", href);
+        return;
+      }
+
+      const duration = Math.min(1100, Math.max(720, Math.abs(distance) * 0.42));
+      const startedAt = performance.now();
+      if (activeScrollFrame) window.cancelAnimationFrame(activeScrollFrame);
+      const animateScroll = (now: number) => {
+        const progress = Math.min(1, (now - startedAt) / duration);
+        const eased = progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+        window.scrollTo(0, start + distance * eased);
+        if (progress < 1) {
+          activeScrollFrame = window.requestAnimationFrame(animateScroll);
+        } else {
+          activeScrollFrame = 0;
+        }
+      };
+      activeScrollFrame = window.requestAnimationFrame(animateScroll);
+      window.history.pushState(null, "", href);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") {
@@ -56,6 +93,8 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       if (window.innerWidth > 860) setOpen(false);
     };
 
+    let activeScrollFrame = 0;
+
     toggle.addEventListener("click", onToggle);
     nav.addEventListener("click", onNavClick);
     document.addEventListener("keydown", onKeyDown);
@@ -67,6 +106,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("pointerdown", onOutsidePointer);
       window.removeEventListener("resize", onResize);
+      if (activeScrollFrame) window.cancelAnimationFrame(activeScrollFrame);
     };
   }, [markup]);
 
