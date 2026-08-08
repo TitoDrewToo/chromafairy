@@ -40,10 +40,14 @@ export async function updateErrorReview(fingerprint: string, verdict: ReviewVerd
 }
 
 async function journalSection(tool: string) {
-  const journal = await readFile(path.join(process.cwd(), "docs", "System_Journal.md"), "utf8");
-  const sections = journal.split(/^## /m).slice(1);
-  const match = sections.find((section) => section.startsWith(`${tool} —`) || section.startsWith("systems —"));
-  return match ? `## ${match}`.slice(0, 20_000) : "## systems — error monitoring and diagnosis\nUse the supplied sanitized error only. Diagnosis is observation-only.";
+  try {
+    const journal = await readFile(path.join(process.cwd(), "docs", "System_Journal.md"), "utf8");
+    const sections = journal.split(/^## /m).slice(1);
+    const match = sections.find((section) => section.startsWith(`${tool} —`) || section.startsWith("systems —"));
+    return match ? `## ${match}`.slice(0, 20_000) : "## systems — error monitoring and diagnosis\nUse the supplied sanitized error only. Diagnosis is observation-only.";
+  } catch {
+    return "## systems — error monitoring and diagnosis\nSystem journal unavailable; use only the supplied sanitized error fields.";
+  }
 }
 
 function validDiagnosis(value: unknown): value is Diagnosis {
