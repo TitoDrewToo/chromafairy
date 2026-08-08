@@ -68,7 +68,7 @@
 .admin-page-content { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; display: flex; flex-direction: column; padding: clamp(34px, 7vw, 90px) clamp(20px, 5vw, 64px); }
 .studio-workspace-loading { display: grid; flex: 1; min-height: min(62vh, 620px); place-items: center; }
 .admin-dashboard { max-width: 680px; }
-.admin-overview { flex: 1; min-height: 100%; display: flex; flex-direction: column; }
+.admin-overview { flex: 1; min-height: 100%; max-width: none; display: flex; flex-direction: column; }
 .admin-overview-verse-space { flex: 1; display: grid; min-height: 0; place-items: center; }
 .daily-verse { width: min(100%, 700px); margin: 0; text-align: center; opacity: 0; }
 .daily-verse.is-sized { opacity: 1; transition: opacity 420ms ease-out; }
@@ -127,8 +127,8 @@
 
 /* Studio notes — a quiet editorial notepad with a single chroma save flourish. */
 .admin-overview-verse-space {
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 1fr);
-  gap: clamp(22px, 4vw, 56px);
+  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 64px);
   align-items: stretch;
 }
 .studio-notes {
@@ -201,8 +201,8 @@
 .studio-notes-drawer-layer { --notes-ink: #0e1a24; --notes-paper: #f6f3ec; --notes-bronze: #a97c3f; --notes-teal: #1f8fa3; --notes-line: rgb(14 26 36 / 16%); position: fixed; z-index: 1200; inset: 0; pointer-events: none; }
 .studio-notes-drawer-tab { position: absolute; top: 50%; right: 0; width: 34px; height: 92px; padding: 8px 5px; pointer-events: auto; transform: translateY(-50%); border: 1px solid var(--notes-line); border-right: 0; border-radius: 3px 0 0 3px; background: #f6f3ec; background-size: var(--chroma-size); color: #0e1a24; cursor: pointer; box-shadow: 0 8px 24px rgb(14 26 36 / 12%); font: 10px "Jost", sans-serif; letter-spacing: .12em; text-transform: uppercase; writing-mode: vertical-rl; }
 .studio-notes-drawer-tab:hover, .studio-notes-drawer-tab:focus-visible { background: var(--chroma-gradient); background-size: var(--chroma-size); color: #fff; border-color: var(--notes-bronze); animation: studio-notes-tab-chroma 3s linear infinite; }
-.studio-notes-drawer-panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(450px, calc(100vw - 34px)); overflow-y: auto; visibility: hidden; pointer-events: none; transform: translateX(100%); border-left: 1px solid var(--notes-line); background: #f6f3ec; box-shadow: -18px 0 46px rgb(14 26 36 / 10%); transition: transform 300ms cubic-bezier(.2,.7,.2,1), visibility 0s linear 300ms; }
-.studio-notes-drawer-layer.is-open .studio-notes-drawer-panel { visibility: visible; pointer-events: auto; transform: translateX(0); transition-delay: 0s; }
+.studio-notes-drawer-panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(620px, calc(100vw - 34px)); overflow-y: auto; visibility: hidden; pointer-events: none; opacity: 0; transform: translateX(100%); border-left: 1px solid var(--notes-line); background: #f6f3ec; box-shadow: -22px 0 60px rgb(14 26 36 / 12%); transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease, visibility 0s linear 420ms; }
+.studio-notes-drawer-layer.is-open .studio-notes-drawer-panel { visibility: visible; pointer-events: auto; opacity: 1; transform: translateX(0); transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1), opacity 300ms ease; }
 .studio-notes-drawer-panel .studio-notes { min-height: 100%; padding: 34px clamp(20px, 4vw, 38px); }
 .studio-notes-drawer-panel .studio-notes-tabs { margin-top: 30px; }
 .studio-notes-drawer-panel .studio-notes-textarea { min-height: min(58vh, 560px); }
