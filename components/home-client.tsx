@@ -48,6 +48,10 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       const href = anchor.getAttribute("href");
       if (!href?.startsWith("#")) return;
 
+      // Desktop keeps the original browser smooth-scroll behavior. The custom
+      // easing is only needed for the mobile menu's more compact viewport.
+      if (window.innerWidth > 860) return;
+
       const target = root.querySelector<HTMLElement>(href);
       if (!target) return;
 
@@ -62,14 +66,12 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
         return;
       }
 
-      const duration = Math.min(1100, Math.max(720, Math.abs(distance) * 0.42));
+      const duration = Math.min(1500, Math.max(1080, Math.abs(distance) * 0.34));
       const startedAt = performance.now();
       if (activeScrollFrame) window.cancelAnimationFrame(activeScrollFrame);
       const animateScroll = (now: number) => {
         const progress = Math.min(1, (now - startedAt) / duration);
-        const eased = progress < 0.5
-          ? 4 * progress * progress * progress
-          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+        const eased = (1 - Math.cos(Math.PI * progress)) / 2;
         window.scrollTo(0, start + distance * eased);
         if (progress < 1) {
           activeScrollFrame = window.requestAnimationFrame(animateScroll);
