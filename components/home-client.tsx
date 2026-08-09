@@ -28,7 +28,7 @@ const PAINTING_FRAGMENT_SHADER = `
   precision highp float;
   varying vec2 vUv;
   uniform sampler2D uTexA,uTexB; uniform vec2 uTexResA,uTexResB,uRes;
-  uniform float uTime,uBlend,uDissolve,uZoom,uShadow,uAmp,uBright;
+  uniform float uTime,uBlend,uDissolve,uZoom,uShadow,uAmp,uBright,uTopExtend;
   float lum(vec3 c){ return dot(c,vec3(0.299,0.587,0.114)); }
   vec2 coverUV(vec2 uv, vec2 tr){ vec2 r=vec2(min((uRes.x/uRes.y)/(tr.x/tr.y),1.0),min((uRes.y/uRes.x)/(tr.y/tr.x),1.0));
     return (uv-0.5)/uZoom*r+0.5; }
@@ -53,9 +53,11 @@ const PAINTING_FRAGMENT_SHADER = `
   }
   vec3 finish(vec3 col){
     col=(col-0.5)*1.06+0.5; float l=lum(col); col=mix(vec3(l),col,1.14); col*=uBright;
-    float band=1.0-smoothstep(0.0,0.55,abs(vUv.y-0.5));
-    float centerScrim=mix(1.0,0.5,band);
-    col*=mix(1.0,centerScrim,uShadow);
+    float dCenter=1.0-smoothstep(0.0,0.55,abs(vUv.y-0.5));
+    float dTop=smoothstep(0.40,1.0,vUv.y);
+    float shade=max(dCenter,dTop*uTopExtend);
+    float scrim=mix(1.0,0.5,shade);
+    col*=mix(1.0,scrim,uShadow);
     return col;
   }
   void main(){
@@ -336,6 +338,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
         shadow: gl.getUniformLocation(program, "uShadow"),
         amp: gl.getUniformLocation(program, "uAmp"),
         bright: gl.getUniformLocation(program, "uBright"),
+        topExtend: gl.getUniformLocation(program, "uTopExtend"),
       };
       const sceneStops = [
         { id: "home", scene: 0.0 }, { id: "collections", scene: 0.7 }, { id: "exhibitions", scene: 1.4 },
@@ -406,12 +409,17 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       window.addEventListener("resize", resize);
 
       let currentScroll = 0;
+      let currentTopExtend = 1;
       let frameId = 0;
       const startedAt = performance.now();
       const frame = (now: number) => {
         if (disposed || document.hidden) { frameId = 0; return; }
         const target = sceneValue() / 4;
         currentScroll += (target - currentScroll) * (holdStill ? 1 : 0.06);
+        const vh = Math.max(1, window.innerHeight);
+        const rawTopExtend = 1 - (window.scrollY / vh) / 0.9;
+        const targetTopExtend = Math.min(1, Math.max(0, rawTopExtend));
+        currentTopExtend += (targetTopExtend - currentTopExtend) * (holdStill ? 1 : 0.06);
         const position = holdStill ? 0 : currentScroll * (PAINTING_TEXTURES.length - 1);
         let index = Math.floor(position);
         if (index >= PAINTING_TEXTURES.length - 1) index = PAINTING_TEXTURES.length - 2;
@@ -438,6 +446,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
           gl.uniform1f(paintingUniforms.shadow, 1.0);
           gl.uniform1f(paintingUniforms.amp, holdStill ? 0 : 1.5);
           gl.uniform1f(paintingUniforms.bright, 1.5);
+          gl.uniform1f(paintingUniforms.topExtend, currentTopExtend);
           gl.drawArrays(gl.TRIANGLES, 0, 3);
         }
         frameId = window.requestAnimationFrame(frame);
