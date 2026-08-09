@@ -10,6 +10,71 @@ type HomeClientProps = {
   markup: string;
 };
 
+const PAINTING_TEXTURES = [
+  "/assets/paintings/01_IMG_8693.jpg",
+  "/assets/paintings/02_IMG_8661.jpg",
+  "/assets/paintings/03_IMG_5909.jpg",
+  "/assets/paintings/04_IMG_5923.jpg",
+  "/assets/paintings/05_IMG_8645.jpg",
+  "/assets/paintings/06_IMG_R_0239.jpg",
+  "/assets/paintings/07_IMG_3835.jpg",
+  "/assets/paintings/08_IMG_8704.jpg",
+  "/assets/paintings/09_IMG_2797.jpg",
+  "/assets/paintings/10_IMG_2742.jpg",
+  "/assets/paintings/11_IMG_1663.jpg",
+];
+
+const PAINTING_FRAGMENT_SHADER = `
+  precision highp float;
+  varying vec2 vUv;
+  uniform sampler2D uTexA,uTexB; uniform vec2 uTexResA,uTexResB,uRes;
+  uniform float uTime,uBlend,uDissolve,uZoom,uShadow,uAmp,uBright;
+  float lum(vec3 c){ return dot(c,vec3(0.299,0.587,0.114)); }
+  vec2 coverUV(vec2 uv, vec2 tr){ vec2 r=vec2(min((uRes.x/uRes.y)/(tr.x/tr.y),1.0),min((uRes.y/uRes.x)/(tr.y/tr.x),1.0));
+    return (uv-0.5)/uZoom*r+0.5; }
+  float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+  float noise(vec2 p){ vec2 i=floor(p),f=fract(p),uu=f*f*(3.0-2.0*f);
+    return mix(mix(hash(i),hash(i+vec2(1,0)),uu.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),uu.x),uu.y); }
+  float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<4;i++){v+=a*noise(p);p*=2.02;a*=0.5;} return v; }
+  vec3 sp(sampler2D t, vec2 uv){ return texture2D(t, clamp(uv,0.002,0.998)).rgb; }
+  vec3 living(sampler2D tex, vec2 tr){
+    vec2 base=coverUV(vUv,tr);
+    float t=uTime*0.05*max(uAmp,0.001);
+    vec2 warp=(vec2(fbm(base*3.0+t),fbm(base*3.0+vec2(4.7,2.1)-t))-0.5)*0.03*uAmp;
+    vec2 uv=base+warp;
+    float e=1.5/max(uRes.x,uRes.y);
+    float gx=lum(sp(tex,uv+vec2(e,0.0)))-lum(sp(tex,uv-vec2(e,0.0)));
+    float gy=lum(sp(tex,uv+vec2(0.0,e)))-lum(sp(tex,uv-vec2(0.0,e)));
+    vec2 flow=vec2(-gy,gx); float fl=length(flow); flow=fl>1e-4?flow/fl:vec2(0.0);
+    vec2 drift=vec2(fbm(base*2.0-t*0.5),fbm(base*2.0+vec2(9.1,3.3)+t*0.5))-0.5;
+    flow=normalize(flow+drift*0.8+1e-5);
+    float speed=0.10*uAmp, scale=0.05; float tt=uTime*speed;
+    return mix(sp(tex,uv-flow*fract(tt)*scale), sp(tex,uv-flow*fract(tt+0.5)*scale), abs(1.0-2.0*fract(tt)));
+  }
+  vec3 finish(vec3 col){
+    col=(col-0.5)*1.06+0.5; float l=lum(col); col=mix(vec3(l),col,1.14); col*=uBright;
+    vec2 d=vUv-0.5;
+    float vig=smoothstep(1.15,0.30,length(d*vec2(1.0,1.06)));
+    float topShade=mix(1.0,0.40,smoothstep(0.32,1.0,vUv.y));
+    col*=mix(1.0, vig*topShade, uShadow);
+    return col;
+  }
+  void main(){
+    float blend=clamp(uBlend,0.0,1.0);
+    vec3 col;
+    // Evaluate only the visible painting at settled endpoints; both are evaluated during a morph.
+    if(blend<=0.001) col=finish(living(uTexA,uTexResA));
+    else if(blend>=0.999) col=finish(living(uTexB,uTexResB));
+    else {
+      vec3 a=living(uTexA,uTexResA); vec3 b=living(uTexB,uTexResB);
+      float n=fbm(vUv*3.2 + uTime*0.04);
+      float w=max(uDissolve,0.001);
+      float m=smoothstep(0.0,1.0, clamp((blend*(1.0+w) - w*0.5) + (n-0.5)*w, 0.0, 1.0));
+      col=finish(mix(a,b,m));
+    }
+    gl_FragColor=vec4(col,1.0);
+  }`;
+
 export default function HomeClient({ styles, markup }: HomeClientProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [backgroundMount, setBackgroundMount] = useState<HTMLElement | null>(null);
@@ -117,6 +182,42 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
 
   useEffect(() => {
     const root = rootRef.current;
+    const header = root?.querySelector<HTMLElement>("#hdr");
+    if (!root || !header) return;
+
+    const onScroll = () => header.classList.toggle("solid", window.scrollY > window.innerHeight * 0.7);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in");
+          observer.unobserve(entry.target);
+        }
+      }),
+      { threshold: 0.14 },
+    );
+    root.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
+    root.querySelectorAll<HTMLElement>("a, button:not(.menu-toggle)").forEach((element) => {
+      if (element.classList.contains("btn")) {
+        element.classList.add("chroma-cta");
+        const label = document.createElement("span");
+        label.className = "chroma-cta-label";
+        while (element.firstChild) label.append(element.firstChild);
+        element.append(label);
+      } else {
+        element.classList.add("chroma-text");
+      }
+    });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      observer.disconnect();
+    };
+  }, [markup]);
+
+  useEffect(() => {
+    const root = rootRef.current;
     const canvas = backgroundMount?.querySelector<HTMLCanvasElement>("#art");
     const fallback = backgroundMount?.querySelector<HTMLElement>("#artFallback");
     if (!root || !canvas || !fallback) return;
@@ -128,8 +229,11 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       return;
     }
 
-    const vs = `attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`;
-    const fs = `
+    const paintingBgEnabled = !["0", "false", "off"].includes((process.env.NEXT_PUBLIC_PAINTING_BG ?? "1").toLowerCase());
+    const vs = paintingBgEnabled
+      ? `attribute vec2 p; varying vec2 vUv; void main(){vUv=vec2(0.5)+p*0.5;gl_Position=vec4(p,0.,1.);}`
+      : `attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`;
+    const oldFragmentShader = `
   precision highp float;
   uniform vec2 u_res; uniform float u_time; uniform float u_scroll; uniform vec2 u_mouse;
 
@@ -182,6 +286,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     col*=0.72+0.42*vig; col+=f*f*0.05;
     gl_FragColor=vec4(col,1.0);
   }`;
+    const fs = paintingBgEnabled ? PAINTING_FRAGMENT_SHADER : oldFragmentShader;
 
     const shader = (type: number, source: string) => {
       const result = gl.createShader(type);
@@ -212,6 +317,157 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     const position = gl.getAttribLocation(program, "p");
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+    if (paintingBgEnabled) {
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+      const lowPower = Boolean(connection?.saveData) || (navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4);
+      const holdStill = reducedMotion || lowPower;
+      const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.25 : 1.75);
+      const paintingUniforms = {
+        res: gl.getUniformLocation(program, "uRes"),
+        time: gl.getUniformLocation(program, "uTime"),
+        texA: gl.getUniformLocation(program, "uTexA"),
+        texB: gl.getUniformLocation(program, "uTexB"),
+        texResA: gl.getUniformLocation(program, "uTexResA"),
+        texResB: gl.getUniformLocation(program, "uTexResB"),
+        blend: gl.getUniformLocation(program, "uBlend"),
+        dissolve: gl.getUniformLocation(program, "uDissolve"),
+        zoom: gl.getUniformLocation(program, "uZoom"),
+        shadow: gl.getUniformLocation(program, "uShadow"),
+        amp: gl.getUniformLocation(program, "uAmp"),
+        bright: gl.getUniformLocation(program, "uBright"),
+      };
+      const sceneStops = [
+        { id: "home", scene: 0.0 }, { id: "collections", scene: 0.7 }, { id: "exhibitions", scene: 1.4 },
+        { id: "gallery", scene: 2.2 }, { id: "commission", scene: 2.9 }, { id: "press", scene: 3.4 },
+        { id: "about", scene: 3.7 }, { id: "contact", scene: 4.0 },
+      ]
+        .map((stop) => ({ el: root.querySelector<HTMLElement>(`#${stop.id}`), scene: stop.scene }))
+        .filter((stop): stop is { el: HTMLElement; scene: number } => Boolean(stop.el));
+      const sceneValue = () => {
+        const probe = window.scrollY + window.innerHeight * 0.5;
+        const points = sceneStops.map((stop) => {
+          const rect = stop.el.getBoundingClientRect();
+          return { center: rect.top + window.scrollY + rect.height * 0.5, scene: stop.scene };
+        });
+        if (probe <= points[0].center) return points[0].scene;
+        for (let i = 0; i < points.length - 1; i += 1) {
+          if (probe >= points[i].center && probe <= points[i + 1].center) {
+            const ratio = (probe - points[i].center) / ((points[i + 1].center - points[i].center) || 1);
+            return points[i].scene + (points[i + 1].scene - points[i].scene) * ratio;
+          }
+        }
+        return points[points.length - 1].scene;
+      };
+      const textures: Array<WebGLTexture | null> = new Array(PAINTING_TEXTURES.length).fill(null);
+      const dimensions: Array<[number, number] | null> = new Array(PAINTING_TEXTURES.length).fill(null);
+      let disposed = false;
+      let firstTextureReady = false;
+
+      const resize = () => {
+        canvas.width = Math.max(1, Math.floor(canvas.clientWidth * dpr));
+        canvas.height = Math.max(1, Math.floor(canvas.clientHeight * dpr));
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.uniform2f(paintingUniforms.res, canvas.clientWidth, canvas.clientHeight);
+      };
+      const uploadTexture = (image: HTMLImageElement, index: number) => {
+        const texture = gl.createTexture();
+        if (!texture) return false;
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        textures[index] = texture;
+        dimensions[index] = [image.naturalWidth, image.naturalHeight];
+        return true;
+      };
+      const loadTexture = (index: number) => new Promise<boolean>((resolve) => {
+        const image = new Image();
+        image.decoding = "async";
+        image.onload = () => {
+          if (disposed) { resolve(false); return; }
+          resolve(uploadTexture(image, index));
+        };
+        image.onerror = () => resolve(false);
+        image.src = PAINTING_TEXTURES[index];
+      });
+      const showFirstTexture = (ready: boolean) => {
+        if (!ready || disposed || firstTextureReady) return;
+        firstTextureReady = true;
+        canvas.style.opacity = "1";
+      };
+      canvas.style.opacity = "0";
+      canvas.style.transition = "opacity 500ms ease";
+      fallback.style.display = "none";
+      resize();
+      window.addEventListener("resize", resize);
+
+      let currentScroll = 0;
+      let frameId = 0;
+      const startedAt = performance.now();
+      const frame = (now: number) => {
+        if (disposed || document.hidden) { frameId = 0; return; }
+        const target = sceneValue() / 4;
+        currentScroll += (target - currentScroll) * (holdStill ? 1 : 0.06);
+        const position = holdStill ? 0 : currentScroll * (PAINTING_TEXTURES.length - 1);
+        let index = Math.floor(position);
+        if (index >= PAINTING_TEXTURES.length - 1) index = PAINTING_TEXTURES.length - 2;
+        if (index < 0) index = 0;
+        const blend = holdStill ? 0 : Math.min(1, Math.max(0, position - index));
+        const textureA = textures[index] ?? textures[0];
+        const textureB = holdStill ? textureA : (textures[index + 1] ?? textureA);
+        const blendReady = textureB && textures[index + 1] ? blend : 0;
+        if (textureA && textureB) {
+          gl.activeTexture(gl.TEXTURE0);
+          gl.bindTexture(gl.TEXTURE_2D, textureA);
+          gl.uniform1i(paintingUniforms.texA, 0);
+          gl.activeTexture(gl.TEXTURE1);
+          gl.bindTexture(gl.TEXTURE_2D, textureB);
+          gl.uniform1i(paintingUniforms.texB, 1);
+          const dimA = dimensions[index] ?? dimensions[0] ?? [1, 1];
+          const dimB = dimensions[index + 1] ?? dimA;
+          gl.uniform2f(paintingUniforms.texResA, dimA[0], dimA[1]);
+          gl.uniform2f(paintingUniforms.texResB, dimB[0], dimB[1]);
+          gl.uniform1f(paintingUniforms.blend, blendReady);
+          gl.uniform1f(paintingUniforms.time, (now - startedAt) / 1000);
+          gl.uniform1f(paintingUniforms.dissolve, 0.55);
+          gl.uniform1f(paintingUniforms.zoom, 1.0);
+          gl.uniform1f(paintingUniforms.shadow, 1.0);
+          gl.uniform1f(paintingUniforms.amp, holdStill ? 0 : 1.5);
+          gl.uniform1f(paintingUniforms.bright, 1.5);
+          gl.drawArrays(gl.TRIANGLES, 0, 3);
+        }
+        frameId = window.requestAnimationFrame(frame);
+      };
+      const onVisibilityChange = () => {
+        if (!document.hidden && !frameId) frameId = window.requestAnimationFrame(frame);
+      };
+      document.addEventListener("visibilitychange", onVisibilityChange);
+      frameId = window.requestAnimationFrame(frame);
+
+      void loadTexture(0).then(showFirstTexture);
+      if (!holdStill) {
+        window.setTimeout(() => {
+          PAINTING_TEXTURES.slice(1).forEach((_, offset) => {
+            window.setTimeout(() => { if (!disposed) void loadTexture(offset + 1); }, Math.min(offset * 45, 360));
+          });
+        }, 0);
+      }
+
+      return () => {
+        disposed = true;
+        if (frameId) window.cancelAnimationFrame(frameId);
+        window.removeEventListener("resize", resize);
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+        textures.forEach((texture) => { if (texture) gl.deleteTexture(texture); });
+        gl.deleteProgram(program);
+      };
+    }
+
     const uniforms = {
       res: gl.getUniformLocation(program, "u_res"),
       time: gl.getUniformLocation(program, "u_time"),
@@ -276,37 +532,11 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     };
     frame(start);
 
-    const header = root.querySelector<HTMLElement>("#hdr");
-    const onScroll = () => header?.classList.toggle("solid", window.scrollY > window.innerHeight * 0.7);
-    window.addEventListener("scroll", onScroll);
-    const observer = new IntersectionObserver(
-      (entries) => entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("in");
-          observer.unobserve(entry.target);
-        }
-      }),
-      { threshold: 0.14 },
-    );
-    root.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
-    root.querySelectorAll<HTMLElement>("a, button:not(.menu-toggle)").forEach((element) => {
-      if (element.classList.contains("btn")) {
-        element.classList.add("chroma-cta");
-        const label = document.createElement("span");
-        label.className = "chroma-cta-label";
-        while (element.firstChild) label.append(element.firstChild);
-        element.append(label);
-      } else {
-        element.classList.add("chroma-text");
-      }
-    });
-
     return () => {
       cancelAnimationFrame(frameId);
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("scroll", onScroll);
-      observer.disconnect();
+      gl.deleteProgram(program);
     };
   }, [backgroundMount]);
 
