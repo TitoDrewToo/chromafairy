@@ -106,15 +106,11 @@
   #contact .socials a{color:var(--teal);text-decoration:none}
   .note{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a97a0;text-align:center;margin-top:24px;font-weight:300}
 
-  /* Thin black keyline for white type exposed directly over the living paintings. */
+  /* White type over the living paintings keeps a soft, local halo rather than a hard outline. */
   header:not(.solid) .brand,header:not(.solid) nav a,
   #home .sig,#home .yr,#home .tag,.scrollcue,.interlude .line,.interlude .k,.roomcap{
-    -webkit-text-stroke:.6px rgba(0,0,0,.6);paint-order:stroke fill;
-    text-shadow:-1px -1px 0 rgba(0,0,0,.45),1px -1px 0 rgba(0,0,0,.45),
-      -1px 1px 0 rgba(0,0,0,.45),1px 1px 0 rgba(0,0,0,.45),0 2px 12px rgba(0,0,0,.4)
+    text-shadow:0 1px 2px rgba(0,0,0,.35),0 2px 22px rgba(0,0,0,.55)
   }
-  #home .sig{ -webkit-text-stroke:.7px rgba(0,0,0,.6) }
-  .roomcap{ -webkit-text-stroke:.5px rgba(0,0,0,.55) }
   .stage.dim .showtext{background:rgba(8,16,26,.35);backdrop-filter:blur(10px);border-radius:2px;padding:clamp(18px,3vw,30px)}
 
   /* ============ CLEAN staged art sections ============ */
