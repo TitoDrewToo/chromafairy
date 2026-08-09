@@ -4,25 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AnimatedFairy from "./animated-fairy";
 import InquiryForm from "./inquiry-form";
+import { PAINTING_TEXTURES, isPaintingBackgroundVariant, type PaintingBackgroundVariant } from "./backgrounds/painting-textures";
 
 type HomeClientProps = {
   styles: string;
   markup: string;
 };
-
-const PAINTING_TEXTURES = [
-  "/assets/paintings/01_IMG_8693.jpg",
-  "/assets/paintings/02_IMG_8661.jpg",
-  "/assets/paintings/03_IMG_5909.jpg",
-  "/assets/paintings/04_IMG_5923.jpg",
-  "/assets/paintings/05_IMG_8645.jpg",
-  "/assets/paintings/06_IMG_R_0239.jpg",
-  "/assets/paintings/07_IMG_3835.jpg",
-  "/assets/paintings/08_IMG_8704.jpg",
-  "/assets/paintings/09_IMG_2797.jpg",
-  "/assets/paintings/10_IMG_2742.jpg",
-  "/assets/paintings/11_IMG_1663.jpg",
-];
 
 const PAINTING_FRAGMENT_SHADER = `
   precision highp float;
@@ -81,6 +68,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
   const [backgroundMount, setBackgroundMount] = useState<HTMLElement | null>(null);
   const [fairyMount, setFairyMount] = useState<HTMLElement | null>(null);
   const [commissionMount, setCommissionMount] = useState<HTMLElement | null>(null);
+  const backgroundVariantRef = useRef<PaintingBackgroundVariant | null>(null);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -223,6 +211,44 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     const fallback = backgroundMount?.querySelector<HTMLElement>("#artFallback");
     if (!root || !canvas || !fallback) return;
 
+    const paintingBgEnabled = !["0", "false", "off"].includes((process.env.NEXT_PUBLIC_PAINTING_BG ?? "1").toLowerCase());
+    if (!backgroundVariantRef.current) {
+      const queryVariant = new URLSearchParams(window.location.search).get("bg");
+      const cookieLast = document.cookie.match(/(?:^|;\s*)cf_bg_last=([^;]+)/)?.[1] ?? null;
+      const requested = paintingBgEnabled && isPaintingBackgroundVariant(queryVariant) ? queryVariant : null;
+      const pool = (["v1", "v2", "v3"] as PaintingBackgroundVariant[]).filter((variant) => variant !== cookieLast);
+      const chosen = requested ?? pool[Math.floor(Math.random() * pool.length)] ?? "v1";
+      backgroundVariantRef.current = paintingBgEnabled ? chosen : "v1";
+      document.cookie = `cf_bg_last=${backgroundVariantRef.current}; Max-Age=31536000; Path=/; SameSite=Lax`;
+    }
+    const selectedVariant = backgroundVariantRef.current;
+
+    if (paintingBgEnabled && selectedVariant !== "v1") {
+      let active = true;
+      let cleanupVariant = () => {};
+      const onVariantError = () => {
+        canvas.style.opacity = "1";
+        canvas.style.display = "none";
+        fallback.style.display = "block";
+      };
+      window.addEventListener("cf-background-error", onVariantError);
+      void (async () => {
+        try {
+          const module = selectedVariant === "v2"
+            ? await import("./backgrounds/omma-v2")
+            : await import("./backgrounds/omma-v3");
+          if (active) cleanupVariant = module.init(canvas);
+        } catch {
+          onVariantError();
+        }
+      })();
+      return () => {
+        active = false;
+        window.removeEventListener("cf-background-error", onVariantError);
+        cleanupVariant();
+      };
+    }
+
     const gl = (canvas.getContext("webgl") || canvas.getContext("experimental-webgl")) as WebGLRenderingContext | null;
     if (!gl) {
       fallback.style.display = "block";
@@ -230,7 +256,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       return;
     }
 
-    const paintingBgEnabled = !["0", "false", "off"].includes((process.env.NEXT_PUBLIC_PAINTING_BG ?? "1").toLowerCase());
+    const usePaintingV1 = paintingBgEnabled && selectedVariant === "v1";
     const vs = paintingBgEnabled
       ? `attribute vec2 p; varying vec2 vUv; void main(){vUv=vec2(0.5)+p*0.5;gl_Position=vec4(p,0.,1.);}`
       : `attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`;
@@ -287,7 +313,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     col*=0.72+0.42*vig; col+=f*f*0.05;
     gl_FragColor=vec4(col,1.0);
   }`;
-    const fs = paintingBgEnabled ? PAINTING_FRAGMENT_SHADER : oldFragmentShader;
+    const fs = usePaintingV1 ? PAINTING_FRAGMENT_SHADER : oldFragmentShader;
 
     const shader = (type: number, source: string) => {
       const result = gl.createShader(type);
@@ -319,7 +345,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
 
-    if (paintingBgEnabled) {
+    if (usePaintingV1) {
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
       const lowPower = Boolean(connection?.saveData) || (navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4);
