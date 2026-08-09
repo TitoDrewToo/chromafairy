@@ -56,7 +56,8 @@ const PAINTING_FRAGMENT_SHADER = `
     vec2 d=vUv-0.5;
     float vig=smoothstep(1.15,0.30,length(d*vec2(1.0,1.06)));
     float topShade=mix(1.0,0.40,smoothstep(0.32,1.0,vUv.y));
-    col*=mix(1.0, vig*topShade, uShadow);
+    float botScrim=mix(1.0,0.62,smoothstep(0.30,0.0,vUv.y));
+    col*=mix(1.0, vig*topShade*botScrim, uShadow);
     return col;
   }
   void main(){
