@@ -30,7 +30,7 @@ export function init(canvas: HTMLCanvasElement): () => void {
       if (disposed) return;
       const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-      const lowPower = Boolean(connection?.saveData) || (navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4);
+      const lowPower = Boolean(connection?.saveData);
       const staticMode = isReduced || lowPower;
       const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.25 : 1.75);
       const N = PAINTING_TEXTURES.length;

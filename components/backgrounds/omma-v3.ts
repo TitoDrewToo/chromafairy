@@ -37,7 +37,7 @@ export function init(canvas: HTMLCanvasElement): () => void {
       if (disposed) return;
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-      const lowPower = Boolean(connection?.saveData) || (navigator.hardwareConcurrency > 0 && navigator.hardwareConcurrency <= 4);
+      const lowPower = Boolean(connection?.saveData);
       const staticMode = reduced || lowPower;
       const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.25 : 1.75);
       const rendererInstance = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); renderer = rendererInstance;
@@ -51,7 +51,7 @@ export function init(canvas: HTMLCanvasElement): () => void {
       canvas.style.opacity = "0"; canvas.style.transition = "opacity 500ms ease";
       const loader = new THREE.TextureLoader();
       for (let i = 0; i < N; i += 1) {
-        const material = new THREE.ShaderMaterial({ vertexShader: V3_VERTEX, fragmentShader: V3_FRAGMENT, transparent: true, depthTest: true, depthWrite: false, uniforms: { uTex: { value: null }, uTexRes: { value: new THREE.Vector2(1350, 1800) }, uBg: { value: background }, uTime: { value: 0 }, uAmp: { value: { value: staticMode ? 0 : .85 } }, uEdge: { value: .24 }, uSeam: { value: .24 }, uHaze: { value: .4 }, uTileAspect: { value: tileW / tileL }, uBright: { value: 1.5 }, uRelief: { value: { value: 0 } }, uFlare: { value: { value: 0 } }, uZoomTex: { value: 1.25 }, uGlow: { value: { value: 0 } }, uRes: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }, uTopExtend: { value: 1 }, uShadow: { value: 1 } } });
+        const material = new THREE.ShaderMaterial({ vertexShader: V3_VERTEX, fragmentShader: V3_FRAGMENT, transparent: true, depthTest: true, depthWrite: false, uniforms: { uTex: { value: null }, uTexRes: { value: new THREE.Vector2(1350, 1800) }, uBg: { value: background }, uTime: { value: 0 }, uAmp: { value: { value: staticMode ? 0 : .85 } }, uEdge: { value: .24 }, uSeam: { value: .24 }, uHaze: { value: .4 }, uTileAspect: { value: tileW / tileL }, uBright: { value: 1.5 }, uRelief: { value: { value: 0 } }, uFlare: { value: { value: 0 } }, uZoomTex: { value: 1.25 }, uGlow: { value: { value: 0 } }, uRes: { value: new THREE.Vector2(window.innerWidth * dpr, window.innerHeight * dpr) }, uTopExtend: { value: 1 }, uShadow: { value: 1 } } });
         // Normalize nested values created above for Three's uniform format.
         material.uniforms.uAmp.value = staticMode ? 0 : .85; material.uniforms.uRelief.value = 0; material.uniforms.uFlare.value = 0; material.uniforms.uGlow.value = 0;
         const geometry = new THREE.PlaneGeometry(tileW, tileL, segX, segY); const mesh = new THREE.Mesh(geometry, material); mesh.rotation.x = -Math.PI / 2; mesh.position.z = -i * step; mesh.renderOrder = N - i; scene.add(mesh); materials.push(material); geometries.push(geometry);
@@ -60,7 +60,7 @@ export function init(canvas: HTMLCanvasElement): () => void {
       let hStart = 19; let target = 0, current = 0; const mouse = { x: 0, y: 0 };
       const progress = () => { const total = document.documentElement.scrollHeight - window.innerHeight; return total > 0 ? Math.min(1, Math.max(0, window.pageYOffset / total)) : 0; };
       target = progress();
-      const resize = () => { rendererInstance.setSize(window.innerWidth, window.innerHeight, false); camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); const vfov = 46 * Math.PI / 180; const hfovHalf = Math.atan(Math.tan(vfov / 2) * camera.aspect); hStart = (tileW * .98) / (2 * Math.tan(hfovHalf)); materials.forEach((m) => m.uniforms.uRes.value.set(window.innerWidth, window.innerHeight)); };
+      const resize = () => { rendererInstance.setSize(window.innerWidth, window.innerHeight, false); camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); const vfov = 46 * Math.PI / 180; const hfovHalf = Math.atan(Math.tan(vfov / 2) * camera.aspect); hStart = (tileW * .98) / (2 * Math.tan(hfovHalf)); materials.forEach((m) => m.uniforms.uRes.value.set(window.innerWidth * dpr, window.innerHeight * dpr)); };
       const onScroll = () => { target = progress(); }; const onMouse = (event: MouseEvent) => { mouse.x = (event.clientX / window.innerWidth - .5) * 2; mouse.y = (event.clientY / window.innerHeight - .5) * 2; };
       const onVisibility = () => { if (!document.hidden && !animationFrame && !staticMode) animationFrame = requestAnimationFrame(frame); };
       const smooth = (x: number) => { const v = Math.min(1, Math.max(0, x)); return v * v * (3 - 2 * v); };
