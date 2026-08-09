@@ -126,7 +126,7 @@ export function useStudioNotes(enabled = true) {
         return;
       }
       const saved = data as StudioNote;
-      setNotes((current) => current.map((item) => item.id === id ? saved : item));
+      setNotes((current) => current.map((item) => item.id === id ? { ...item, updated_at: saved.updated_at } : item));
       setSaveStates((current) => ({ ...current, [id]: { state: "saved", at: saved.updated_at } }));
       delete saveTimers.current[id];
     }, SAVE_DELAY);
