@@ -60,7 +60,7 @@ export function init(canvas: HTMLCanvasElement): () => void {
       let hStart = 19; let target = 0, current = 0; const mouse = { x: 0, y: 0 };
       const progress = () => { const total = document.documentElement.scrollHeight - window.innerHeight; return total > 0 ? Math.min(1, Math.max(0, window.pageYOffset / total)) : 0; };
       target = progress();
-      const resize = () => { rendererInstance.setSize(window.innerWidth, window.innerHeight, false); camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); const vfov = 46 * Math.PI / 180; const hfovHalf = Math.atan(Math.tan(vfov / 2) * camera.aspect); hStart = (tileW * .98) / (2 * Math.tan(hfovHalf)); materials.forEach((m) => m.uniforms.uRes.value.set(window.innerWidth * dpr, window.innerHeight * dpr)); };
+      const resize = () => { rendererInstance.setSize(window.innerWidth, window.innerHeight, false); camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); const vfov = 46 * Math.PI / 180; const hfovHalf = Math.atan(Math.tan(vfov / 2) * camera.aspect); hStart = Math.min((tileW * .98) / (2 * Math.tan(hfovHalf)), (tileL * .98) / (2 * Math.tan(vfov / 2))); materials.forEach((m) => m.uniforms.uRes.value.set(window.innerWidth * dpr, window.innerHeight * dpr)); };
       const onScroll = () => { target = progress(); }; const onMouse = (event: MouseEvent) => { mouse.x = (event.clientX / window.innerWidth - .5) * 2; mouse.y = (event.clientY / window.innerHeight - .5) * 2; };
       const onVisibility = () => { if (!document.hidden && !animationFrame && !staticMode) animationFrame = requestAnimationFrame(frame); };
       const smooth = (x: number) => { const v = Math.min(1, Math.max(0, x)); return v * v * (3 - 2 * v); };
