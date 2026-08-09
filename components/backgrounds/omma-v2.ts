@@ -3,7 +3,7 @@ import { PAINTING_TEXTURES } from "./painting-textures";
 const V2_FRAGMENT = `
 precision highp float; varying vec2 vUv;
 uniform sampler2D uTexA,uTexB; uniform vec2 uTexResA,uTexResB,uRes,uPan;
-uniform float uTime,uBlend,uDissolve,uZoom,uShadow,uAmp,uBright,uAngle,uFocus,uScrollBoost,uPersp;
+uniform float uTime,uBlend,uDissolve,uZoom,uShadow,uAmp,uBright,uAngle,uFocus,uScrollBoost,uPersp,uTopExtend;
 float lum(vec3 c){return dot(c,vec3(0.299,0.587,0.114));}
 vec2 coverUV(vec2 uv,vec2 tr){vec2 r=vec2(min((uRes.x/uRes.y)/(tr.x/tr.y),1.0),min((uRes.y/uRes.x)/(tr.y/tr.x),1.0));vec2 p=uv-0.5;float c=cos(uAngle),s=sin(uAngle);p=mat2(c,-s,s,c)*p;float z=1.0+p.y*uPersp;p/=max(z,0.2);p=p/uZoom*r;p+=uPan;return p+0.5;}
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
@@ -12,7 +12,7 @@ float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.02;a
 vec3 sp(sampler2D t,vec2 uv){return texture2D(t,clamp(uv,0.002,0.998)).rgb;}
 vec3 spBlur(sampler2D t,vec2 uv,float rad){if(rad<0.0009)return sp(t,uv);vec3 acc=sp(t,uv);for(int k=0;k<6;k++){float a=1.0472*float(k);acc+=sp(t,uv+vec2(cos(a),sin(a))*rad);}return acc/7.0;}
 vec3 living(sampler2D tex,vec2 tr){vec2 base=coverUV(vUv,tr);float t=uTime*0.05*max(uAmp,0.001);vec2 warp=(vec2(fbm(base*3.0+t),fbm(base*3.0+vec2(4.7,2.1)-t))-0.5)*0.03*uAmp;vec2 uv=base+warp;float e=1.5/max(uRes.x,uRes.y);float gx=lum(sp(tex,uv+vec2(e,0.0)))-lum(sp(tex,uv-vec2(e,0.0)));float gy=lum(sp(tex,uv+vec2(0.0,e)))-lum(sp(tex,uv-vec2(0.0,e)));vec2 flow=vec2(-gy,gx);float fl=length(flow);flow=fl>1e-4?flow/fl:vec2(0.0);vec2 drift=vec2(fbm(base*2.0-t*0.5),fbm(base*2.0+vec2(9.1,3.3)+t*0.5))-0.5;flow=normalize(flow+drift*0.8+1e-5);float speed=(0.10+uScrollBoost)*uAmp,scale=0.05;float tt=uTime*speed;float rad=uFocus*0.013;return mix(spBlur(tex,uv-flow*fract(tt)*scale,rad),spBlur(tex,uv-flow*fract(tt+0.5)*scale,rad),abs(1.0-2.0*fract(tt)));}
-void main(){vec3 a=living(uTexA,uTexResA);vec3 b=living(uTexB,uTexResB);float n=fbm(vUv*3.2+uTime*0.04);float w=max(uDissolve,0.001);float m=smoothstep(0.0,1.0,clamp((uBlend*(1.0+w)-w*0.5)+(n-0.5)*w,0.0,1.0));vec3 col=mix(a,b,m);col=(col-0.5)*1.06+0.5;float l=lum(col);col=mix(vec3(l),col,1.14);col*=uBright;vec2 d=vUv-0.5;float vig=smoothstep(1.15,0.30,length(d*vec2(1.0,1.06)));float topShade=mix(1.0,0.40,smoothstep(0.32,1.0,vUv.y));col*=mix(1.0,vig*topShade,uShadow);gl_FragColor=vec4(col,1.0);}
+void main(){vec3 a=living(uTexA,uTexResA);vec3 b=living(uTexB,uTexResB);float n=fbm(vUv*3.2+uTime*0.04);float w=max(uDissolve,0.001);float m=smoothstep(0.0,1.0,clamp((uBlend*(1.0+w)-w*0.5)+(n-0.5)*w,0.0,1.0));vec3 col=mix(a,b,m);col=(col-0.5)*1.06+0.5;float l=lum(col);col=mix(vec3(l),col,1.14);col*=uBright;float dCenter=1.0-smoothstep(0.0,0.55,abs(vUv.y-0.5));float dTop=smoothstep(0.40,1.0,vUv.y);float shade=max(dCenter,dTop*uTopExtend);float scrim=mix(1.0,0.5,shade);col*=mix(1.0,scrim,uShadow);gl_FragColor=vec4(col,1.0);}
 `;
 
 const signalError = () => window.dispatchEvent(new Event("cf-background-error"));
@@ -48,7 +48,7 @@ export function init(canvas: HTMLCanvasElement): () => void {
         uRes: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }, uTime: { value: 0 }, uBlend: { value: 0 },
         uDissolve: { value: 0.55 }, uZoom: { value: 1.1 }, uShadow: { value: 1 }, uAmp: { value: staticMode ? 0 : 0.9 },
         uBright: { value: 1.5 }, uAngle: { value: 0 }, uFocus: { value: staticMode ? 0 : 0.06 }, uScrollBoost: { value: 0 },
-        uPersp: { value: 0.12 }, uPan: { value: new THREE.Vector2(0, 0) },
+        uPersp: { value: 0.12 }, uPan: { value: new THREE.Vector2(0, 0) }, uTopExtend: { value: 1 },
       };
       const material = new THREE.ShaderMaterial({ uniforms, vertexShader: "varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.0,1.0);}", fragmentShader: V2_FRAGMENT });
       const mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
@@ -80,6 +80,8 @@ export function init(canvas: HTMLCanvasElement): () => void {
       const onResize = () => { rendererInstance.setSize(window.innerWidth, window.innerHeight, false); uniforms.uRes.value.set(window.innerWidth, window.innerHeight); };
       const onVisibility = () => { if (!document.hidden && !animationFrame && !staticMode) animationFrame = requestAnimationFrame(frame); };
       const render = (time: number) => {
+        const teVh = Math.max(1, window.innerHeight);
+        uniforms.uTopExtend.value += (Math.min(1, Math.max(0, 1 - (window.pageYOffset / teVh) / .9)) - uniforms.uTopExtend.value) * (staticMode ? 1 : .06);
         const p = staticMode ? 0 : current;
         const position = p * (N - 1); let index = Math.min(N - 2, Math.max(0, Math.floor(position))); const frac = staticMode ? 0 : Math.min(1, Math.max(0, position - index));
         const a = textureSlots[index] ?? textureSlots[0]; const b = staticMode ? a : (textureSlots[index + 1] ?? a);
