@@ -23,7 +23,8 @@ const PAINTING_FRAGMENT_SHADER = `
   float noise(vec2 p){ vec2 i=floor(p),f=fract(p),uu=f*f*(3.0-2.0*f);
     return mix(mix(hash(i),hash(i+vec2(1,0)),uu.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),uu.x),uu.y); }
   float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<4;i++){v+=a*noise(p);p*=2.02;a*=0.5;} return v; }
-  vec3 sp(sampler2D t, vec2 uv){ return texture2D(t, clamp(uv,0.002,0.998)).rgb; }
+  float mir(float x){ x=abs(x); if(x>1.0) x=2.0-x; return clamp(x,0.001,0.999); }
+  vec3 sp(sampler2D t, vec2 uv){ return texture2D(t, vec2(mir(uv.x),mir(uv.y))).rgb; }
   vec3 living(sampler2D tex, vec2 tr){
     vec2 base=coverUV(vUv,tr);
     float t=uTime*0.05*max(uAmp,0.001);
@@ -468,7 +469,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
           gl.uniform1f(paintingUniforms.blend, blendReady);
           gl.uniform1f(paintingUniforms.time, (now - startedAt) / 1000);
           gl.uniform1f(paintingUniforms.dissolve, 0.55);
-          gl.uniform1f(paintingUniforms.zoom, 1.0);
+          gl.uniform1f(paintingUniforms.zoom, 1.06);
           gl.uniform1f(paintingUniforms.shadow, 1.0);
           gl.uniform1f(paintingUniforms.amp, holdStill ? 0 : 1.5);
           gl.uniform1f(paintingUniforms.bright, 1.5);

@@ -9,7 +9,8 @@ vec2 coverUV(vec2 uv,vec2 tr){vec2 r=vec2(min((uRes.x/uRes.y)/(tr.x/tr.y),1.0),m
 float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p),uu=f*f*(3.0-2.0*f);return mix(mix(hash(i),hash(i+vec2(1,0)),uu.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),uu.x),uu.y);}
 float fbm(vec2 p){float v=0.0,a=0.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.02;a*=0.5;}return v;}
-vec3 sp(sampler2D t,vec2 uv){return texture2D(t,clamp(uv,0.002,0.998)).rgb;}
+float mir(float x){x=abs(x);if(x>1.0)x=2.0-x;return clamp(x,0.001,0.999);}
+vec3 sp(sampler2D t,vec2 uv){return texture2D(t,vec2(mir(uv.x),mir(uv.y))).rgb;}
 vec3 spBlur(sampler2D t,vec2 uv,float rad){if(rad<0.0009)return sp(t,uv);vec3 acc=sp(t,uv);for(int k=0;k<6;k++){float a=1.0472*float(k);acc+=sp(t,uv+vec2(cos(a),sin(a))*rad);}return acc/7.0;}
 vec3 living(sampler2D tex,vec2 tr){vec2 base=coverUV(vUv,tr);float t=uTime*0.05*max(uAmp,0.001);vec2 warp=(vec2(fbm(base*3.0+t),fbm(base*3.0+vec2(4.7,2.1)-t))-0.5)*0.03*uAmp;vec2 uv=base+warp;float e=1.5/max(uRes.x,uRes.y);float gx=lum(sp(tex,uv+vec2(e,0.0)))-lum(sp(tex,uv-vec2(e,0.0)));float gy=lum(sp(tex,uv+vec2(0.0,e)))-lum(sp(tex,uv-vec2(0.0,e)));vec2 flow=vec2(-gy,gx);float fl=length(flow);flow=fl>1e-4?flow/fl:vec2(0.0);vec2 drift=vec2(fbm(base*2.0-t*0.5),fbm(base*2.0+vec2(9.1,3.3)+t*0.5))-0.5;flow=normalize(flow+drift*0.8+1e-5);float speed=(0.10+uScrollBoost)*uAmp,scale=0.05;float tt=uTime*speed;float rad=uFocus*0.013;return mix(spBlur(tex,uv-flow*fract(tt)*scale,rad),spBlur(tex,uv-flow*fract(tt+0.5)*scale,rad),abs(1.0-2.0*fract(tt)));}
 void main(){vec3 a=living(uTexA,uTexResA);vec3 b=living(uTexB,uTexResB);float n=fbm(vUv*3.2+uTime*0.04);float w=max(uDissolve,0.001);float m=smoothstep(0.0,1.0,clamp((uBlend*(1.0+w)-w*0.5)+(n-0.5)*w,0.0,1.0));vec3 col=mix(a,b,m);col=(col-0.5)*1.06+0.5;float l=lum(col);col=mix(vec3(l),col,1.14);col*=uBright;float dCenter=1.0-smoothstep(0.0,0.55,abs(vUv.y-0.5));float dTop=smoothstep(0.40,1.0,vUv.y);float shade=max(dCenter,dTop*uTopExtend);float scrim=mix(1.0,0.5,shade);col*=mix(1.0,scrim,uShadow);gl_FragColor=vec4(col,1.0);}
@@ -90,7 +91,7 @@ export function init(canvas: HTMLCanvasElement): () => void {
         const da = dims[index] ?? dims[0] ?? [1, 1]; const db = dims[index + 1] ?? da; uniforms.uTexResA.value.set(da[0], da[1]); uniforms.uTexResB.value.set(db[0], db[1]);
         const es = frac * frac * (3 - 2 * frac); const trans = Math.sin(Math.PI * frac); const tt = time * .001;
         const pan = .05; uniforms.uPan.value.set(Math.cos(index * 2.399) * pan * (1 - es) + Math.cos((index + 1) * 2.399) * pan * es + Math.sin(tt * .03 + index) * pan * .3, Math.sin(index * 1.71) * pan * (1 - es) + Math.sin((index + 1) * 1.71) * pan * es + Math.cos(tt * .025 + index) * pan * .3);
-        uniforms.uZoom.value = 1.1 + .03 * Math.sin(tt * .05 + index) + trans * .18; uniforms.uAngle.value = trans * (2.5 * Math.PI / 180) * (index % 2 === 0 ? 1 : -1) + Math.sin(tt * .02 + index) * .003; uniforms.uFocus.value = staticMode ? 0 : trans * 1.3 + .06; uniforms.uPersp.value = .12 + trans * .1 + Math.sin(tt * .02 + index) * .01;
+        uniforms.uZoom.value = 1.14 + .03 * Math.sin(tt * .05 + index) + trans * .18; uniforms.uAngle.value = trans * (2.5 * Math.PI / 180) * (index % 2 === 0 ? 1 : -1) + Math.sin(tt * .02 + index) * .003; uniforms.uFocus.value = staticMode ? 0 : trans * 1.3 + .06; uniforms.uPersp.value = .12 + trans * .1 + Math.sin(tt * .02 + index) * .01;
         rendererInstance.render(scene, camera);
       };
       const frame = (time: number) => {
