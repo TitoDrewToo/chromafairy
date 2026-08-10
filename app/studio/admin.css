@@ -45,6 +45,12 @@
 .admin-action-button:focus-visible { border-color: #171715; background: transparent !important; transform: translateY(-1px); }
 .admin-action-button:hover .admin-action-label,
 .admin-action-button:focus-visible .admin-action-label { background-image: var(--chroma-gradient); background-size: var(--chroma-size); background-position: 0% 50%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: chroma-shimmer var(--chroma-duration) linear infinite; }
+.admin-action-button.is-busy,
+.admin-action-button.is-busy:hover,
+.admin-action-button.is-busy:focus-visible { border-color: #a97c3f; background: var(--chroma-gradient) !important; background-size: var(--chroma-size); color: #fff; animation: chroma-shimmer var(--chroma-duration) linear infinite; transform: none; }
+.admin-action-button.is-busy .admin-action-label,
+.admin-action-button.is-busy:hover .admin-action-label,
+.admin-action-button.is-busy:focus-visible .admin-action-label { background-image: none; color: #fff; animation: none; }
 .admin-primary-button { padding: 15px 20px; }
 .admin-primary-button:disabled { cursor: wait; opacity: .6; }
 .admin-sign-out { padding: 9px 13px; }
@@ -84,7 +90,10 @@
   .admin-action-button:hover,
   .admin-action-button:focus-visible { transition: none; animation: none; }
   .admin-action-button:hover .admin-action-label,
-  .admin-action-button:focus-visible .admin-action-label { animation: none; }
+  .admin-action-button:focus-visible .admin-action-label,
+  .admin-action-button.is-busy,
+  .admin-action-button.is-busy:hover,
+  .admin-action-button.is-busy:focus-visible { animation: none; }
 }
 
 @media (max-width: 860px) {
