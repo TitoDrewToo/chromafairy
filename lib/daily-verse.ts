@@ -1,31 +1,30 @@
-export const VERSES = [
-  "John 3:16", "Jeremiah 29:11", "Philippians 4:13", "Philippians 4:6-7", "Psalm 23:1-4", "Proverbs 3:5-6",
-  "Isaiah 40:31", "Isaiah 41:10", "Romans 8:28", "Psalm 46:1", "Psalm 118:24", "Joshua 1:9", "Matthew 6:33",
-  "Matthew 11:28", "2 Corinthians 5:7", "2 Corinthians 12:9", "Galatians 5:22-23", "Ephesians 2:8-9",
-  "Hebrews 11:1", "Hebrews 12:1-2", "1 Corinthians 13:4-7", "1 Corinthians 10:13", "Psalm 27:1", "Psalm 37:4",
-  "Psalm 91:1-2", "Psalm 121:1-2", "Psalm 139:14", "Proverbs 16:3", "Proverbs 18:10", "Isaiah 26:3",
-  "Isaiah 43:2", "Lamentations 3:22-23", "Zephaniah 3:17", "Matthew 7:7", "Mark 10:27", "Luke 1:37",
-  "John 14:27", "John 16:33", "Romans 5:3-5", "Romans 12:12", "Romans 15:13", "2 Corinthians 4:16-18",
-  "2 Corinthians 9:8", "Galatians 6:9", "Ephesians 3:20", "Philippians 1:6", "Philippians 4:8",
-  "Colossians 3:23", "1 Thessalonians 5:16-18", "2 Timothy 1:7", "Hebrews 13:5", "James 1:2-3", "James 1:5",
-  "1 Peter 5:7", "1 John 4:18", "Psalm 16:11", "Psalm 28:7", "Psalm 30:5", "Psalm 34:8", "Psalm 34:18",
-  "Psalm 42:11", "Psalm 55:22", "Psalm 56:3", "Psalm 62:1-2", "Psalm 73:26", "Psalm 94:19", "Psalm 119:105",
-  "Psalm 143:8", "Psalm 147:3", "Proverbs 4:23", "Proverbs 17:22", "Proverbs 31:25", "Isaiah 12:2",
-  "Isaiah 30:15", "Isaiah 40:29", "Isaiah 54:10", "Isaiah 58:11", "Jeremiah 17:7-8", "Jeremiah 31:3",
-  "Micah 6:8", "Nahum 1:7", "Habakkuk 3:19", "Matthew 19:26", "Matthew 28:20", "John 1:5", "John 8:12",
-  "John 15:5", "Romans 8:38-39", "1 Corinthians 2:9", "1 Corinthians 15:58", "2 Corinthians 1:3-4",
-  "2 Corinthians 3:17", "Ephesians 6:10", "Philippians 2:3-4", "Colossians 2:6-7", "Hebrews 4:16",
-  "Hebrews 10:23", "James 4:8", "1 Peter 4:10", "1 Peter 5:10", "1 John 1:9", "Revelation 21:4",
-  "Numbers 6:24-26", "Deuteronomy 31:6", "1 Chronicles 16:11", "Nehemiah 8:10", "Psalm 9:9-10",
-] as const;
+import { VERSES } from "../../docs/daily-verse-references-366";
+
+export { VERSES };
 
 type Verse = { reference: string; text: string; translation_name: string };
 
+type BookCode = Record<string, string>;
+
+const BOOK_CODES: BookCode = {
+  Genesis: "GEN", Exodus: "EXO", Leviticus: "LEV", Numbers: "NUM", Deuteronomy: "DEU",
+  Joshua: "JOS", Ruth: "RUT", "1 Samuel": "1SA", "2 Samuel": "2SA", "1 Kings": "1KI", "2 Kings": "2KI",
+  "1 Chronicles": "1CH", "2 Chronicles": "2CH", Nehemiah: "NEH", Job: "JOB", Psalm: "PSA", Psalms: "PSA",
+  Proverbs: "PRO", Ecclesiastes: "ECC", "Song of Solomon": "SNG", Isaiah: "ISA", Jeremiah: "JER",
+  Lamentations: "LAM", Ezekiel: "EZK", Daniel: "DAN", Hosea: "HOS", Joel: "JOL", Amos: "AMO", Micah: "MIC",
+  Nahum: "NAM", Habakkuk: "HAB", Zephaniah: "ZEP", Haggai: "HAG", Zechariah: "ZEC", Malachi: "MAL",
+  Matthew: "MAT", Mark: "MRK", Luke: "LUK", John: "JHN", Acts: "ACT", Romans: "ROM",
+  "1 Corinthians": "1CO", "2 Corinthians": "2CO", Galatians: "GAL", Ephesians: "EPH", Philippians: "PHP",
+  Colossians: "COL", "1 Thessalonians": "1TH", "2 Thessalonians": "2TH", "1 Timothy": "1TI", "2 Timothy": "2TI",
+  Titus: "TIT", Hebrews: "HEB", James: "JAS", "1 Peter": "1PE", "2 Peter": "2PE", "1 John": "1JN",
+  Jude: "JUD", Revelation: "REV",
+};
+
 const FALLBACKS: Verse[] = [
-  { reference: "Philippians 4:13", text: "I can do all things through Christ which strengtheneth me.", translation_name: "King James Version" },
-  { reference: "Psalm 23:1", text: "The LORD is my shepherd; I shall not want.", translation_name: "King James Version" },
-  { reference: "Isaiah 41:10", text: "Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness.", translation_name: "King James Version" },
-  { reference: "Matthew 11:28", text: "Come unto me, all ye that labour and are heavy laden, and I will give you rest.", translation_name: "King James Version" },
+  { reference: "Philippians 4:13", text: "I can do all things through Christ who gives me strength.", translation_name: "Berean Standard Bible" },
+  { reference: "Psalm 23:1", text: "The LORD is my shepherd; I shall not want.", translation_name: "Berean Standard Bible" },
+  { reference: "Isaiah 41:10", text: "Do not fear, for I am with you; do not be afraid, for I am your God. I will strengthen you; I will surely help you; I will uphold you with My righteous right hand.", translation_name: "Berean Standard Bible" },
+  { reference: "Matthew 11:28", text: "Come to Me, all you who are weary and burdened, and I will give you rest.", translation_name: "Berean Standard Bible" },
 ];
 
 function normalizeWhitespace(text: string) {
@@ -46,14 +45,34 @@ export function pickReference(date = new Date()) {
   return VERSES[dayOfYear(new Date(Date.UTC(year, month, day))) % VERSES.length];
 }
 
+function parseReference(reference: string) {
+  const match = reference.match(/^(.+?)\s+(\d+):(\d+)(?:-(\d+))?$/);
+  if (!match) throw new Error("Unsupported Bible reference");
+  const [, book, chapter, start, end] = match;
+  const code = BOOK_CODES[book];
+  if (!code) throw new Error("Unsupported Bible book");
+  return { code, chapter, start: Number(start), end: Number(end ?? start) };
+}
+
+function extractVerseText(content: unknown[]) {
+  return content.map((item) => {
+    if (typeof item === "string") return item;
+    if (item && typeof item === "object" && "text" in item && typeof item.text === "string") return item.text;
+    return "";
+  }).join(" ");
+}
+
 export async function getDailyVerse(): Promise<Verse> {
   const reference = pickReference();
   try {
-    const response = await fetch(`https://bible-api.com/${encodeURIComponent(reference)}?translation=kjv`, { next: { revalidate: 86400 } });
+    const { code, chapter, start, end } = parseReference(reference);
+    const response = await fetch(`https://bible.helloao.org/api/BSB/${code}/${chapter}.json`, { next: { revalidate: 86400 } });
     if (!response.ok) throw new Error(`Bible API returned ${response.status}`);
-    const verse = await response.json() as Partial<Verse>;
-    if (!verse.text || !verse.reference) throw new Error("Bible API response was incomplete");
-    return { reference: verse.reference, text: normalizeWhitespace(verse.text), translation_name: "King James Version" };
+    const payload = await response.json() as { chapter?: { content?: Array<{ type?: string; number?: number; content?: unknown[] }> } };
+    const verses = payload.chapter?.content?.filter((entry) => entry.type === "verse" && typeof entry.number === "number" && entry.number >= start && entry.number <= end) ?? [];
+    const text = normalizeWhitespace(verses.map((verse) => extractVerseText(verse.content ?? [])).join(" "));
+    if (!text) throw new Error("Bible API response was incomplete");
+    return { reference, text, translation_name: "Berean Standard Bible" };
   } catch {
     return FALLBACKS[VERSES.indexOf(reference) % FALLBACKS.length];
   }

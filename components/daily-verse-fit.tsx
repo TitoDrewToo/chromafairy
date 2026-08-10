@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from "react";
 
-export default function DailyVerseFit({ reference, text, attribution }: { reference: string; text: string; attribution: string }) {
+export default function DailyVerseFit({ reference, text }: { reference: string; text: string }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const [fontSize, setFontSize] = useState(2.6);
@@ -48,7 +48,6 @@ export default function DailyVerseFit({ reference, text, attribution }: { refere
         <p className="daily-verse-text" ref={textRef} style={{ fontSize: `${fontSize}rem` }}>“{text}”</p>
       </div>
       <p className="daily-verse-reference">{reference}</p>
-      <p className="daily-verse-attribution">{attribution}</p>
     </section>
   );
 }
