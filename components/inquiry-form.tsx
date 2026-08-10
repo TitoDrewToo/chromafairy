@@ -29,7 +29,7 @@ type DustFieldProps =
   | (DustFieldSharedProps & Omit<InputHTMLAttributes<HTMLInputElement>, keyof DustFieldSharedProps> & { as?: "input" })
   | (DustFieldSharedProps & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, keyof DustFieldSharedProps> & { as: "textarea" });
 
-function DustPlaceholderField({ as = "input", placeholder, value, onChange, className, ...props }: DustFieldProps) {
+export function DustPlaceholderField({ as = "input", placeholder, value, onChange, className, ...props }: DustFieldProps) {
   const fieldRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [enhanced, setEnhanced] = useState(false);
