@@ -197,11 +197,58 @@ textarea:focus-visible {
   color: var(--ink);
 }
 
+.inquiry-dust-field {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.inquiry-dust-field .inquiry-dust-input {
+  position: relative;
+  z-index: 0;
+}
+
+.inquiry-dust-input.is-enhanced::placeholder {
+  color: transparent;
+}
+
+.inquiry-dust-placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
 .home-inquiry-form textarea { min-height: 120px; resize: vertical; }
 .home-inquiry-form button { justify-self: start; }
 .inquiry-error { margin: 0; color: #9c3d32; font-size: 12px; }
 .inquiry-success { margin: 32px 0 0; color: var(--teal); font-size: 14px; text-align: left; }
 .home-inquiry-success { text-align: center; }
+
+.inquiry-submit-meta {
+  display: grid;
+  gap: 5px;
+  margin-top: 1px;
+}
+
+.inquiry-required,
+.inquiry-disclosure {
+  margin: 0;
+  color: #6a7883;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.inquiry-required span {
+  color: #b99653;
+}
+
+.inquiry-disclosure {
+  max-width: 520px;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .home-inquiry-form button { animation: none; }

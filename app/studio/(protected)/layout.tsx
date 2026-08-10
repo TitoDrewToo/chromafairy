@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AdminSignOut from "../../../components/admin-sign-out";
+import AdminMobileNav from "../../../components/admin-mobile-nav";
 import { Hint } from "../../../components/studio-hint";
 import StudioNotes from "../../../components/studio-notes";
 import { createClient } from "../../../lib/supabase/server";
@@ -51,9 +52,9 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
 
   return (
     <div className="admin-shell">
-      <aside className="admin-sidebar">
+      <aside id="admin-sidebar" className="admin-sidebar">
         <Hint id="wordmark"><Link className="admin-wordmark" href="/studio">Chroma Fairy<span>Studio</span></Link></Hint>
-        <nav className="admin-nav" aria-label="Admin areas">
+        <nav id="admin-sidebar-nav" className="admin-nav" aria-label="Studio areas">
           {staffAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
           {canViewSystems && <>{managerAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}<Hint id="navSystems"><Link href="/studio/systems">Systems</Link></Hint></>}
         </nav>
@@ -61,6 +62,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
       </aside>
       <section className="admin-content">
         <header className="admin-topbar">
+          <AdminMobileNav />
           <Hint id="userRole"><div><span className="admin-user-email">{displayName}</span><span className="admin-role">{role}</span></div></Hint>
           <div className="admin-topbar-actions"><AdminSignOut /></div>
         </header>

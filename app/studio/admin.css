@@ -63,6 +63,8 @@
 .admin-site-link { margin-top: auto; }
 .admin-content { min-width: 0; min-height: 0; height: 100svh; display: flex; flex-direction: column; overflow: hidden; }
 .admin-topbar { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 20px; padding: 22px clamp(20px, 5vw, 64px); border-bottom: 1px solid #ded9cf; background: rgba(251, 250, 247, .78); }
+.admin-mobile-nav-toggle,
+.admin-mobile-nav-backdrop { display: none; }
 .admin-user-email { display: block; font-size: 13px; }
 .admin-role { display: block; margin-top: 4px; color: #a6844d; font-size: 10px; letter-spacing: .15em; text-transform: uppercase; }
 .admin-page-content { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; display: flex; flex-direction: column; padding: clamp(34px, 7vw, 90px) clamp(20px, 5vw, 64px); }
@@ -85,15 +87,82 @@
   .admin-action-button:focus-visible .admin-action-label { animation: none; }
 }
 
-@media (max-width: 720px) {
-  .admin-shell { display: flex; flex-direction: column; }
-  .admin-sidebar { width: 100%; height: auto; max-height: 40svh; min-height: auto; padding: 20px 16px 14px; border-right: 0; border-bottom: 1px solid #ded9cf; }
-  .admin-nav { display: flex; gap: 4px; margin-top: 24px; overflow-x: auto; padding-bottom: 2px; }
-  .admin-nav a { flex: 0 0 auto; white-space: nowrap; }
-  .admin-site-link { display: none; }
-  .admin-content { height: auto; flex: 1; }
+@media (max-width: 860px) {
+  .admin-shell { position: relative; display: flex; flex-direction: column; }
+  .admin-sidebar {
+    position: fixed;
+    z-index: 1400;
+    inset: 0 auto 0 0;
+    width: min(300px, 86vw);
+    height: 100svh;
+    min-height: 0;
+    padding: 24px 18px;
+    overflow-y: auto;
+    border-right: 1px solid #ded9cf;
+    border-bottom: 0;
+    box-shadow: 18px 0 45px rgb(23 23 21 / 14%);
+    transform: translateX(-105%);
+    transition: transform 280ms cubic-bezier(.2, .7, .2, 1);
+  }
+  .admin-shell.nav-open .admin-sidebar { transform: translateX(0); }
+  .admin-nav { display: grid; gap: 3px; margin-top: 42px; }
+  .admin-nav a { white-space: normal; }
+  .admin-site-link { display: block; }
+  .admin-content { width: 100%; height: 100svh; flex: 1; }
   .admin-topbar { padding: 18px 16px; }
   .admin-page-content { padding: 42px 16px; }
+  .admin-mobile-nav-toggle {
+    position: relative;
+    z-index: 1501;
+    display: grid;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 auto;
+    place-items: center;
+    gap: 4px;
+    padding: 10px;
+    border: 1px solid #a6844d;
+    border-radius: 999px;
+    background: transparent;
+    color: #171715;
+    cursor: pointer;
+    transition: border-color 220ms ease, color 220ms ease, background 220ms ease;
+  }
+  .admin-mobile-nav-toggle span {
+    display: block;
+    width: 16px;
+    height: 1px;
+    background: currentColor;
+    transition: transform 220ms ease, opacity 180ms ease, background-color 220ms ease;
+  }
+  .admin-shell.nav-open .admin-mobile-nav-toggle {
+    border-color: transparent;
+    background: var(--chroma-gradient);
+    background-size: var(--chroma-size);
+    color: #fff;
+    animation: chroma-shimmer var(--chroma-duration) linear infinite;
+  }
+  .admin-shell.nav-open .admin-mobile-nav-toggle span:nth-child(1) { transform: translateY(5px) rotate(45deg); }
+  .admin-shell.nav-open .admin-mobile-nav-toggle span:nth-child(2) { opacity: 0; }
+  .admin-shell.nav-open .admin-mobile-nav-toggle span:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
+  .admin-mobile-nav-backdrop {
+    position: fixed;
+    z-index: 1300;
+    inset: 0;
+    display: block;
+    background: rgb(14 18 24 / 42%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 240ms ease;
+  }
+  .admin-shell.nav-open .admin-mobile-nav-backdrop { opacity: 1; pointer-events: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-mobile-nav-toggle,
+  .admin-mobile-nav-toggle span,
+  .admin-mobile-nav-backdrop,
+  .admin-sidebar { transition: none; animation: none; }
 }
 .studio-hint-anchor {
   position: relative;
