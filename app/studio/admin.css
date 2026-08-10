@@ -205,7 +205,7 @@
 
 /* Studio notes — a quiet editorial notepad with a single chroma save flourish. */
 .admin-overview-verse-space {
-  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(24px, 4vw, 64px);
   align-items: stretch;
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Hint } from "./studio-hint";
 import { useStudioNotes } from "../lib/use-studio-notes";
@@ -29,9 +28,7 @@ function SaveState({ state, at }: { state?: "idle" | "saving" | "saved" | "error
 }
 
 export default function StudioNotes({ variant }: { variant: NotesVariant }) {
-  const pathname = usePathname();
-  const isOverviewDrawer = variant === "drawer" && pathname === "/studio";
-  const notes = useStudioNotes(!isOverviewDrawer);
+  const notes = useStudioNotes(true);
   const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<NotesView>("notes");
@@ -90,7 +87,7 @@ export default function StudioNotes({ variant }: { variant: NotesVariant }) {
     };
   }, [open, variant]);
 
-  if (isOverviewDrawer || !mounted && variant === "drawer") return null;
+  if (!mounted && variant === "drawer") return null;
 
   const active = notes.activeNote;
   const saveState = active ? notes.saveStates[active.id] : undefined;
