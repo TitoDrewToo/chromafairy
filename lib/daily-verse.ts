@@ -1,4 +1,4 @@
-import { VERSES } from "../../docs/daily-verse-references-366";
+import { VERSES } from "./daily-verse-references";
 
 export { VERSES };
 
