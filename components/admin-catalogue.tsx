@@ -27,6 +27,7 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [batchStatus, setBatchStatus] = useState<WorkStatus | "">("");
   const [batchSeries, setBatchSeries] = useState<string>("");
+  const [batchNewSeriesName, setBatchNewSeriesName] = useState("");
   const [batchDetails, setBatchDetails] = useState<BatchDetails>(emptyBatchDetails);
   const [inlineEdits, setInlineEdits] = useState<Record<string, InlineEdit>>({});
   const [busy, setBusy] = useState(false);
@@ -60,11 +61,19 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
   }
 
   async function applyBatch() {
-    if (!selected.size || (!batchStatus && !batchSeries && !hasBatchDetails(batchDetails))) return;
+    if (!selected.size || (!batchStatus && !batchSeries && !batchNewSeriesName.trim() && !hasBatchDetails(batchDetails))) return;
     const supabase = createClient();
     if (!supabase) return setError("Supabase is not configured.");
     setBusy(true); setError(""); setMessage("");
-    const payloadForBatch = createBatchPayload(batchStatus, batchSeries, batchDetails);
+    let seriesForBatch = batchSeries;
+    if (batchNewSeriesName.trim()) {
+      const newSeriesId = crypto.randomUUID();
+      const newSeriesSlug = `${slugify(batchNewSeriesName) || "series"}-${newSeriesId.slice(0, 8)}`;
+      const { error: seriesError } = await supabase.from("series").insert({ id: newSeriesId, name: batchNewSeriesName.trim(), slug: newSeriesSlug, year: batchDetails.year ? Number(batchDetails.year) : new Date().getFullYear() });
+      if (seriesError) { setBusy(false); return setError("Could not create that series. Check its name and try again."); }
+      seriesForBatch = newSeriesId;
+    }
+    const payloadForBatch = createBatchPayload(batchStatus, seriesForBatch, batchDetails);
     const updates = Array.from(selected).map((id) => {
       return supabase.from("works").update(payloadForBatch).eq("id", id);
     });
@@ -76,11 +85,11 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
         ...work,
         ...payloadForBatch,
         status: batchStatus || work.status,
-        series_id: batchSeries ? batchSeries === "__none__" ? null : batchSeries : work.series_id,
-        series_name: batchSeries ? batchSeries === "__none__" ? null : initialSeries.find((item) => item.id === batchSeries)?.name ?? null : work.series_name,
+        series_id: seriesForBatch ? seriesForBatch === "__none__" ? null : seriesForBatch : work.series_id,
+        series_name: seriesForBatch ? seriesForBatch === "__none__" ? null : (batchNewSeriesName.trim() || initialSeries.find((item) => item.id === seriesForBatch)?.name || null) : work.series_name,
       } : work));
       setMessage(`${selected.size} work${selected.size === 1 ? "" : "s"} updated.`);
-      setSelected(new Set()); setBatchStatus(""); setBatchSeries(""); setBatchDetails(emptyBatchDetails);
+      setSelected(new Set()); setBatchStatus(""); setBatchSeries(""); setBatchNewSeriesName(""); setBatchDetails(emptyBatchDetails);
     }
     setBusy(false);
   }
@@ -160,7 +169,8 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
         <strong>{selected.size} selected</strong>
         <select aria-label="Bulk status" value={batchStatus} onChange={(event) => setBatchStatus(event.target.value as WorkStatus | "")}><option value="">Set status…</option>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select>
         <select aria-label="Bulk series" value={batchSeries} onChange={(event) => setBatchSeries(event.target.value)}><option value="">Assign series…</option><option value="__none__">No series</option>{initialSeries.map((series) => <option key={series.id} value={series.id}>{series.name}</option>)}</select>
-        <Hint id="applyBulk"><button className="admin-action-button" disabled={busy || (!batchStatus && !batchSeries)} onClick={() => void applyBatch()} type="button"><span className="admin-action-label">Apply status / series</span></button></Hint>
+        <input aria-label="Create new series" placeholder="Or create new series…" value={batchNewSeriesName} onChange={(event) => { setBatchNewSeriesName(event.target.value); setBatchSeries(""); }} />
+        <Hint id="applyBulk"><button className="admin-action-button" disabled={busy || (!batchStatus && !batchSeries && !batchNewSeriesName.trim())} onClick={() => void applyBatch()} type="button"><span className="admin-action-label">Apply status / series</span></button></Hint>
       </div>}
       {selected.size > 0 && <section className="admin-batch-details">
         <div><h2>Batch edit details</h2><p>Only filled fields change. Leave fields blank to keep each work’s current value.</p></div>

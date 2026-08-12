@@ -5,7 +5,8 @@
 .admin-catalogue-toolbar label,
 .admin-batch-bar select { display: grid; gap: 7px; color: #77736b; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
 .admin-catalogue-toolbar select,
-.admin-batch-bar select { min-width: 150px; padding: 10px 12px; border: 1px solid #cfc8bb; background: #fff; color: #171715; font: 13px "Jost", sans-serif; letter-spacing: normal; text-transform: none; }
+.admin-batch-bar select,
+.admin-batch-bar input { min-width: 150px; padding: 10px 12px; border: 1px solid #cfc8bb; background: #fff; color: #171715; font: 13px "Jost", sans-serif; letter-spacing: normal; text-transform: none; }
 .admin-quick-add { position: relative; display: flex; align-items: end; }
 .admin-quick-add input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
 .admin-quick-add button { padding: 10px 13px; }
@@ -72,5 +73,5 @@
 @media (max-width: 560px) {
   .admin-selected-editor-row { grid-template-columns: 54px 1fr; }.admin-selected-editor-row label:first-of-type { grid-column: 2; }.admin-selected-editor-row label:not(:first-of-type) { grid-column: 2; }
   .admin-batch-details-grid { display: block; }.admin-batch-details-grid label { margin-bottom: 12px; }.admin-batch-details-grid .field-wide { grid-column: auto; }
-  .admin-catalogue-heading { align-items: start; flex-direction: column; }.admin-work-row { grid-template-columns: 18px 56px minmax(0, 1fr); gap: 10px; }.admin-work-thumb { width: 56px; }.admin-status-badge, .admin-work-price { grid-column: 3; }.admin-row-status { grid-column: 3; width: 100%; }.admin-form-grid { display: block; }.admin-form-grid label { margin-bottom: 14px; }.admin-form-grid .field-wide { grid-column: auto; }.admin-batch-bar { align-items: stretch; flex-direction: column; }.admin-batch-bar strong { margin-right: 0; }.admin-batch-bar select, .admin-batch-bar .admin-action-button { width: 100%; }.admin-catalogue-toolbar { align-items: stretch; flex-direction: column; }.admin-catalogue-toolbar label select, .admin-quick-add, .admin-quick-add button { width: 100%; }.admin-list-header { align-items: start; flex-direction: column; }.admin-image-item { grid-template-columns: 58px 1fr; }.admin-image-item > img { width: 58px; height: 58px; }
+  .admin-catalogue-heading { align-items: start; flex-direction: column; }.admin-work-row { grid-template-columns: 18px 56px minmax(0, 1fr); gap: 10px; }.admin-work-thumb { width: 56px; }.admin-status-badge, .admin-work-price { grid-column: 3; }.admin-row-status { grid-column: 3; width: 100%; }.admin-form-grid { display: block; }.admin-form-grid label { margin-bottom: 14px; }.admin-form-grid .field-wide { grid-column: auto; }.admin-batch-bar { align-items: stretch; flex-direction: column; }.admin-batch-bar strong { margin-right: 0; }.admin-batch-bar select, .admin-batch-bar input, .admin-batch-bar .admin-action-button { width: 100%; }.admin-catalogue-toolbar { align-items: stretch; flex-direction: column; }.admin-catalogue-toolbar label select, .admin-quick-add, .admin-quick-add button { width: 100%; }.admin-list-header { align-items: start; flex-direction: column; }.admin-image-item { grid-template-columns: 58px 1fr; }.admin-image-item > img { width: 58px; height: 58px; }
 }
