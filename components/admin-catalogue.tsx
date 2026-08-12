@@ -24,6 +24,7 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
   const [works, setWorks] = useState(initialWorks);
   const [statusFilter, setStatusFilter] = useState<WorkStatus | "all">("all");
   const [seriesFilter, setSeriesFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [batchStatus, setBatchStatus] = useState<WorkStatus | "">("");
   const [batchSeries, setBatchSeries] = useState<string>("");
@@ -35,9 +36,14 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
   const [error, setError] = useState("");
 
   const filteredWorks = useMemo(() => works
+    .filter((work) => {
+      const query = search.trim().toLowerCase();
+      if (!query) return true;
+      return [work.title, work.slug, work.series_name ?? "", work.medium ?? "", String(work.year)].some((value) => value.toLowerCase().includes(query));
+    })
     .filter((work) => statusFilter === "all" || work.status === statusFilter)
     .filter((work) => seriesFilter === "all" || work.series_id === seriesFilter)
-    .sort((a, b) => b.year - a.year || (b.month ?? 0) - (a.month ?? 0) || (b.created_at ?? "").localeCompare(a.created_at ?? "")), [works, statusFilter, seriesFilter]);
+    .sort((a, b) => b.year - a.year || (b.month ?? 0) - (a.month ?? 0) || (b.created_at ?? "").localeCompare(a.created_at ?? "")), [works, search, statusFilter, seriesFilter]);
 
   function toggleSelected(id: string) {
     setSelected((current) => {
@@ -48,7 +54,12 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
   }
 
   function toggleAll() {
-    setSelected((current) => current.size === filteredWorks.length ? new Set() : new Set(filteredWorks.map((work) => work.id)));
+    setSelected((current) => {
+      const next = new Set(current);
+      const allSelected = filteredWorks.length > 0 && filteredWorks.every((work) => next.has(work.id));
+      filteredWorks.forEach((work) => allSelected ? next.delete(work.id) : next.add(work.id));
+      return next;
+    });
   }
 
   async function setStatus(id: string, status: WorkStatus) {
@@ -160,6 +171,7 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
   return (
     <section className="admin-catalogue-tools">
       <div className="admin-catalogue-toolbar">
+        <label className="admin-catalogue-search">Search catalogue<input aria-label="Search catalogue" placeholder="Title, series, slug, medium, or year…" value={search} onChange={(event) => setSearch(event.target.value)} />{search && <button aria-label="Clear catalogue search" onClick={() => setSearch("")} type="button">×</button>}</label>
         <Hint id="statusFilters"><label>Status<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as WorkStatus | "all")}>{statuses.map((status) => <option key={status} value={status}>{status === "all" ? "All statuses" : titleCase(status)}</option>)}</select></label></Hint>
         <label>Series<select value={seriesFilter} onChange={(event) => setSeriesFilter(event.target.value)}><option value="all">All series</option>{initialSeries.map((series) => <option key={series.id} value={series.id}>{series.name}</option>)}</select></label>
         <div className="admin-quick-add"><input ref={quickAddRef} accept="image/*" multiple onChange={(event: ChangeEvent<HTMLInputElement>) => void quickAdd(event.target.files)} type="file" /><Hint id="quickAdd"><button className="admin-action-button" onClick={() => quickAddRef.current?.click()} type="button"><span className="admin-action-label">Batch upload artwork</span></button></Hint></div>
@@ -207,7 +219,7 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
       {error && <p className="admin-error" role="alert">{error}</p>}
 
       <div className="admin-work-list">
-        <div className="admin-list-header"><label><input checked={filteredWorks.length > 0 && selected.size === filteredWorks.length} onChange={toggleAll} type="checkbox" /> Select all</label><span>{filteredWorks.length} shown · newest first</span></div>
+        <div className="admin-list-header"><label><input checked={filteredWorks.length > 0 && filteredWorks.every((work) => selected.has(work.id))} onChange={toggleAll} type="checkbox" /> Select all</label><span>{filteredWorks.length} shown · {works.length} total · newest first</span></div>
         {filteredWorks.length ? filteredWorks.map((work) => <WorkRow key={work.id} work={work} selected={selected.has(work.id)} onSelect={() => toggleSelected(work.id)} onStatus={(status) => void setStatus(work.id, status)} />) : <div className="admin-empty-state">No works match these filters.</div>}
       </div>
     </section>
