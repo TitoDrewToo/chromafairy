@@ -15,10 +15,18 @@ export const studioHints = {
   tips: "Turn these little hints on or off anytime.",
   addWork: "Start a new piece — add its photos, details, and price.",
   statusFilters: "Show or hide pieces by status. Drafts are only visible here, never in the shop.",
+  catalogueSearch: "Find a piece by title, series, slug, medium, or year.",
+  clearSearch: "Clear the catalogue search.",
+  seriesFilter: "Show only pieces assigned to this collection.",
   quickAdd: "Rapidly create several placeholder pieces to flesh out later.",
   bulkStatus: "Change the status of every selected piece at once.",
   bulkSeries: "Move all selected pieces into a collection.",
+  createSeries: "Create a new collection and assign it to every selected piece.",
   applyBulk: "Apply the chosen bulk change to your selected pieces.",
+  applyDetails: "Apply the filled-in details to every selected piece. Blank fields stay unchanged.",
+  selectAll: "Select or clear every piece currently shown by the search and filters.",
+  saveSelected: "Save the edited names and prices for the selected pieces.",
+  rowStatus: "Change this piece's catalogue status immediately.",
   viewWork: "Open this piece to edit its details or photos.",
   title: "The name of the piece (required).",
   slug: "The piece's web address — auto-fills from the title; edit only if you want.",
@@ -82,6 +90,8 @@ export const studioHints = {
   notesDelete: "Delete this page. Your last remaining page is always kept.",
   notesBoardToggle: "Open the shared team board once the Studio has more than one member.",
   notesBoardDelete: "Delete this team-board note. You can remove your own posts; managers can remove any post.",
+  boardComposer: "Write a note for everyone in the Studio team board.",
+  postBoard: "Publish this note to the shared team board.",
 } as const;
 
 export type StudioHintId = keyof typeof studioHints;

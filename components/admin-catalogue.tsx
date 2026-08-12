@@ -171,17 +171,17 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
   return (
     <section className="admin-catalogue-tools">
       <div className="admin-catalogue-toolbar">
-        <label className="admin-catalogue-search">Search catalogue<input aria-label="Search catalogue" placeholder="Title, series, slug, medium, or year…" value={search} onChange={(event) => setSearch(event.target.value)} />{search && <button aria-label="Clear catalogue search" onClick={() => setSearch("")} type="button">×</button>}</label>
+        <Hint id="catalogueSearch"><label className="admin-catalogue-search">Search catalogue<input aria-label="Search catalogue" placeholder="Title, series, slug, medium, or year…" value={search} onChange={(event) => setSearch(event.target.value)} />{search && <Hint id="clearSearch"><button aria-label="Clear catalogue search" onClick={() => setSearch("")} type="button">×</button></Hint>}</label></Hint>
         <Hint id="statusFilters"><label>Status<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as WorkStatus | "all")}>{statuses.map((status) => <option key={status} value={status}>{status === "all" ? "All statuses" : titleCase(status)}</option>)}</select></label></Hint>
-        <label>Series<select value={seriesFilter} onChange={(event) => setSeriesFilter(event.target.value)}><option value="all">All series</option>{initialSeries.map((series) => <option key={series.id} value={series.id}>{series.name}</option>)}</select></label>
+        <Hint id="seriesFilter"><label>Series<select value={seriesFilter} onChange={(event) => setSeriesFilter(event.target.value)}><option value="all">All series</option>{initialSeries.map((series) => <option key={series.id} value={series.id}>{series.name}</option>)}</select></label></Hint>
         <div className="admin-quick-add"><input ref={quickAddRef} accept="image/*" multiple onChange={(event: ChangeEvent<HTMLInputElement>) => void quickAdd(event.target.files)} type="file" /><Hint id="quickAdd"><button className="admin-action-button" onClick={() => quickAddRef.current?.click()} type="button"><span className="admin-action-label">Batch upload artwork</span></button></Hint></div>
       </div>
 
       {selected.size > 0 && <div className="admin-batch-bar">
         <strong>{selected.size} selected</strong>
-        <select aria-label="Bulk status" value={batchStatus} onChange={(event) => setBatchStatus(event.target.value as WorkStatus | "")}><option value="">Set status…</option>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select>
-        <select aria-label="Bulk series" value={batchSeries} onChange={(event) => setBatchSeries(event.target.value)}><option value="">Assign series…</option><option value="__none__">No series</option>{initialSeries.map((series) => <option key={series.id} value={series.id}>{series.name}</option>)}</select>
-        <input aria-label="Create new series" placeholder="Or create new series…" value={batchNewSeriesName} onChange={(event) => { setBatchNewSeriesName(event.target.value); setBatchSeries(""); }} />
+        <Hint id="bulkStatus"><select aria-label="Bulk status" value={batchStatus} onChange={(event) => setBatchStatus(event.target.value as WorkStatus | "")}><option value="">Set status…</option>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select></Hint>
+        <Hint id="bulkSeries"><select aria-label="Bulk series" value={batchSeries} onChange={(event) => setBatchSeries(event.target.value)}><option value="">Assign series…</option><option value="__none__">No series</option>{initialSeries.map((series) => <option key={series.id} value={series.id}>{series.name}</option>)}</select></Hint>
+        <Hint id="createSeries"><input aria-label="Create new series" placeholder="Or create new series…" value={batchNewSeriesName} onChange={(event) => { setBatchNewSeriesName(event.target.value); setBatchSeries(""); }} /></Hint>
         <Hint id="applyBulk"><button className="admin-action-button" disabled={busy || (!batchStatus && !batchSeries && !batchNewSeriesName.trim())} onClick={() => void applyBatch()} type="button"><span className="admin-action-label">Apply status / series</span></button></Hint>
       </div>}
       {selected.size > 0 && <section className="admin-batch-details">
@@ -197,7 +197,7 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
           <label>Featured<select value={batchDetails.isFeatured} onChange={(event) => setBatchDetails((current) => ({ ...current, isFeatured: event.target.value as TriState }))}><option value="">Leave unchanged</option><option value="true">Yes</option><option value="false">No</option></select></label>
           <label className="field-wide">Description<textarea rows={3} value={batchDetails.description} onChange={(event) => setBatchDetails((current) => ({ ...current, description: event.target.value }))} /></label>
         </div>
-        <button className="admin-action-button" disabled={busy || !hasBatchDetails(batchDetails)} onClick={() => void applyBatch()} type="button"><span className="admin-action-label">Apply details to {selected.size} works</span></button>
+        <Hint id="applyDetails"><button className="admin-action-button" disabled={busy || !hasBatchDetails(batchDetails)} onClick={() => void applyBatch()} type="button"><span className="admin-action-label">Apply details to {selected.size} works</span></button></Hint>
       </section>}
       {selected.size > 0 && <section className="admin-selected-editor">
         <div><h2>Edit selected works</h2><p>These titles are the names customers see in the shop. Prices can be different for every painting.</p></div>
@@ -213,13 +213,13 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
             </div>;
           })}
         </div>
-        <button className="admin-action-button" disabled={busy} onClick={() => void saveInlineEdits()} type="button"><span className="admin-action-label">Save selected details</span></button>
+        <Hint id="saveSelected"><button className="admin-action-button" disabled={busy} onClick={() => void saveInlineEdits()} type="button"><span className="admin-action-label">Save selected details</span></button></Hint>
       </section>}
       {message && <p className="admin-inline-success" role="status">{message}</p>}
       {error && <p className="admin-error" role="alert">{error}</p>}
 
       <div className="admin-work-list">
-        <div className="admin-list-header"><label><input checked={filteredWorks.length > 0 && filteredWorks.every((work) => selected.has(work.id))} onChange={toggleAll} type="checkbox" /> Select all</label><span>{filteredWorks.length} shown · {works.length} total · newest first</span></div>
+        <div className="admin-list-header"><Hint id="selectAll"><label><input checked={filteredWorks.length > 0 && filteredWorks.every((work) => selected.has(work.id))} onChange={toggleAll} type="checkbox" /> Select all</label></Hint><span>{filteredWorks.length} shown · {works.length} total · newest first</span></div>
         {filteredWorks.length ? filteredWorks.map((work) => <WorkRow key={work.id} work={work} selected={selected.has(work.id)} onSelect={() => toggleSelected(work.id)} onStatus={(status) => void setStatus(work.id, status)} />) : <div className="admin-empty-state">No works match these filters.</div>}
       </div>
     </section>
@@ -235,7 +235,7 @@ function WorkRow({ work, selected, onSelect, onStatus }: { work: AdminCatalogueW
       <div className="admin-work-summary"><Hint id="viewWork"><Link href={`/studio/catalogue/${work.id}`}>{work.title}</Link></Hint><span>{work.year}{work.month ? ` · ${monthName(work.month)}` : ""} · {work.series_name ?? "Unassigned"}</span></div>
       <span className={`admin-status-badge status-${work.status}`}>{titleCase(work.status)}{work.is_new ? " · New" : ""}</span>
       <span className="admin-work-price">{formatPrice(work)}</span>
-      <select aria-label={`Set status for ${work.title}`} className="admin-row-status" value={work.status} onChange={(event) => onStatus(event.target.value as WorkStatus)}>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select>
+      <Hint id="rowStatus"><select aria-label={`Set status for ${work.title}`} className="admin-row-status" value={work.status} onChange={(event) => onStatus(event.target.value as WorkStatus)}>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select></Hint>
     </article>
   );
 }
