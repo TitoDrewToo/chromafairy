@@ -6,11 +6,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: "Chroma Fairy — Samantha Ty", template: "%s · Chroma Fairy" },
+  title: { default: "Chroma Fairy", template: "%s · Chroma Fairy" },
   description: SITE_DESCRIPTION,
   alternates: { canonical: SITE_URL },
-  openGraph: { type: "website", siteName: SITE_NAME, title: "Chroma Fairy — Samantha Ty", description: SITE_DESCRIPTION, url: SITE_URL, images: [{ url: absoluteUrl("/fairy-logo.png"), alt: "Chroma Fairy" }] },
-  twitter: { card: "summary_large_image", title: "Chroma Fairy — Samantha Ty", description: SITE_DESCRIPTION, images: [absoluteUrl("/fairy-logo.png")] },
+  openGraph: { type: "website", siteName: SITE_NAME, title: "Chroma Fairy", description: SITE_DESCRIPTION, url: SITE_URL, images: [{ url: absoluteUrl("/fairy-logo.png"), alt: "Chroma Fairy" }] },
+  twitter: { card: "summary_large_image", title: "Chroma Fairy", description: SITE_DESCRIPTION, images: [absoluteUrl("/fairy-logo.png")] },
   robots: { index: true, follow: true },
 };
 
