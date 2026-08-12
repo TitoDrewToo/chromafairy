@@ -267,7 +267,7 @@
 .studio-board-empty h3 { margin: 12px 0 4px; font: 500 25px/1.1 "Cormorant Garamond", Georgia, serif; }
 .studio-board-empty p { max-width: 280px; margin: 0; color: rgb(14 26 36 / 58%); font-size: 12px; line-height: 1.6; }
 .studio-board-feed { display: grid; gap: 10px; max-height: 330px; margin-top: 18px; overflow: auto; }
-.studio-board-post { padding: 12px 0; border-bottom: 1px solid var(--notes-line); }
+.studio-board-post { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--notes-line); }
 .studio-board-post p { margin: 0; white-space: pre-wrap; font: 16px/1.5 "Cormorant Garamond", Georgia, serif; }
 .studio-board-post small, .studio-board-muted { color: rgb(14 26 36 / 50%); font-size: 10px; }
 .studio-board-composer { display: grid; gap: 10px; margin-top: 18px; }

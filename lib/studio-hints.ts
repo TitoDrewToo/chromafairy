@@ -81,6 +81,7 @@ export const studioHints = {
   notesRename: "Rename this page inline — press Enter or click away to save.",
   notesDelete: "Delete this page. Your last remaining page is always kept.",
   notesBoardToggle: "Open the shared team board once the Studio has more than one member.",
+  notesBoardDelete: "Delete this team-board note. You can remove your own posts; managers can remove any post.",
 } as const;
 
 export type StudioHintId = keyof typeof studioHints;

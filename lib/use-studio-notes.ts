@@ -192,6 +192,17 @@ export function useStudioNotes(enabled = true) {
     return true;
   }, [hasTeam, supabase]);
 
+  const deleteBoardPost = useCallback(async (id: string) => {
+    if (!supabase || !window.confirm("Delete this team-board note?")) return false;
+    const { error: deleteError } = await supabase.from("studio_board").delete().eq("id", id);
+    if (deleteError) {
+      setError("Could not delete that team-board note.");
+      return false;
+    }
+    setBoardPosts((current) => current.filter((post) => post.id !== id));
+    return true;
+  }, [supabase]);
+
   return {
     notes,
     activeId,
@@ -204,6 +215,7 @@ export function useStudioNotes(enabled = true) {
     boardPosts,
     hasTeam,
     addBoardPost,
+    deleteBoardPost,
     loading,
     error,
   };

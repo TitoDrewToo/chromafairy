@@ -138,7 +138,9 @@ export default function StudioNotes({ variant }: { variant: NotesVariant }) {
       {notes.loading ? <div className="studio-notes-loading" aria-label="Loading notes"><span /></div> : view === "board" ? (
         <div className="studio-board" role="tabpanel">
           {!notes.hasTeam ? <div className="studio-board-empty"><span className="studio-notes-mark">✦</span><h3>A board for the whole studio</h3><p>Invite a teammate and this shared space will be ready for ideas, handoffs, and gentle reminders.</p></div> : <>
-            <div className="studio-board-feed">{notes.boardPosts.length === 0 ? <p className="studio-board-muted">Nothing posted yet. Start the conversation.</p> : notes.boardPosts.map((post) => <article className="studio-board-post" key={post.id}><p>{post.body}</p><small>Studio member · {new Date(post.created_at).toLocaleDateString("en-PH", { month: "short", day: "numeric" })}</small></article>)}</div>
+            <div className="studio-board-feed">
+              {notes.boardPosts.length === 0 ? <p className="studio-board-muted">Nothing posted yet. Start the conversation.</p> : notes.boardPosts.map((post) => <article className="studio-board-post" key={post.id}><div><p>{post.body}</p><small>Studio member · {new Date(post.created_at).toLocaleDateString("en-PH", { month: "short", day: "numeric" })}</small></div><Hint id="notesBoardDelete"><button aria-label="Delete team-board note" className="studio-notes-icon is-danger" onClick={() => void notes.deleteBoardPost(post.id)} type="button">×</button></Hint></article>)}
+            </div>
             <form className="studio-board-composer" onSubmit={submitBoardPost}><label htmlFor={`studio-board-${variant}`}>Share with the team<textarea id={`studio-board-${variant}`} maxLength={5000} onChange={(event) => setBoardDraft(event.target.value)} placeholder="A note for the studio…" rows={3} value={boardDraft} /></label><button className="studio-notes-submit" disabled={!boardDraft.trim()} type="submit">Post to board</button></form>
           </>}
         </div>
