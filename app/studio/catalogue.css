@@ -12,6 +12,14 @@
 .admin-batch-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 18px 0; padding: 13px; border: 1px solid #ded9cf; background: #fbfaf7; }
 .admin-batch-bar strong { margin-right: auto; font-size: 12px; }
 .admin-batch-bar .admin-action-button { padding: 10px 14px; }
+.admin-batch-details { display: grid; gap: 16px; margin: 18px 0 24px; padding: 18px; border: 1px solid #ded9cf; background: #fbfaf7; }
+.admin-batch-details h2 { margin: 0 0 5px; color: #765b2d; font-size: 11px; font-weight: 400; letter-spacing: .18em; text-transform: uppercase; }
+.admin-batch-details p { margin: 0; color: #77736b; font-size: 12px; }
+.admin-batch-details-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.admin-batch-details-grid label { display: grid; gap: 6px; color: #77736b; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.admin-batch-details-grid .field-wide { grid-column: span 2; }
+.admin-batch-details-grid input, .admin-batch-details-grid textarea, .admin-batch-details-grid select { box-sizing: border-box; width: 100%; padding: 9px 10px; border: 1px solid #cfc8bb; background: #fff; color: #171715; font: 13px "Jost", sans-serif; letter-spacing: normal; text-transform: none; }
+.admin-batch-details .admin-action-button { justify-self: start; padding: 10px 14px; }
 .admin-inline-success { color: #56745c; font-size: 13px; }
 .admin-work-list { border-top: 1px solid #ded9cf; }
 .admin-list-header { display: flex; justify-content: space-between; gap: 14px; padding: 13px 8px; color: #77736b; font-size: 11px; }
@@ -47,8 +55,10 @@
 .admin-image-list { display: grid; gap: 8px; margin-top: 16px; }.admin-image-item { display: grid; grid-template-columns: 76px 1fr; align-items: center; gap: 14px; padding: 10px; border: 1px solid #ded9cf; background: #fff; }.admin-image-item > img { width: 76px; height: 76px; object-fit: cover; }.admin-image-item strong { font-size: 12px; font-weight: 400; }.admin-image-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }.admin-small-button { padding: 6px 8px; border: 1px solid #cfc8bb; background: #fff; color: #5d5952; cursor: pointer; font: 10px "Jost", sans-serif; }.admin-small-button:disabled { cursor: default; opacity: .4; }.admin-danger-button { color: #9c3d32; }.admin-form-note { color: #77736b; font-size: 12px; }.admin-form-actions { display: flex; align-items: center; gap: 14px; }.admin-form-actions .admin-action-button { padding: 14px 18px; }.admin-secondary-button { padding: 13px 16px; border: 1px solid #cfc8bb; background: transparent; color: #5d5952; cursor: pointer; font: 11px "Jost", sans-serif; letter-spacing: .12em; text-transform: uppercase; }
 
 @media (max-width: 800px) {
+  .admin-batch-details-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .admin-work-row { grid-template-columns: 18px 62px minmax(0, 1fr) auto; }.admin-work-price { min-width: 0; text-align: left; }.admin-row-status { grid-column: 3 / -1; }.admin-work-thumb { width: 62px; }.admin-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }.admin-form-grid .field-wide { grid-column: span 2; }
 }
 @media (max-width: 560px) {
+  .admin-batch-details-grid { display: block; }.admin-batch-details-grid label { margin-bottom: 12px; }.admin-batch-details-grid .field-wide { grid-column: auto; }
   .admin-catalogue-heading { align-items: start; flex-direction: column; }.admin-work-row { grid-template-columns: 18px 56px minmax(0, 1fr); gap: 10px; }.admin-work-thumb { width: 56px; }.admin-status-badge, .admin-work-price { grid-column: 3; }.admin-row-status { grid-column: 3; width: 100%; }.admin-form-grid { display: block; }.admin-form-grid label { margin-bottom: 14px; }.admin-form-grid .field-wide { grid-column: auto; }.admin-batch-bar { align-items: stretch; flex-direction: column; }.admin-batch-bar strong { margin-right: 0; }.admin-batch-bar select, .admin-batch-bar .admin-action-button { width: 100%; }.admin-catalogue-toolbar { align-items: stretch; flex-direction: column; }.admin-catalogue-toolbar label select, .admin-quick-add, .admin-quick-add button { width: 100%; }.admin-list-header { align-items: start; flex-direction: column; }.admin-image-item { grid-template-columns: 58px 1fr; }.admin-image-item > img { width: 58px; height: 58px; }
 }
