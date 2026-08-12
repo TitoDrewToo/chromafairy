@@ -15,6 +15,7 @@ export type AdminCatalogueWork = Work & { series_name: string | null; images: Ad
 const statuses: Array<WorkStatus | "all"> = ["all", "draft", "available", "reserved", "sold"];
 type TriState = "" | "true" | "false";
 type BatchDetails = { year: string; month: string; medium: string; description: string; pricePhp: string; priceUsd: string; priceOnRequest: TriState; isNew: TriState; isFeatured: TriState };
+type InlineEdit = { title: string; pricePhp: string; priceUsd: string };
 const emptyBatchDetails: BatchDetails = { year: "", month: "", medium: "", description: "", pricePhp: "", priceUsd: "", priceOnRequest: "", isNew: "", isFeatured: "" };
 
 export default function CatalogueAdmin({ initialWorks, initialSeries }: { initialWorks: AdminCatalogueWork[]; initialSeries: AdminCatalogueSeries[] }) {
@@ -27,6 +28,7 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
   const [batchStatus, setBatchStatus] = useState<WorkStatus | "">("");
   const [batchSeries, setBatchSeries] = useState<string>("");
   const [batchDetails, setBatchDetails] = useState<BatchDetails>(emptyBatchDetails);
+  const [inlineEdits, setInlineEdits] = useState<Record<string, InlineEdit>>({});
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -79,6 +81,34 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
       } : work));
       setMessage(`${selected.size} work${selected.size === 1 ? "" : "s"} updated.`);
       setSelected(new Set()); setBatchStatus(""); setBatchSeries(""); setBatchDetails(emptyBatchDetails);
+    }
+    setBusy(false);
+  }
+
+  async function saveInlineEdits() {
+    const selectedWorks = works.filter((work) => selected.has(work.id));
+    const changed = selectedWorks.map((work) => {
+      const edit = inlineEdits[work.id] ?? inlineEditFor(work);
+      const payload: Partial<Pick<Work, "title" | "price_php" | "price_usd">> = {};
+      if (edit.title.trim() && edit.title.trim() !== work.title) payload.title = edit.title.trim();
+      if (edit.pricePhp !== numberString(work.price_php)) payload.price_php = edit.pricePhp.trim() ? Number(edit.pricePhp) : null;
+      if (edit.priceUsd !== numberString(work.price_usd)) payload.price_usd = edit.priceUsd.trim() ? Number(edit.priceUsd) : null;
+      return { work, edit, payload };
+    }).filter((item) => Object.keys(item.payload).length > 0);
+    if (!changed.length) return;
+    if (changed.some((item) => !item.edit.title.trim())) return setError("Each selected work needs a title.");
+    const supabase = createClient();
+    if (!supabase) return setError("Supabase is not configured.");
+    setBusy(true); setError(""); setMessage("");
+    const results = await Promise.all(changed.map((item) => supabase.from("works").update(item.payload).eq("id", item.work.id)));
+    if (results.some((result) => result.error)) {
+      setError("Some work details could not be saved.");
+    } else {
+      setWorks((current) => current.map((work) => {
+        const item = changed.find((entry) => entry.work.id === work.id);
+        return item ? { ...work, ...item.payload } : work;
+      }));
+      setMessage(`${changed.length} work${changed.length === 1 ? "" : "s"} updated.`);
     }
     setBusy(false);
   }
@@ -147,6 +177,22 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
         </div>
         <button className="admin-action-button" disabled={busy || !hasBatchDetails(batchDetails)} onClick={() => void applyBatch()} type="button"><span className="admin-action-label">Apply details to {selected.size} works</span></button>
       </section>}
+      {selected.size > 0 && <section className="admin-selected-editor">
+        <div><h2>Edit selected works</h2><p>These titles are the names customers see in the shop. Prices can be different for every painting.</p></div>
+        <div className="admin-selected-editor-list">
+          {works.filter((work) => selected.has(work.id)).map((work) => {
+            const edit = inlineEdits[work.id] ?? inlineEditFor(work);
+            const image = work.images.find((item) => item.is_primary) ?? work.images[0];
+            return <div className="admin-selected-editor-row" key={work.id}>
+              <div className="admin-selected-editor-thumb">{image ? <img alt="" src={image.url} /> : <span>No image</span>}</div>
+              <label>Shop title<input value={edit.title} onChange={(event) => setInlineEdits((current) => ({ ...current, [work.id]: { ...edit, title: event.target.value } }))} /></label>
+              <label>PHP price<input min="0" step="0.01" type="number" value={edit.pricePhp} onChange={(event) => setInlineEdits((current) => ({ ...current, [work.id]: { ...edit, pricePhp: event.target.value } }))} /></label>
+              <label>USD price<input min="0" step="0.01" type="number" value={edit.priceUsd} onChange={(event) => setInlineEdits((current) => ({ ...current, [work.id]: { ...edit, priceUsd: event.target.value } }))} /></label>
+            </div>;
+          })}
+        </div>
+        <button className="admin-action-button" disabled={busy} onClick={() => void saveInlineEdits()} type="button"><span className="admin-action-label">Save selected details</span></button>
+      </section>}
       {message && <p className="admin-inline-success" role="status">{message}</p>}
       {error && <p className="admin-error" role="alert">{error}</p>}
 
@@ -176,6 +222,8 @@ function slugify(value: string) { return value.toLowerCase().trim().replace(/[^a
 function safeExtension(value: string) { const extension = value.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif)$/)?.[1] ?? "jpg"; return `${crypto.randomUUID()}.${extension}`; }
 function titleCase(value: string) { return value.charAt(0).toUpperCase() + value.slice(1); }
 function monthName(value: number) { return new Date(2020, value - 1, 1).toLocaleString("en", { month: "short" }); }
+function numberString(value: number | null) { return value === null ? "" : String(value); }
+function inlineEditFor(work: AdminCatalogueWork): InlineEdit { return { title: work.title, pricePhp: numberString(work.price_php), priceUsd: numberString(work.price_usd) }; }
 function hasBatchDetails(details: BatchDetails) { return Object.values(details).some(Boolean); }
 function createBatchPayload(status: WorkStatus | "", series: string, details: BatchDetails): Partial<Pick<Work, "status" | "series_id" | "year" | "month" | "medium" | "description" | "price_php" | "price_usd" | "price_on_request" | "is_new" | "is_featured">> {
   return {
