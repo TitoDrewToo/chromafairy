@@ -82,6 +82,33 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
 
   useEffect(() => {
     const root = rootRef.current;
+    const switcher = root?.querySelector<HTMLButtonElement>("#footer-logo-switch");
+    const logo = root?.querySelector<HTMLImageElement>("#footer-logo-option");
+    if (!switcher || !logo) return;
+
+    const options = [
+      { src: "/fairy-logo-option-v2.png", label: "Chroma Fairy logo, version 1" },
+      { src: "/fairy-logo-option-v2-flat.png", label: "Chroma Fairy logo, version 2" },
+    ];
+    let optionIndex = 1;
+    const updateLogo = () => {
+      const option = options[optionIndex];
+      logo.src = option.src;
+      logo.alt = option.label;
+      switcher.setAttribute("aria-label", `Switch to ${options[optionIndex === 1 ? 0 : 1].label.toLowerCase()}`);
+    };
+    const onClick = () => {
+      optionIndex = optionIndex === 1 ? 0 : 1;
+      updateLogo();
+    };
+
+    switcher.addEventListener("click", onClick);
+    updateLogo();
+    return () => switcher.removeEventListener("click", onClick);
+  }, [markup]);
+
+  useEffect(() => {
+    const root = rootRef.current;
     const header = root?.querySelector<HTMLElement>("#hdr");
     const toggle = root?.querySelector<HTMLButtonElement>("#home-menu-toggle");
     const nav = root?.querySelector<HTMLElement>("#home-nav");
