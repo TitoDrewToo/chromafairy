@@ -82,35 +82,6 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
 
   useEffect(() => {
     const root = rootRef.current;
-    const switcher = root?.querySelector<HTMLButtonElement>("#footer-logo-switch");
-    const logo = root?.querySelector<HTMLImageElement>("#footer-logo-option");
-    const logoWrap = root?.querySelector<HTMLElement>(".footer-logo-option-wrap");
-    if (!switcher || !logo || !logoWrap) return;
-
-    const options = [
-      { src: "/fairy-logo.png", label: "the original Chroma Fairy logo", isV2: false },
-      { src: "/fairy-logo-option-v2.png", label: "the Chroma Fairy v2 logo", isV2: true },
-    ];
-    let optionIndex = 1;
-    const updateLogo = () => {
-      const option = options[optionIndex];
-      logo.src = option.src;
-      logo.alt = option.label;
-      logoWrap.classList.toggle("is-v2", option.isV2);
-      switcher.setAttribute("aria-label", `Switch to ${options[optionIndex === 1 ? 0 : 1].label}`);
-    };
-    const onClick = () => {
-      optionIndex = optionIndex === 1 ? 0 : 1;
-      updateLogo();
-    };
-
-    switcher.addEventListener("click", onClick);
-    updateLogo();
-    return () => switcher.removeEventListener("click", onClick);
-  }, [markup]);
-
-  useEffect(() => {
-    const root = rootRef.current;
     const header = root?.querySelector<HTMLElement>("#hdr");
     const toggle = root?.querySelector<HTMLButtonElement>("#home-menu-toggle");
     const nav = root?.querySelector<HTMLElement>("#home-nav");
