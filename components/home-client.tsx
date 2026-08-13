@@ -84,18 +84,20 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     const root = rootRef.current;
     const switcher = root?.querySelector<HTMLButtonElement>("#footer-logo-switch");
     const logo = root?.querySelector<HTMLImageElement>("#footer-logo-option");
-    if (!switcher || !logo) return;
+    const logoWrap = root?.querySelector<HTMLElement>(".footer-logo-option-wrap");
+    if (!switcher || !logo || !logoWrap) return;
 
     const options = [
-      { src: "/fairy-logo-option-v2.png", label: "Chroma Fairy logo, version 1" },
-      { src: "/fairy-logo-option-v2-flat.png", label: "Chroma Fairy logo, version 2" },
+      { src: "/fairy-logo.png", label: "the original Chroma Fairy logo", isV2: false },
+      { src: "/fairy-logo-option-v2.png", label: "the Chroma Fairy v2 logo", isV2: true },
     ];
     let optionIndex = 1;
     const updateLogo = () => {
       const option = options[optionIndex];
       logo.src = option.src;
       logo.alt = option.label;
-      switcher.setAttribute("aria-label", `Switch to ${options[optionIndex === 1 ? 0 : 1].label.toLowerCase()}`);
+      logoWrap.classList.toggle("is-v2", option.isV2);
+      switcher.setAttribute("aria-label", `Switch to ${options[optionIndex === 1 ? 0 : 1].label}`);
     };
     const onClick = () => {
       optionIndex = optionIndex === 1 ? 0 : 1;
