@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "../lib/supabase/client";
+import { createClient, createInviteClient } from "../lib/supabase/client";
 import { absoluteUrl } from "../lib/site";
 import { Hint } from "./studio-hint";
 
-export default function SetPasswordForm({ mode }: { mode: "forgot" | "set" }) {
+export default function SetPasswordForm({ mode }: { mode: "forgot" | "invite" | "reset" }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,12 +18,27 @@ export default function SetPasswordForm({ mode }: { mode: "forgot" | "set" }) {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
-    if (!supabase) return;
-    void supabase.auth.getSession().then(({ data }) => setHasSession(Boolean(data.session)));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => setHasSession(Boolean(session)));
-    return () => listener.subscription.unsubscribe();
-  }, []);
+    const cookieClient = createClient();
+    const inviteClient = mode === "invite" ? createInviteClient() : cookieClient;
+    if (!cookieClient || !inviteClient) return;
+
+    let active = true;
+    void inviteClient.auth.getSession().then(async ({ data }) => {
+      if (!active) return;
+      if (mode === "invite" && data.session) {
+        await cookieClient.auth.setSession(data.session);
+      }
+      if (active) setHasSession(Boolean(data.session));
+    });
+
+    const { data: listener } = cookieClient.auth.onAuthStateChange((_event, session) => {
+      if (active) setHasSession(Boolean(session));
+    });
+    return () => {
+      active = false;
+      listener.subscription.unsubscribe();
+    };
+  }, [mode]);
 
   async function requestReset(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
