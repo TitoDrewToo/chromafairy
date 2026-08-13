@@ -205,7 +205,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     });
 
     function onCtaClick() {
-      window.dispatchEvent(new CustomEvent("cf-audio-effect", { detail: { name: "glitter", volume: 0.08 } }));
+      window.dispatchEvent(new CustomEvent("cf-audio-effect", { detail: { name: "sparkle", volume: 0.08 } }));
     }
 
     return () => {

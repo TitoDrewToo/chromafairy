@@ -186,7 +186,7 @@ export function DustPlaceholderField({ as = "input", placeholder, value, onChang
       state = "dusting";
       restoreAfterDust = false;
       resetParticles();
-      window.dispatchEvent(new CustomEvent("cf-audio-effect", { detail: { name: "sparkle", volume: 0.1 } }));
+      window.dispatchEvent(new CustomEvent("cf-audio-effect", { detail: { name: "glitter", volume: 0.1 } }));
       frame = requestAnimationFrame(() => animateDust(performance.now()));
     };
 
