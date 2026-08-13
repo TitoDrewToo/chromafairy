@@ -20,7 +20,7 @@ function getHomeSource() {
     .replace(/\s*<canvas id="art"><\/canvas>\s*<div id="artFallback"><\/div>/, "")
     .replaceAll('src="assets/', 'src="/assets/')
     .replace('      <a href="#contact">Contact</a>', '      <a href="#contact">Contact</a>\n      <a href="/shop">Shop</a>')
-    .replace('<div class="brand2">Samantha Ty</div>', '<div id="animated-fairy-mount"></div><div class="brand2">Samantha Ty</div>');
+    .replace('<div class="brand2">Samantha Ty</div>', '<div class="brand2">Samantha Ty</div>');
 
   return { styles, markup };
 }
