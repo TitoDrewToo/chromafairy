@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AnimatedFairy from "./animated-fairy";
+import HomeAudio from "./home-audio";
 import InquiryForm from "./inquiry-form";
 import { PAINTING_TEXTURES, isPaintingBackgroundVariant, type PaintingBackgroundVariant } from "./backgrounds/painting-textures";
 
@@ -103,6 +104,8 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       const href = anchor.getAttribute("href");
       if (!href?.startsWith("#")) return;
 
+      window.dispatchEvent(new CustomEvent("cf-audio-effect", { detail: { name: "whoosh", volume: 0.1 } }));
+
       // Desktop keeps the original browser smooth-scroll behavior. The custom
       // easing is only needed for the mobile menu's more compact viewport.
       if (window.innerWidth > 860) return;
@@ -195,14 +198,20 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
         label.className = "chroma-cta-label";
         while (element.firstChild) label.append(element.firstChild);
         element.append(label);
+        element.addEventListener("click", onCtaClick);
       } else {
         element.classList.add("chroma-text");
       }
     });
 
+    function onCtaClick() {
+      window.dispatchEvent(new CustomEvent("cf-audio-effect", { detail: { name: "glitter", volume: 0.08 } }));
+    }
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       observer.disconnect();
+      root.querySelectorAll<HTMLElement>(".chroma-cta").forEach((element) => element.removeEventListener("click", onCtaClick));
     };
   }, [markup]);
 
@@ -579,6 +588,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     <div className="home-shell" ref={rootRef}>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <div dangerouslySetInnerHTML={{ __html: markup }} />
+      <HomeAudio />
       {backgroundMount ? createPortal(<><canvas id="art" /><div id="artFallback" /></>, backgroundMount) : null}
       {fairyMount ? createPortal(<AnimatedFairy />, fairyMount) : null}
       {commissionMount ? createPortal(<InquiryForm kind="commission" />, commissionMount) : null}

@@ -6,7 +6,7 @@
 <title>Samantha Ty — Fluid Artist</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&family=Sacramento&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&family=WindSong:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   :root{
     --ink:#0e1a24; --teal:#1f8fa3; --deep:#0a2740;
@@ -15,6 +15,7 @@
     --serif:'Cormorant Garamond', Georgia, serif;
     --sans:'Jost', system-ui, sans-serif;
     --script:'Sacramento', cursive;
+    --hero-script:'WindSong', cursive;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -30,7 +31,7 @@
     align-items:center;padding:20px clamp(20px,5vw,64px);transition:background .5s,backdrop-filter .5s,box-shadow .5s}
   #hdr:not(.solid) .brand,#hdr:not(.solid) nav a{text-shadow:0 1px 12px rgba(0,0,0,.6)}
   header.solid{background:rgba(246,243,236,.9);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--line)}
-  .brand{font-family:var(--script);font-size:30px;line-height:1;color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35);
+  .brand{font-family:var(--hero-script);font-size:30px;line-height:1;color:#fff;text-shadow:0 2px 18px rgba(0,0,0,.35);
     text-decoration:none;transition:color .5s,text-shadow .5s}
   header.solid .brand{color:var(--ink);text-shadow:none}
   nav{display:flex;gap:clamp(10px,1.6vw,26px);flex-wrap:wrap;justify-content:flex-end}
@@ -59,7 +60,7 @@
 
   /* HERO */
   #home{height:100vh;min-height:600px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-  #home .sig{font-family:var(--script);font-size:clamp(64px,13vw,150px);color:#fff;line-height:.9;text-shadow:0 6px 50px rgba(0,0,0,.4)}
+  #home .sig{font-family:var(--hero-script);font-size:clamp(64px,13vw,150px);color:#fff;line-height:.9;text-shadow:0 6px 50px rgba(0,0,0,.4)}
   #home .yr{letter-spacing:.7em;font-size:14px;color:#fff;margin-top:18px;padding-left:.7em;text-shadow:0 2px 18px rgba(0,0,0,.5)}
   #home .tag{margin-top:26px;font-family:var(--serif);font-style:italic;font-size:clamp(16px,2.2vw,22px);
     color:rgba(255,255,255,.92);text-shadow:0 2px 20px rgba(0,0,0,.45);max-width:24ch}
