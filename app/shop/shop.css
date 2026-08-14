@@ -672,13 +672,16 @@
 .shop-inquiry-modal {
   position: relative;
   width: min(100%, 650px);
-  max-height: min(760px, calc(100vh - 44px));
+  max-height: min(760px, calc(100vh - 32px));
   overflow-y: auto;
-  padding: clamp(30px, 5vw, 58px);
+  padding: clamp(26px, 4vw, 46px) clamp(30px, 5vw, 58px);
   background: var(--shop-paper);
   box-shadow: 0 24px 80px rgba(0, 0, 0, .24);
   animation: inquiry-modal-rise 240ms cubic-bezier(.2, .8, .2, 1) both;
+  scrollbar-width: none;
 }
+
+.shop-inquiry-modal::-webkit-scrollbar { display: none; }
 
 .shop-inquiry-modal-close {
   position: absolute;

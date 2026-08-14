@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import InquiryForm from "./inquiry-form";
 import InquirySoundEffects from "./inquiry-sound-effects";
 
@@ -36,7 +37,7 @@ export default function WorkInquiryModal({ workId, workTitle }: { workId: string
     <>
       <InquirySoundEffects />
       <button className="shop-inquire inquiry-chroma-button" onClick={show} type="button"><span className="inquiry-chroma-label">Inquire about this work</span></button>
-      {open && <div className="shop-inquiry-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) hide(); }}>
+      {open && createPortal(<div className="shop-inquiry-modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) hide(); }}>
         <section aria-labelledby="work-inquiry-title" aria-modal="true" className="shop-inquiry-modal" role="dialog">
           <button aria-label="Close inquiry" className="shop-inquiry-modal-close" onClick={hide} ref={closeButtonRef} type="button">×</button>
           <div className="shop-eyebrow">Piece inquiry</div>
@@ -44,7 +45,7 @@ export default function WorkInquiryModal({ workId, workTitle }: { workId: string
           <p className="shop-inquiry-intro">Ask Samantha about this work, availability, or bringing its feeling into your space.</p>
           <InquiryForm kind="piece" workId={workId} workTitle={workTitle} />
         </section>
-      </div>}
+      </div>, document.body)}
     </>
   );
 }
