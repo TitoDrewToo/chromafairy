@@ -18,8 +18,8 @@ type AudioEffectName = keyof typeof EFFECT_TRACKS;
 export default function HomeAudio() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const effectRefs = useRef<Record<AudioEffectName, HTMLAudioElement | null>>({ sparkle: null, glitter: null, whoosh: null });
-  const enabledRef = useRef(false);
-  const [enabled, setEnabled] = useState(false);
+  const enabledRef = useRef(true);
+  const [enabled, setEnabled] = useState(true);
   const [waveIndex, setWaveIndex] = useState(0);
 
   useEffect(() => {
@@ -28,6 +28,18 @@ export default function HomeAudio() {
     const effects = effectRefs.current;
 
     audio.volume = 0.18;
+
+    const startAmbient = () => {
+      if (!enabledRef.current) return;
+      void audio.play().catch(() => {
+        // Autoplay may be blocked until the visitor interacts. Keep the
+        // toggle on and retry from the first interaction below.
+      });
+    };
+    const retryAfterInteraction = () => startAmbient();
+    window.addEventListener("pointerdown", retryAfterInteraction, { once: true });
+    window.addEventListener("keydown", retryAfterInteraction, { once: true });
+    startAmbient();
 
     const onEffect = (event: Event) => {
       const name = (event as CustomEvent<{ name?: AudioEffectName; volume?: number }>).detail?.name;
@@ -44,6 +56,8 @@ export default function HomeAudio() {
       audio.pause();
       audio.currentTime = 0;
       window.removeEventListener("cf-audio-effect", onEffect);
+      window.removeEventListener("pointerdown", retryAfterInteraction);
+      window.removeEventListener("keydown", retryAfterInteraction);
       Object.values(effects).forEach((effect) => effect?.pause());
     };
   }, []);
