@@ -147,7 +147,7 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
       const { error: workError } = await supabase.from("works").insert({ id, title, slug, year: new Date().getFullYear(), status: "draft", is_new: false, is_featured: false });
       if (workError) continue;
       const path = `works/${id}/${id}-${safeExtension(file.name)}`;
-      const { error: uploadError } = await supabase.storage.from("artwork").upload(path, file, { contentType: file.type || "image/jpeg", upsert: false });
+      const { error: uploadError } = await supabase.storage.from("artwork").upload(path, file, { contentType: file.type || contentTypeFor(file.name), upsert: false });
       if (uploadError) continue;
       const { error: imageError } = await supabase.from("work_images").insert({ work_id: id, storage_path: path, alt: title, display_order: 0, is_primary: true });
       if (!imageError) { added += 1; addedIds.push(id); }
@@ -174,7 +174,7 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
         <Hint id="catalogueSearch"><label className="admin-catalogue-search">Search catalogue<input aria-label="Search catalogue" placeholder="Title, series, slug, medium, or year…" value={search} onChange={(event) => setSearch(event.target.value)} />{search && <Hint id="clearSearch"><button aria-label="Clear catalogue search" onClick={() => setSearch("")} type="button">×</button></Hint>}</label></Hint>
         <Hint id="statusFilters"><label>Status<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as WorkStatus | "all")}>{statuses.map((status) => <option key={status} value={status}>{status === "all" ? "All statuses" : titleCase(status)}</option>)}</select></label></Hint>
         <Hint id="seriesFilter"><label>Series<select value={seriesFilter} onChange={(event) => setSeriesFilter(event.target.value)}><option value="all">All series</option>{initialSeries.map((series) => <option key={series.id} value={series.id}>{series.name}</option>)}</select></label></Hint>
-        <div className="admin-quick-add"><input ref={quickAddRef} accept="image/*" multiple onChange={(event: ChangeEvent<HTMLInputElement>) => void quickAdd(event.target.files)} type="file" /><Hint id="quickAdd"><button className="admin-action-button" onClick={() => quickAddRef.current?.click()} type="button"><span className="admin-action-label">Batch upload artwork</span></button></Hint></div>
+        <div className="admin-quick-add"><input ref={quickAddRef} accept=".jpg,.jpeg,.png,.webp,.gif,.heic,.heif,image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" multiple onChange={(event: ChangeEvent<HTMLInputElement>) => void quickAdd(event.target.files)} type="file" /><Hint id="quickAdd"><button className="admin-action-button" onClick={() => quickAddRef.current?.click()} type="button"><span className="admin-action-label">Batch upload artwork</span></button></Hint></div>
       </div>
 
       {selected.size > 0 && <div className="admin-batch-bar">
@@ -241,7 +241,8 @@ function WorkRow({ work, selected, onSelect, onStatus }: { work: AdminCatalogueW
 }
 
 function slugify(value: string) { return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
-function safeExtension(value: string) { const extension = value.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif)$/)?.[1] ?? "jpg"; return `${crypto.randomUUID()}.${extension}`; }
+function safeExtension(value: string) { const extension = value.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif|heic|heif)$/)?.[1] ?? "jpg"; return `${crypto.randomUUID()}.${extension}`; }
+function contentTypeFor(value: string) { const extension = value.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif|heic|heif)$/)?.[1]; return extension === "heic" ? "image/heic" : extension === "heif" ? "image/heif" : extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : extension === "gif" ? "image/gif" : "image/jpeg"; }
 function titleCase(value: string) { return value.charAt(0).toUpperCase() + value.slice(1); }
 function monthName(value: number) { return new Date(2020, value - 1, 1).toLocaleString("en", { month: "short" }); }
 function numberString(value: number | null) { return value === null ? "" : String(value); }

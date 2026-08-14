@@ -5,6 +5,7 @@ import { createClient } from "../../../lib/supabase/server";
 import { formatPrice, getArtworkUrl } from "../../../lib/catalogue";
 import { absoluteUrl } from "../../../lib/site";
 import ShopImage from "../../../components/shop-image";
+import WorkInquiryModal from "../../../components/work-inquiry-modal";
 import "../shop.css";
 
 export const dynamic = "force-dynamic";
@@ -66,7 +67,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
               <div className="shop-spec"><dt>Year</dt><dd>{work.year}</dd></div>
               {series?.name && <div className="shop-spec"><dt>Series</dt><dd>{series.name}</dd></div>}
             </dl>
-            <Link className="shop-inquire inquiry-chroma-button" href={`/inquire?work=${encodeURIComponent(work.slug)}`}><span className="inquiry-chroma-label">Inquire about this work</span></Link>
+            <WorkInquiryModal workId={work.id} workTitle={work.title} />
             {paymentsFlag?.enabled && <Link className="shop-buy inquiry-chroma-button" href={`/checkout?work=${encodeURIComponent(work.slug)}`}><span className="inquiry-chroma-label">Buy</span></Link>}
             <p className="shop-inquire-note">A personal response will follow with availability and details.</p>
           </article>
