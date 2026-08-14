@@ -15,7 +15,7 @@ type ImageDraft = ExistingImage & { file?: File; previewUrl?: string };
 const statusOptions: WorkStatus[] = ["draft", "available", "reserved", "sold"];
 const unitOptions = ["cm", "in"] as const;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-const imageTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+const imageTypes = new Map([["jpg", "image/jpeg"], ["jpeg", "image/jpeg"], ["png", "image/png"], ["webp", "image/webp"], ["gif", "image/gif"]]);
 
 export default function WorkForm({ mode, work, images = [], series }: { mode: FormMode; work?: Work; images?: ExistingImage[]; series: SeriesOption[] }) {
   const router = useRouter();
@@ -68,21 +68,29 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
   }
 
   function addFiles(files: FileList | File[]) {
-    const additions = Array.from(files).filter((file) => {
-      const extension = file.name.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1];
-      return imageTypes.has(file.type) && ["jpg", "jpeg", "png", "webp", "gif"].includes(extension ?? "") && file.size <= MAX_IMAGE_BYTES;
-    }).map((file, index) => ({
+    const rejected: string[] = [];
+    const additions = Array.from(files).flatMap((file, index) => {
+      const extension = file.name.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] ?? "";
+      const expectedType = imageTypes.get(extension);
+      const typeMatches = !file.type || file.type === expectedType;
+      if (!expectedType || !typeMatches || file.size <= 0 || file.size > MAX_IMAGE_BYTES) {
+        rejected.push(file.name);
+        return [];
+      }
+      const previewUrl = URL.createObjectURL(file);
+      return [{
       id: `new-${crypto.randomUUID()}`,
       work_id: work?.id ?? "",
       storage_path: "",
       alt: title || file.name,
       display_order: imageDrafts.length + index,
       is_primary: !hasPrimary && imageDrafts.length === 0 && index === 0,
-      url: URL.createObjectURL(file),
+      url: previewUrl,
       file,
-      previewUrl: URL.createObjectURL(file),
-    }));
-    if (additions.length < Array.from(files).length) setError("Only JPG, PNG, WebP, or GIF images up to 10 MB are accepted.");
+      previewUrl,
+      }];
+    });
+    if (rejected.length) setError(`Could not preview ${rejected.join(", ")}. Use a JPG, PNG, WebP, or GIF image up to 10 MB.`);
     setImageDrafts((current) => [...current, ...additions]);
   }
 
@@ -186,7 +194,7 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
 
       <section className="admin-form-section"><h2>Shipping (optional)</h2><div className="admin-form-grid"><label>Packed weight kg<input min="0" step="0.01" type="number" value={packedWeight} onChange={(event) => setPackedWeight(event.target.value)} /></label><label>Packed length<input min="0" step="0.01" type="number" value={packedL} onChange={(event) => setPackedL(event.target.value)} /></label><label>Packed width<input min="0" step="0.01" type="number" value={packedW} onChange={(event) => setPackedW(event.target.value)} /></label><label>Packed height<input min="0" step="0.01" type="number" value={packedH} onChange={(event) => setPackedH(event.target.value)} /></label><label className="admin-check"><input checked={shipRolled} onChange={(event) => setShipRolled(event.target.checked)} type="checkbox" /> Can ship rolled</label></div></section>
 
-      <section className="admin-form-section"><h2>Images</h2><div className={`admin-dropzone ${dragging ? "is-dragging" : ""}`} onDragEnter={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDragOver={(event) => event.preventDefault()} onDrop={dropFiles}><strong>Drop artwork images here</strong><span>or choose files below</span><input accept="image/*" multiple onChange={(event) => event.target.files && addFiles(event.target.files)} type="file" /></div>{imageDrafts.length > 0 && <div className="admin-image-list">{imageDrafts.map((image, index) => <div className="admin-image-item" key={image.id}><img alt={image.alt ?? title} src={image.previewUrl ?? image.url} /><div><strong>{index + 1}. {image.alt || "Artwork image"}</strong><div className="admin-image-actions"><button className="admin-small-button" onClick={() => setPrimary(image.id)} type="button">{image.is_primary ? "Primary" : "Make primary"}</button><button className="admin-small-button" disabled={index === 0} onClick={() => moveImage(index, -1)} type="button">↑</button><button className="admin-small-button" disabled={index === imageDrafts.length - 1} onClick={() => moveImage(index, 1)} type="button">↓</button><button className="admin-small-button admin-danger-button" onClick={() => removeImage(image)} type="button">Remove</button></div></div></div>)}</div>}{!hasPrimary && imageDrafts.length > 0 && <p className="admin-form-note">The first image will be used as primary.</p>}</section>
+      <section className="admin-form-section"><h2>Images</h2><div className={`admin-dropzone ${dragging ? "is-dragging" : ""}`} onDragEnter={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDragOver={(event) => event.preventDefault()} onDrop={dropFiles}><strong>Drop artwork images here</strong><span>or choose files below</span><input accept=".jpg,.jpeg,.png,.webp,.gif,image/jpeg,image/png,image/webp,image/gif" multiple onChange={(event) => { addFiles(event.target.files ?? []); event.currentTarget.value = ""; }} type="file" /></div>{imageDrafts.length > 0 && <div className="admin-image-list">{imageDrafts.map((image, index) => <div className="admin-image-item" key={image.id}><img alt={image.alt ?? title} src={image.previewUrl ?? image.url} /><div><strong>{index + 1}. {image.alt || "Artwork image"}</strong><div className="admin-image-actions"><button className="admin-small-button" onClick={() => setPrimary(image.id)} type="button">{image.is_primary ? "Primary" : "Make primary"}</button><button className="admin-small-button" disabled={index === 0} onClick={() => moveImage(index, -1)} type="button">↑</button><button className="admin-small-button" disabled={index === imageDrafts.length - 1} onClick={() => moveImage(index, 1)} type="button">↓</button><button className="admin-small-button admin-danger-button" onClick={() => removeImage(image)} type="button">Remove</button></div></div></div>)}</div>}{!hasPrimary && imageDrafts.length > 0 && <p className="admin-form-note">The first image will be used as primary.</p>}</section>
 
       {error && <p className="admin-error" role="alert">{error}</p>}
       <div className="admin-form-actions"><Hint id="save"><button className="admin-action-button" disabled={busy} type="submit"><span className="admin-action-label">{busy ? "Saving…" : mode === "create" ? "Create work" : "Save changes"}</span></button></Hint><Hint id="cancel"><button className="admin-secondary-button" onClick={() => router.push("/studio/catalogue")} type="button">Cancel</button></Hint></div>
