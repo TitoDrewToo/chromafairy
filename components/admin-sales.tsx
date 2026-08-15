@@ -14,6 +14,7 @@ const orderStatuses: OrderStatus[] = ["paid", "packed", "shipped", "delivered", 
 
 export default function SalesAdmin({ works, customers: initialCustomers, inquiries, initialOrders }: { works: SaleWork[]; customers: SaleCustomer[]; inquiries: SaleInquiry[]; initialOrders: AdminOrder[] }) {
   const [orders, setOrders] = useState(initialOrders);
+  const [saleWorks, setSaleWorks] = useState(works);
   const [customers, setCustomers] = useState(initialCustomers);
   const [customerId, setCustomerId] = useState("");
   const [customerName, setCustomerName] = useState("");
@@ -45,22 +46,30 @@ export default function SalesAdmin({ works, customers: initialCustomers, inquiri
       const result = await recordSale({ customerId: customerId || undefined, customerName: customerName.trim(), customerEmail: customerEmail.trim(), customerPhone: customerPhone.trim(), workId, inquiryId: inquiryId || undefined, amount: Number(amount), currency, saleDate, channel, notes, shipment: showShipment ? { carrier, trackingNumber, packageType } : undefined });
       const customer = customers.find((item) => item.id === result.customerId) ?? { id: result.customerId, name: customerName, email: customerEmail, phone: customerPhone, notes: null, created_at: null, updated_at: null };
       const work = works.find((item) => item.id === workId) ?? null;
+      const previousWorkStatus = work?.status ?? "available";
       setCustomers((current) => current.some((item) => item.id === customer.id) ? current.map((item) => item.id === customer.id ? customer : item) : [...current, customer]);
-      setOrders((current) => [{ id: result.orderId, work_id: workId, inquiry_id: inquiryId || null, customer_id: result.customerId, buyer_name: customerName, buyer_email: customerEmail, buyer_phone: customerPhone || null, amount: Number(amount), currency, payment_status: "paid", payment_provider: "manual", payment_ref: null, order_status: "paid", work_status_before_sale: null, sale_date: saleDate, channel, notes: notes || null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), work, customer }, ...current]);
+      setSaleWorks((current) => current.map((item) => item.id === workId ? { ...item, status: "sold" } : item));
+      setOrders((current) => [{ id: result.orderId, work_id: workId, inquiry_id: inquiryId || null, customer_id: result.customerId, buyer_name: customerName, buyer_email: customerEmail, buyer_phone: customerPhone || null, amount: Number(amount), currency, payment_status: "paid", payment_provider: "manual", payment_ref: null, order_status: "paid", work_status_before_sale: previousWorkStatus, sale_date: saleDate, channel, notes: notes || null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), work: work ? { ...work, status: "sold" } : work, customer }, ...current]);
       setMessage("Sale recorded and work marked sold."); setCustomerId(""); setCustomerName(""); setCustomerEmail(""); setCustomerPhone(""); setWorkId(""); setInquiryId(""); setAmount(""); setNotes(""); setCarrier(""); setTrackingNumber("");
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Could not record sale."); }
     setBusy(false);
   }
   async function updateOrder(id: string, orderStatus: OrderStatus) {
     const result = await updateOrderStatus(id, orderStatus);
-    if (!result.ok) setError(result.error ?? "Could not update order status."); else setOrders((current) => current.map((order) => order.id === id ? { ...order, order_status: orderStatus } : order));
+    if (!result.ok) setError(result.error ?? "Could not update order status."); else {
+      setOrders((current) => current.map((order) => order.id === id ? { ...order, order_status: orderStatus } : order));
+      if (orderStatus === "cancelled") {
+        const order = orders.find((item) => item.id === id);
+        if (order?.work_id) setSaleWorks((current) => current.map((work) => work.id === order.work_id ? { ...work, status: order.work_status_before_sale ?? "available" } : work));
+      }
+    }
   }
   return <section className="admin-sales-layout">
     <form className="admin-operation-form" onSubmit={submit}><Hint id="recordSale"><h2>Record a sale</h2></Hint>
       <label>Existing customer<select value={customerId} onChange={(event) => chooseCustomer(event.target.value)}><option value="">New or match by email</option>{customers.map((customer) => <option key={customer.id} value={customer.id}>{customer.name || customer.email}</option>)}</select></label>
       <div className="admin-two-col"><label>Name<input required value={customerName} onChange={(event) => setCustomerName(event.target.value)} /></label><label>Email<input required type="email" value={customerEmail} onChange={(event) => setCustomerEmail(event.target.value)} /></label></div>
       <label>Phone<input value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} /></label>
-      <Hint id="chooseWork"><label>Work<select required value={workId} onChange={(event) => setWorkId(event.target.value)}><option value="">Choose work</option>{works.filter((work) => work.status !== "draft").map((work) => <option key={work.id} value={work.id}>{work.title} · {work.status}</option>)}</select></label></Hint>
+      <Hint id="chooseWork"><label>Work<select required value={workId} onChange={(event) => setWorkId(event.target.value)}><option value="">Choose work</option>{saleWorks.filter((work) => work.status !== "draft" && work.status !== "sold").map((work) => <option key={work.id} value={work.id}>{work.title} · {work.status}</option>)}</select></label></Hint>
       <div className="admin-two-col"><label>Final amount<input required min="0" step="0.01" type="number" value={amount} onChange={(event) => setAmount(event.target.value)} /></label><label>Currency<select value={currency} onChange={(event) => setCurrency(event.target.value)}><option>PHP</option><option>USD</option><option>EUR</option></select></label></div>
       <div className="admin-two-col"><label>Sale date<input required type="date" value={saleDate} onChange={(event) => setSaleDate(event.target.value)} /></label><label>Channel<input value={channel} onChange={(event) => setChannel(event.target.value)} /></label></div>
       <label>Originating inquiry<select value={inquiryId} onChange={(event) => setInquiryId(event.target.value)}><option value="">None</option>{inquiries.map((inquiry) => <option key={inquiry.id} value={inquiry.id}>{inquiry.name} · {inquiry.work_title_snapshot ?? "Commission"}</option>)}</select></label>
