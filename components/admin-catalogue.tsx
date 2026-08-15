@@ -140,20 +140,36 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
     setBusy(true); setError(""); setMessage("");
     let added = 0;
     const addedIds: string[] = [];
+    const failedFiles: string[] = [];
     for (const file of Array.from(files)) {
+      if (!isSupportedArtworkFile(file)) {
+        failedFiles.push(file.name);
+        continue;
+      }
       const id = crypto.randomUUID();
       const title = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]+/g, " ").trim() || "Untitled work";
       const slug = `${slugify(title) || "untitled-work"}-${id.slice(0, 8)}`;
       const { error: workError } = await supabase.from("works").insert({ id, title, slug, year: new Date().getFullYear(), status: "draft", is_new: false, is_featured: false });
-      if (workError) continue;
+      if (workError) { failedFiles.push(file.name); continue; }
       const path = `works/${id}/${id}-${safeExtension(file.name)}`;
       const { error: uploadError } = await supabase.storage.from("artwork").upload(path, file, { contentType: file.type || contentTypeFor(file.name), upsert: false });
-      if (uploadError) continue;
+      if (uploadError) {
+        await supabase.from("works").delete().eq("id", id);
+        failedFiles.push(file.name);
+        continue;
+      }
       const { error: imageError } = await supabase.from("work_images").insert({ work_id: id, storage_path: path, alt: title, display_order: 0, is_primary: true });
-      if (!imageError) { added += 1; addedIds.push(id); }
+      if (imageError) {
+        await supabase.storage.from("artwork").remove([path]);
+        await supabase.from("works").delete().eq("id", id);
+        failedFiles.push(file.name);
+        continue;
+      }
+      added += 1; addedIds.push(id);
     }
     setBusy(false);
     setMessage(`${added} draft${added === 1 ? "" : "s"} added.`);
+    if (failedFiles.length) setError(`Could not add ${failedFiles.join(", ")}. Check the file type, size, and Studio permissions.`);
     if (addedIds.length) {
       const [{ data: newWorks }, { data: newImages }] = await Promise.all([
         supabase.from("works").select("*").in("id", addedIds),
@@ -243,6 +259,7 @@ function WorkRow({ work, selected, onSelect, onStatus }: { work: AdminCatalogueW
 function slugify(value: string) { return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
 function safeExtension(value: string) { const extension = value.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif|heic|heif)$/)?.[1] ?? "jpg"; return `${crypto.randomUUID()}.${extension}`; }
 function contentTypeFor(value: string) { const extension = value.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif|heic|heif)$/)?.[1]; return extension === "heic" ? "image/heic" : extension === "heif" ? "image/heif" : extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : extension === "gif" ? "image/gif" : "image/jpeg"; }
+function isSupportedArtworkFile(file: File) { return /\.(jpg|jpeg|png|webp|gif|heic|heif)$/i.test(file.name) && file.size > 0 && file.size <= 10 * 1024 * 1024; }
 function titleCase(value: string) { return value.charAt(0).toUpperCase() + value.slice(1); }
 function monthName(value: number) { return new Date(2020, value - 1, 1).toLocaleString("en", { month: "short" }); }
 function numberString(value: number | null) { return value === null ? "" : String(value); }
