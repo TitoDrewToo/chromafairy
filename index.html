@@ -175,6 +175,7 @@
   .room .photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
   .room .scrim{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(0,0,0,.35))}
   #about .portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  #about .portrait video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#171310}
   .plaque{position:absolute;left:50%;transform:translateX(-50%);bottom:-30px;font-size:10px;letter-spacing:.18em;
     text-transform:uppercase;color:#7a746a;white-space:nowrap}
 
@@ -280,6 +281,7 @@
       -webkit-background-clip:text;background-clip:text;color:transparent;animation:chroma-shimmer var(--chroma-duration) linear infinite}
     #home-nav a:focus-visible{outline:1px solid var(--teal);outline-offset:-2px}
     #about .wrap,.steps,.press-row,.duo{grid-template-columns:1fr;gap:24px}
+    #about .portrait{order:-1;width:100%}
     .wallrow{gap:20px}
   }
   @media (prefers-reduced-motion: reduce){
@@ -453,7 +455,7 @@
           <p class="lead">Samantha Ty is a Philippine-based abstract artist whose works capture the life and essence of nature.</p>
           <p class="body">She combines techniques that create unique patterns resembling the elements — water, magma, lightning, and other forces. Through her medium, she allows the paint's natural flow to take center stage, gently guiding its course with her movements. Her pieces are infused with energy, and they breathe life into any space they grace.<br/><br/>Born on August 30, 1992, in the province of Surigao del Sur, Samantha's early exposure to music set the stage for her artistic pursuits. However, it was the loss of her father that became the catalyst for her exploration of abstract painting. This pivotal moment reminded her of the fleeting nature of life and encouraged her to pursue her dream of becoming an artist. Driven by a profound connection to nature, she discovered the world of fluid art.<br/><br/>This process of creating allowed her to tap into her true self and experience a great sense of joy and freedom. Today, Samantha continues to explore the depths of her imagination through her art. Her work is a testament to the beauty of dreams and the transformative power of following one's heart.</p>
         </div>
-        <div class="portrait"><img src="assets/sel-portrait.jpg" alt="Samantha Ty in her studio" /></div>
+        <div class="portrait"><video controls playsinline preload="metadata" poster="assets/about-artist-poster.jpg"><source src="assets/about-artist.mp4" type="video/mp4" />Your browser does not support the artist video.</video></div>
       </div>
     </section>
 
