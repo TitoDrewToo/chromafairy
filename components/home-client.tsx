@@ -285,6 +285,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     const canvas = backgroundMount?.querySelector<HTMLCanvasElement>("#art");
     const fallback = backgroundMount?.querySelector<HTMLElement>("#artFallback");
     if (!root || !canvas || !fallback) return;
+    const signalBackgroundReady = () => window.dispatchEvent(new Event("cf-home-background-ready"));
 
     const paintingBgEnabled = !["0", "false", "off"].includes((process.env.NEXT_PUBLIC_PAINTING_BG ?? "1").toLowerCase());
     if (!backgroundVariantRef.current) {
@@ -305,14 +306,15 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
         canvas.style.opacity = "1";
         canvas.style.display = "none";
         fallback.style.display = "block";
+        signalBackgroundReady();
       };
       window.addEventListener("cf-background-error", onVariantError);
       void (async () => {
         try {
-          const module = selectedVariant === "v2"
+          const backgroundModule = selectedVariant === "v2"
             ? await import("./backgrounds/omma-v2")
             : await import("./backgrounds/omma-v3");
-          if (active) cleanupVariant = module.init(canvas);
+          if (active) cleanupVariant = backgroundModule.init(canvas);
         } catch {
           onVariantError();
         }
@@ -328,6 +330,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     if (!gl) {
       fallback.style.display = "block";
       canvas.style.display = "none";
+      signalBackgroundReady();
       return;
     }
 
@@ -408,8 +411,10 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       fallback.style.display = "block";
       canvas.style.display = "none";
+      signalBackgroundReady();
       return;
     }
+    if (!paintingBgEnabled) signalBackgroundReady();
 
     gl.useProgram(program);
     const buffer = gl.createBuffer();
@@ -495,13 +500,17 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
           if (disposed) { resolve(false); return; }
           resolve(uploadTexture(image, index));
         };
-        image.onerror = () => resolve(false);
+        image.onerror = () => { signalBackgroundReady(); resolve(false); };
         image.src = PAINTING_TEXTURES[index];
       });
       const showFirstTexture = (ready: boolean) => {
-        if (!ready || disposed || firstTextureReady) return;
+        if (!ready || disposed || firstTextureReady) {
+          if (!ready && !disposed) signalBackgroundReady();
+          return;
+        }
         firstTextureReady = true;
         canvas.style.opacity = "1";
+        signalBackgroundReady();
       };
       canvas.style.opacity = "0";
       canvas.style.transition = "opacity 500ms ease";

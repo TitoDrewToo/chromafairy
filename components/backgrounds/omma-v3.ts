@@ -47,7 +47,7 @@ export function init(canvas: HTMLCanvasElement): () => void {
       const tileW = 140, tileL = 70, step = tileL - 24, N = PAINTING_TEXTURES.length;
       const segX = window.innerWidth < 700 ? 52 : 84, segY = window.innerWidth < 700 ? 42 : 64;
       const background = new THREE.Color(0x070b12); const materials: any[] = []; const geometries: any[] = []; const textures: any[] = [];
-      let firstReady = false; const reveal = () => { if (!firstReady && !disposed) { firstReady = true; canvas.style.opacity = "1"; } };
+      let firstReady = false; const reveal = () => { if (!firstReady && !disposed) { firstReady = true; canvas.style.opacity = "1"; window.dispatchEvent(new Event("cf-home-background-ready")); } };
       canvas.style.opacity = "0"; canvas.style.transition = "opacity 500ms ease";
       const loader = new THREE.TextureLoader();
       for (let i = 0; i < N; i += 1) {

@@ -26,8 +26,16 @@ export default function HomeAudio() {
     const audio = audioRef.current;
     if (!audio) return;
     const effects = effectRefs.current;
+    let audioReady = false;
+    const signalAudioReady = () => {
+      if (audioReady) return;
+      audioReady = true;
+      window.dispatchEvent(new Event("cf-home-audio-ready"));
+    };
 
     audio.volume = 0.18;
+    audio.addEventListener("canplay", signalAudioReady, { once: true });
+    audio.load();
 
     const startAmbient = () => {
       if (!enabledRef.current) return;
@@ -58,6 +66,7 @@ export default function HomeAudio() {
       window.removeEventListener("cf-audio-effect", onEffect);
       window.removeEventListener("pointerdown", retryAfterInteraction);
       window.removeEventListener("keydown", retryAfterInteraction);
+      audio.removeEventListener("canplay", signalAudioReady);
       Object.values(effects).forEach((effect) => effect?.pause());
     };
   }, []);
@@ -106,7 +115,7 @@ export default function HomeAudio() {
 
   return (
     <>
-      <audio ref={audioRef} loop preload="metadata" src={WAVE_TRACKS[waveIndex].src} />
+      <audio ref={audioRef} loop preload="auto" src={WAVE_TRACKS[waveIndex].src} />
       {Object.entries(EFFECT_TRACKS).map(([name, src]) => (
         <audio
           key={name}

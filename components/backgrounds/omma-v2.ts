@@ -57,7 +57,7 @@ export function init(canvas: HTMLCanvasElement): () => void {
       const textureSlots: Array<{ dispose: () => void } | null> = new Array(N).fill(null);
       const dims: Array<[number, number] | null> = new Array(N).fill(null);
       let revealed = false;
-      const reveal = () => { if (!revealed && !disposed) { revealed = true; canvas.style.opacity = "1"; } };
+      const reveal = () => { if (!revealed && !disposed) { revealed = true; canvas.style.opacity = "1"; window.dispatchEvent(new Event("cf-home-background-ready")); } };
       canvas.style.opacity = "0";
       canvas.style.transition = "opacity 500ms ease";
       const loadTexture = (index: number) => new Promise<void>((resolve, reject) => {
