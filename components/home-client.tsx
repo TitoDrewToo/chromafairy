@@ -217,6 +217,71 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
 
   useEffect(() => {
     const root = rootRef.current;
+    if (!root) return;
+
+    const instagram = () => {
+      const win = window as Window & { instgrm?: { Embeds?: { process: () => void } } };
+      if (win.instgrm?.Embeds) {
+        win.instgrm.Embeds.process();
+        return;
+      }
+      const existing = document.querySelector<HTMLScriptElement>("script[data-instagram-embed]");
+      if (existing) {
+        existing.addEventListener("load", () => win.instgrm?.Embeds?.process(), { once: true });
+        return;
+      }
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = "https://www.instagram.com/embed.js";
+      script.dataset.instagramEmbed = "true";
+      script.addEventListener("load", () => win.instgrm?.Embeds?.process(), { once: true });
+      document.body.appendChild(script);
+    };
+
+    const cleanups: Array<() => void> = [];
+    const modalClosers = new Map<HTMLElement, () => void>();
+    root.querySelectorAll<HTMLButtonElement>(".press-cover-trigger").forEach((trigger) => {
+      const modalId = trigger.getAttribute("aria-controls");
+      const modal = modalId ? root.querySelector<HTMLElement>(`#${CSS.escape(modalId)}`) : null;
+      if (!modal) return;
+      let previousFocus: HTMLElement | null = null;
+      const open = () => {
+        previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        modal.hidden = false;
+        document.body.style.overflow = "hidden";
+        if (trigger.classList.contains("press-instagram-trigger")) instagram();
+      };
+      const closeModal = () => {
+        modal.hidden = true;
+        document.body.style.overflow = "";
+        previousFocus?.focus();
+      };
+      modalClosers.set(modal, closeModal);
+      const onBackdrop = (event: MouseEvent) => {
+        if (event.target === modal) closeModal();
+      };
+      trigger.addEventListener("click", open);
+      modal.addEventListener("click", onBackdrop);
+      cleanups.push(() => {
+        trigger.removeEventListener("click", open);
+        modal.removeEventListener("click", onBackdrop);
+        modalClosers.delete(modal);
+      });
+    });
+
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      root.querySelectorAll<HTMLElement>(".press-modal:not([hidden])").forEach((modal) => modalClosers.get(modal)?.());
+    };
+    document.addEventListener("keydown", onEscape);
+    return () => {
+      document.removeEventListener("keydown", onEscape);
+      cleanups.forEach((cleanup) => cleanup());
+    };
+  }, [markup]);
+
+  useEffect(() => {
+    const root = rootRef.current;
     const canvas = backgroundMount?.querySelector<HTMLCanvasElement>("#art");
     const fallback = backgroundMount?.querySelector<HTMLElement>("#artFallback");
     if (!root || !canvas || !fallback) return;

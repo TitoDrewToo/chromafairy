@@ -112,7 +112,31 @@
   .press-row{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:38px;text-align:left}
   .quote{border-top:2px solid var(--teal);padding-top:20px}
   .quote p{font-family:var(--serif);font-style:italic;font-size:19px;line-height:1.5;color:#26333c}
+  .quote p a{color:inherit;text-decoration-color:var(--teal);text-decoration-thickness:1px;text-underline-offset:4px}
+  .quote p a:hover{color:var(--teal)}
   .quote .src{margin-top:14px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#6a7680}
+  .quote.adb-feature{padding-top:20px}
+  .press-cover-trigger{position:relative;display:block;width:100%;padding:0;border:0;background:none;color:inherit;text-align:left;cursor:zoom-in;overflow:hidden}
+  .press-cover-trigger::after{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 25%,rgba(255,255,255,.58) 46%,transparent 67%);transform:translateX(-120%);opacity:0;transition:transform .9s ease,opacity .35s ease}
+  .press-cover-trigger:hover::after,.press-cover-trigger:focus-visible::after{transform:translateX(120%);opacity:1}
+  .press-cover-trigger:focus-visible{outline:2px solid var(--teal);outline-offset:5px}
+  .press-cover-image{display:block;width:100%;height:230px;object-fit:cover;object-position:center;filter:saturate(.94);box-shadow:0 18px 34px -24px rgba(0,10,20,.7);transition:transform .7s cubic-bezier(.2,.7,.2,1),filter .7s ease}
+  .press-cover-trigger:hover .press-cover-image,.press-cover-trigger:focus-visible .press-cover-image{transform:scale(1.035);filter:saturate(1.08)}
+  .press-cover-caption{display:block;margin-top:12px;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6a7680}
+  .press-instagram-tile{display:flex;min-height:230px;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 30% 20%,#d9edf0 0,#8bbec6 30%,#274d59 72%,#142b35 100%);color:#fff;text-align:center;text-shadow:0 2px 16px rgba(0,0,0,.35)}
+  .press-instagram-tile strong{display:block;font:500 clamp(28px,4vw,42px) var(--serif);letter-spacing:.03em}
+  .press-instagram-tile span{display:block;margin-top:8px;font:10px var(--sans);letter-spacing:.2em;text-transform:uppercase;opacity:.85}
+  .press-instagram-modal-card{width:min(560px,92vw);max-height:92vh;overflow:auto}
+  .press-instagram-modal-card .instagram-media{min-width:0!important;width:100%!important;margin:0!important}
+  .press-instagram-fallback{margin:15px 6px 4px;text-align:center;font:11px var(--sans);letter-spacing:.1em;text-transform:uppercase}
+  .press-instagram-fallback a{color:#4b5a62;text-decoration-color:var(--teal);text-underline-offset:4px}
+  .press-modal[hidden]{display:none}
+  .press-modal{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:22px;background:rgba(5,15,22,.72);backdrop-filter:blur(12px);animation:press-modal-in .35s ease both}
+  .press-modal-card{position:relative;max-width:min(780px,92vw);max-height:92vh;padding:10px;background:rgba(246,243,236,.96);box-shadow:0 30px 90px rgba(0,0,0,.45);animation:press-card-in .45s cubic-bezier(.2,.7,.2,1) both}
+  .press-modal-card img{display:block;max-width:100%;max-height:calc(92vh - 62px);width:auto;height:auto;object-fit:contain}
+  .press-modal-card figcaption{padding:13px 6px 4px;color:#4b5a62;font:11px var(--sans);letter-spacing:.13em;text-transform:uppercase}
+  @keyframes press-modal-in{from{opacity:0}to{opacity:1}}
+  @keyframes press-card-in{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
   #contact form{display:grid;gap:14px;margin-top:32px;text-align:left}
   #contact input,#contact textarea{font-family:var(--sans);font-size:14px;padding:14px 16px;border:1px solid var(--line);
     background:rgba(255,255,255,.8);border-radius:1px;color:var(--ink)}
@@ -347,8 +371,8 @@
     <!-- INTERLUDE -->
     <section class="interlude"><div class="line reveal"><span class="k">Exhibited</span>Shown as a body of work, for the first time.</div></section>
 
-    <!-- EXHIBITIONS — dim gallery + outdoor -->
-    <section id="exhibitions" class="stage dim">
+    <!-- EXHIBITIONS — clean gallery palette + outdoor -->
+    <section id="exhibitions" class="stage light">
       <div class="head reveal"><div class="eyebrow">Exhibitions</div><h2>On View</h2></div>
       <div class="duo reveal" style="margin-bottom:clamp(24px,4vh,44px)">
         <div class="room" style="min-height:460px">
@@ -436,15 +460,38 @@
         <div class="eyebrow">Events &amp; Features</div>
         <h2>In Print &amp; On View</h2>
         <div class="press-row">
-          <div class="quote"><p>Cover artwork for the <em>Asian Development Outlook 2024</em>.</p><div class="src">Asian Development Bank</div></div>
-          <div class="quote"><p>Featured in the Asian Development Bank's LinkedIn newsletter.</p><div class="src">ADB · Feature</div></div>
-          <div class="quote"><p>Featured artist, <em>The Weigh+</em>.</p><div class="src">Jan–March 2024</div></div>
-          <div class="quote"><p>Exhibited at <em>Xavier Artfest 2024</em>.</p><div class="src">Group Exhibition</div></div>
+          <div class="quote adb-feature"><button class="press-cover-trigger press-instagram-trigger" type="button" aria-haspopup="dialog" aria-controls="xavier-modal"><span class="press-instagram-tile"><span><strong>Xavier Artfest</strong><span>2024 · Group exhibition</span></span></span><span class="press-cover-caption">Open Instagram profile</span></button><p>Exhibited at <em>Xavier Artfest 2024</em>.</p><div class="src">Group Exhibition</div></div>
+          <div class="quote"><p><a href="https://www.linkedin.com/pulse/adb-raises-developing-asia-pacifics-economic-growth-vdj5c/" target="_blank" rel="noopener noreferrer">Featured in the Asian Development Bank's LinkedIn newsletter.</a></p><div class="src">ADB · Feature</div></div>
+          <div class="quote adb-feature"><button class="press-cover-trigger press-instagram-trigger" type="button" aria-haspopup="dialog" aria-controls="weigh-modal"><span class="press-instagram-tile"><span><strong>The Weigh+</strong><span>Featured artist</span></span></span><span class="press-cover-caption">Open Instagram feature</span></button><p>Featured artist, <em>The Weigh+</em>.</p><div class="src">Jan–March 2024</div></div>
+          <div class="quote adb-feature"><button class="press-cover-trigger" type="button" aria-haspopup="dialog" aria-controls="adb-cover-modal"><img class="press-cover-image" src="assets/adb-outlook-cover.jpeg" alt="Asian Development Outlook April 2024 featuring Samantha Ty's artwork" /><span class="press-cover-caption">Open cover artwork</span></button><p>Cover artwork for the <em>Asian Development Outlook 2024</em>.</p><div class="src">Asian Development Bank</div></div>
           <div class="quote"><p>"Philippine's Finest" at the House of Representatives.</p><div class="src">Exhibition</div></div>
-          <div class="quote"><p><em>Waves of Being</em> — solo exhibit, Galeria Lienzo.</p><div class="src">Bacolod City · 2025</div></div>
+          <div class="quote"><p><a href="https://charliesartgallery.com/exhibit/waves-of-being-samantha-ty/" target="_blank" rel="noopener noreferrer"><em>Waves of Being</em> — solo exhibit, Charlie's Art Gallery.</a></p><div class="src">Bacolod City · 2025</div></div>
         </div>
       </div>
     </section>
+
+    <div id="adb-cover-modal" class="press-modal" role="dialog" aria-modal="true" aria-labelledby="adb-cover-modal-title" hidden>
+      <figure class="press-modal-card">
+        <img src="assets/adb-outlook-cover.jpeg" alt="Asian Development Outlook April 2024 featuring Samantha Ty's artwork" />
+        <figcaption id="adb-cover-modal-title">Asian Development Outlook · April 2024 · Asian Development Bank</figcaption>
+      </figure>
+    </div>
+
+    <div id="weigh-modal" class="press-modal" role="dialog" aria-modal="true" aria-labelledby="weigh-modal-title" hidden>
+      <figure class="press-modal-card press-instagram-modal-card">
+        <div id="weigh-modal-title" class="eyebrow">Featured artist · The Weigh+</div>
+        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/p/C2UME2Voc8K/" data-instgrm-version="14"></blockquote>
+        <p class="press-instagram-fallback"><a href="https://www.instagram.com/p/C2UME2Voc8K/" target="_blank" rel="noopener noreferrer">Open the feature on Instagram</a></p>
+      </figure>
+    </div>
+
+    <div id="xavier-modal" class="press-modal" role="dialog" aria-modal="true" aria-labelledby="xavier-modal-title" hidden>
+      <figure class="press-modal-card press-instagram-modal-card">
+        <div id="xavier-modal-title" class="eyebrow">Xavier Artfest · 2024</div>
+        <blockquote class="instagram-media" data-instgrm-permalink="https://www.instagram.com/xsartfest/" data-instgrm-version="14"></blockquote>
+        <p class="press-instagram-fallback"><a href="https://www.instagram.com/xsartfest/" target="_blank" rel="noopener noreferrer">Open Xavier Artfest on Instagram</a></p>
+      </figure>
+    </div>
 
     <!-- ABOUT (glass over art) — placed near the end, after Press -->
     <section id="about" class="airsec" style="padding-top:clamp(40px,7vh,90px)">
@@ -630,6 +677,7 @@ document.querySelectorAll('[data-art]').forEach((el,i)=>{
   else{const cv=document.createElement('canvas');cv.width=500;cv.height=640;marble(cv,1000+i*97,p);
     el.style.background=`url(${cv.toDataURL()}) center/cover`;}
 });
+
 </script>
 </body>
 </html>
