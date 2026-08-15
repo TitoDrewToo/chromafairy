@@ -35,18 +35,18 @@ export default function HomeAudio() {
 
     audio.volume = 0.18;
     audio.addEventListener("canplay", signalAudioReady, { once: true });
-    audio.load();
 
     const startAmbient = () => {
-      if (!enabledRef.current) return;
+      if (!enabledRef.current || !audio.paused) return;
       void audio.play().catch(() => {
-        // Autoplay may be blocked until the visitor interacts. Keep the
-        // toggle on and retry from the first interaction below.
+        // Autoplay may be blocked until the visitor interacts. Keep retrying
+        // while the preference remains on instead of consuming one retry.
       });
     };
     const retryAfterInteraction = () => startAmbient();
-    window.addEventListener("pointerdown", retryAfterInteraction, { once: true });
-    window.addEventListener("keydown", retryAfterInteraction, { once: true });
+    audio.addEventListener("canplay", startAmbient);
+    window.addEventListener("pointerdown", retryAfterInteraction);
+    window.addEventListener("keydown", retryAfterInteraction);
     startAmbient();
 
     const onEffect = (event: Event) => {
@@ -67,6 +67,7 @@ export default function HomeAudio() {
       window.removeEventListener("pointerdown", retryAfterInteraction);
       window.removeEventListener("keydown", retryAfterInteraction);
       audio.removeEventListener("canplay", signalAudioReady);
+      audio.removeEventListener("canplay", startAmbient);
       Object.values(effects).forEach((effect) => effect?.pause());
     };
   }, []);
@@ -75,7 +76,7 @@ export default function HomeAudio() {
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (enabled) {
+    if (enabled && !audio.paused) {
       audio.pause();
       enabledRef.current = false;
       setEnabled(false);
@@ -115,7 +116,7 @@ export default function HomeAudio() {
 
   return (
     <>
-      <audio ref={audioRef} loop preload="auto" src={WAVE_TRACKS[waveIndex].src} />
+      <audio data-home-ambient="true" ref={audioRef} loop preload="auto" src={WAVE_TRACKS[waveIndex].src} />
       {Object.entries(EFFECT_TRACKS).map(([name, src]) => (
         <audio
           key={name}

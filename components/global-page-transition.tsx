@@ -52,6 +52,15 @@ export default function GlobalPageTransition({ children }: { children: ReactNode
     };
     const markBackgroundReady = () => { backgroundReady = true; finishWhenReady(); };
     const markAudioReady = () => { audioReady = true; finishWhenReady(); };
+    const readinessProbe = window.setInterval(() => {
+      const audio = document.querySelector<HTMLAudioElement>("audio[data-home-ambient]");
+      const canvas = document.querySelector<HTMLCanvasElement>("#global-background-layer canvas#art");
+      const fallback = document.querySelector<HTMLElement>("#global-background-layer #artFallback");
+      if (audio && audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) audioReady = true;
+      if ((canvas && canvas.style.opacity === "1") || fallback?.style.display === "block") backgroundReady = true;
+      finishWhenReady();
+      if (finished) window.clearInterval(readinessProbe);
+    }, 100);
     const failSafe = window.setTimeout(() => {
       backgroundReady = true;
       audioReady = true;
@@ -61,6 +70,7 @@ export default function GlobalPageTransition({ children }: { children: ReactNode
     window.addEventListener("cf-home-audio-ready", markAudioReady);
     return () => {
       window.clearTimeout(failSafe);
+      window.clearInterval(readinessProbe);
       if (bufferLeaveTimer.current !== null) window.clearTimeout(bufferLeaveTimer.current);
       if (bufferReadyTimer.current !== null) window.clearTimeout(bufferReadyTimer.current);
       window.removeEventListener("cf-home-background-ready", markBackgroundReady);
