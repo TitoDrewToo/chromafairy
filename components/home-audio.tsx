@@ -37,14 +37,24 @@ export default function HomeAudio() {
     audio.addEventListener("canplay", signalAudioReady, { once: true });
 
     const startAmbient = () => {
-      if (!enabledRef.current || !audio.paused) return;
+      if (!enabledRef.current || !audio.paused || audio.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) return;
       void audio.play().catch(() => {
         // Autoplay may be blocked until the visitor interacts. Keep retrying
         // while the preference remains on instead of consuming one retry.
       });
     };
     const retryAfterInteraction = () => startAmbient();
-    audio.addEventListener("canplay", startAmbient);
+    const readinessEvents = ["loadeddata", "canplay", "canplaythrough"] as const;
+    readinessEvents.forEach((eventName) => audio.addEventListener(eventName, startAmbient));
+    let readinessRetries = 0;
+    const readinessTimer = window.setInterval(() => {
+      if (!enabledRef.current || !audio.paused || readinessRetries >= 20) {
+        window.clearInterval(readinessTimer);
+        return;
+      }
+      readinessRetries += 1;
+      startAmbient();
+    }, 250);
     window.addEventListener("pointerdown", retryAfterInteraction);
     window.addEventListener("keydown", retryAfterInteraction);
     startAmbient();
@@ -67,7 +77,8 @@ export default function HomeAudio() {
       window.removeEventListener("pointerdown", retryAfterInteraction);
       window.removeEventListener("keydown", retryAfterInteraction);
       audio.removeEventListener("canplay", signalAudioReady);
-      audio.removeEventListener("canplay", startAmbient);
+      window.clearInterval(readinessTimer);
+      readinessEvents.forEach((eventName) => audio.removeEventListener(eventName, startAmbient));
       Object.values(effects).forEach((effect) => effect?.pause());
     };
   }, []);
