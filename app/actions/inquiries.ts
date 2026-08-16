@@ -70,7 +70,7 @@ export async function submitInquiry(input: InquiryInput): Promise<{ ok: boolean;
   });
   if (error) return { ok: false, error: "We couldn’t send that just now. Please try again." };
 
-  await markInquiryNotified(inquiryId);
+  await notifyInquiry({ inquiryId, type: input.kind, name, email, phone, message, workTitle: workTitleSnapshot });
   return { ok: true };
 }
 
@@ -87,25 +87,66 @@ function allowInquiry(key: string) {
   return true;
 }
 
-async function markInquiryNotified(inquiryId: string) {
-  if (!UUID_PATTERN.test(inquiryId)) return;
+type InquiryNotification = {
+  inquiryId: string;
+  type: "piece" | "commission";
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  workTitle: string | null;
+};
 
-  const admin = createAdminClient();
-  if (!admin) {
-    console.warn("[inquiry-notification-stub] Admin client unavailable; email provider TODO.");
-    return;
+async function notifyInquiry(details: InquiryNotification) {
+  if (!UUID_PATTERN.test(details.inquiryId)) return;
+
+  // Send the studio notification email via Resend. Best-effort: a failed email
+  // must never break the already-saved inquiry.
+  let sent = false;
+  try {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.warn("[inquiry-notification] RESEND_API_KEY not set; skipping email.");
+    } else {
+      const to = process.env.INQUIRY_NOTIFY_TO || "hello@chromafairy.com";
+      const from = process.env.INQUIRY_NOTIFY_FROM || "Chroma Fairy <hello@chromafairy.com>";
+      const body = [
+        `New ${details.type} inquiry`,
+        "",
+        `Name:  ${details.name}`,
+        `Email: ${details.email}`,
+        details.phone ? `Phone: ${details.phone}` : null,
+        details.workTitle ? `Work:  ${details.workTitle}` : null,
+        "",
+        details.message ? `Message:\n${details.message}` : "(no message)",
+      ].filter((line): line is string => line !== null).join("\n");
+
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from,
+          to,
+          reply_to: details.email,
+          subject: `New ${details.type} inquiry from ${details.name}`,
+          text: body,
+        }),
+      });
+      if (response.ok) sent = true;
+      else console.error("[inquiry-notification] Resend send failed:", response.status, await response.text().catch(() => ""));
+    }
+  } catch (err) {
+    console.error("[inquiry-notification] Email error:", err instanceof Error ? err.message : err);
   }
 
+  // Record that we notified, only when the email actually went out.
+  if (!sent) return;
+  const admin = createAdminClient();
+  if (!admin) return;
   const { error } = await admin
     .from("inquiries")
     .update({ notified_at: new Date().toISOString() })
-    .eq("id", inquiryId)
+    .eq("id", details.inquiryId)
     .is("notified_at", null);
-
-  if (error) {
-    console.error("[inquiry-notification-stub] Could not mark inquiry notified:", error.message);
-    return;
-  }
-
-  console.info("[inquiry-notification-stub] Inquiry recorded; email provider TODO.", { inquiryId });
+  if (error) console.error("[inquiry-notification] Could not mark inquiry notified:", error.message);
 }
