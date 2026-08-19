@@ -194,17 +194,17 @@
 .shop-status-filter.active,
 .shop-status-filter.active:hover,
 .shop-status-filter.active:focus-visible {
-  border-color: var(--shop-ink);
-  background-color: var(--shop-ink) !important;
+  border-color: var(--shop-gold);
+  background-color: var(--shop-gold) !important;
   background-image: none !important;
-  color: #fff;
+  color: var(--shop-ink);
 }
 
 .shop-status-filter.active .shop-filter-label {
   background-image: none;
   background-size: var(--chroma-size);
   background-position: 0% 50%;
-  color: #fff;
+  color: var(--shop-ink);
   animation: none;
 }
 
