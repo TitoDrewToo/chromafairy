@@ -12,8 +12,9 @@ const statuses: InquiryStatus[] = ["new", "replied", "closed"];
 function gmailComposeUrl(inquiry: AdminInquiry) {
   const subject = inquiry.work ? `Re: ${inquiry.work.title} — Chroma Fairy` : "Re: your Chroma Fairy inquiry";
   const firstName = (inquiry.name ?? "").trim().split(/\s+/)[0] || "there";
-  const about = inquiry.work ? `“${inquiry.work.title}”` : "your commission";
-  const body = `Hi ${firstName},\n\nThank you so much for reaching out about ${about} — I'd love to help.\n\n`;
+  const body = inquiry.work
+    ? `Hi ${firstName},\n\nThank you so much for reaching out about “${inquiry.work.title}” — it means a lot that it caught your eye. I'd love to share more about the piece — its size, story, and price — and help however suits you best, whether that's seeing it in person or arranging delivery.\n\nIs there anything in particular you'd like to know?\n\nWarmly,`
+    : `Hi ${firstName},\n\nThank you so much for reaching out about a commission — I'd be delighted to create something just for you. To picture the right piece, it helps to know a few things: the space it's for, the colors and mood you're drawn to, a rough size, and any timeline or budget in mind.\n\nShare whatever comes to mind and we'll shape it together from there.\n\nWarmly,`;
   return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(inquiry.email)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
