@@ -4,7 +4,7 @@ import { createAdminClient } from "../../lib/supabase/admin";
 import { createClient } from "../../lib/supabase/server";
 import type { UserRole } from "../../lib/supabase/types";
 
-const roles: UserRole[] = ["owner", "admin", "developer"];
+const roles: UserRole[] = ["owner", "admin", "developer", "staff"];
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export async function inviteAdminUser(emailInput: string, role: UserRole) {

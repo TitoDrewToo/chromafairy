@@ -6,7 +6,7 @@ import { inviteAdminUser, removeAdminUser, updateAdminUserRole } from "../app/ac
 import type { Profile, UserRole } from "../lib/supabase/types";
 import { Hint } from "./studio-hint";
 
-const roles: UserRole[] = ["owner", "admin", "developer"];
+const roles: UserRole[] = ["owner", "admin", "developer", "staff"];
 export default function UsersAdmin({ initialUsers }: { initialUsers: Array<Pick<Profile, "id" | "email" | "full_name" | "role" | "created_at">> }) {
   const router = useRouter();
   const [users, setUsers] = useState(initialUsers); const [email, setEmail] = useState(""); const [role, setRole] = useState<UserRole>("admin"); const [message, setMessage] = useState(""); const [error, setError] = useState(""); const [busy, setBusy] = useState(false);
