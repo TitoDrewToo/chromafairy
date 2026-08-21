@@ -72,7 +72,7 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
     const additions = Array.from(files).flatMap((file, index) => {
       const extension = file.name.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] ?? "";
       const expectedType = imageTypes.get(extension);
-      const typeMatches = isCompatibleImageType(file.type, expectedType);
+      const typeMatches = isCompatibleImageType(file.type, expectedType, extension);
       if (!expectedType || !typeMatches || file.size <= 0 || file.size > MAX_IMAGE_BYTES) {
         rejected.push(file.name);
         return [];
@@ -152,7 +152,7 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
     for (const image of savedImages) {
       if (image.file) {
         const upload = await uploadArtworkImage({ workId, file: image.file, alt: image.alt || title, displayOrder: image.display_order, isPrimary: Boolean(image.is_primary) });
-        if (!upload.ok) imageErrors.push(image.file.name);
+        if (!upload.ok) imageErrors.push(upload.error ? `${image.file.name}: ${upload.error}` : image.file.name);
       } else {
         const row = await supabase.from("work_images").update({ display_order: image.display_order, is_primary: image.is_primary, alt: image.alt }).eq("id", image.id);
         if (row.error) imageErrors.push(image.id);
@@ -214,10 +214,14 @@ function slugify(value: string) {
     .replace(/^-|-$/g, "");
 }
 function titleCase(value: string) { return value.charAt(0).toUpperCase() + value.slice(1); }
-function isCompatibleImageType(declaredType: string, expectedType: string | undefined) {
+function isCompatibleImageType(declaredType: string, expectedType: string | undefined, extension?: string) {
   if (!expectedType) return false;
   const normalizedType = declaredType.trim().toLowerCase();
-  return !normalizedType || normalizedType === expectedType || (expectedType === "image/jpeg" && normalizedType === "image/jpg");
+  const isHeic = extension === "heic" || extension === "heif";
+  return !normalizedType
+    || normalizedType === expectedType
+    || (expectedType === "image/jpeg" && normalizedType === "image/jpg")
+    || (isHeic && (normalizedType === "application/octet-stream" || normalizedType.startsWith("image/heic") || normalizedType.startsWith("image/heif") || normalizedType === "image/x-heic" || normalizedType === "image/x-heif"));
 }
 
 function DraftImagePreview({ alt, src, fileName }: { alt: string; src: string; fileName?: string }) {

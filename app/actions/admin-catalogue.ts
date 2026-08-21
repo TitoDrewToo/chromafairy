@@ -15,7 +15,7 @@ export async function uploadArtworkImage(input: { workId: string; file: File; al
   const storageExtension = isHeic || filenameExtension === "jpeg" ? "jpg" : filenameExtension;
   const hasFileData = Boolean(file && typeof file.size === "number" && typeof file.arrayBuffer === "function");
   if (!UUID_PATTERN.test(input.workId) || !hasFileData || file.size <= 0 || file.size > MAX_IMAGE_BYTES) return { ok: false, error: "Images must be smaller than 10 MB." };
-  if (!isCompatibleImageType(file.type, contentType)) return { ok: false, error: "Use a JPG, PNG, WebP, GIF, HEIC, or HEIF image." };
+  if (!isCompatibleImageType(file.type, contentType, filenameExtension)) return { ok: false, error: "Use a JPG, PNG, WebP, GIF, HEIC, or HEIF image." };
   const supabase = await createClient();
   if (!supabase) return { ok: false, error: "Supabase is not configured." };
   const { data: isAdmin } = await supabase.rpc("is_admin");
@@ -27,7 +27,12 @@ export async function uploadArtworkImage(input: { workId: string; file: File; al
       const sharp = (await import("sharp")).default;
       uploadBody = await sharp(Buffer.from(await file.arrayBuffer())).jpeg({ quality: 92 }).toBuffer();
       uploadContentType = "image/jpeg";
-    } catch {
+    } catch (error) {
+      console.error("[catalogue-upload] HEIC conversion failed", {
+        filenameExtension,
+        bytes: file.size,
+        error: error instanceof Error ? error.message : String(error),
+      });
       return { ok: false, error: "HEIC could not be converted. Please try a JPG or PNG copy of the image." };
     }
   }
@@ -76,12 +81,12 @@ export async function deleteCatalogueWork(workId: string) {
   return { ok: true };
 }
 
-function isCompatibleImageType(declaredType: string, expectedType: string | undefined) {
+function isCompatibleImageType(declaredType: string, expectedType: string | undefined, extension?: string) {
   if (!expectedType) return false;
   const normalizedType = declaredType.trim().toLowerCase();
   return !normalizedType
     || normalizedType === expectedType
     || normalizedType === "application/octet-stream"
     || (expectedType === "image/jpeg" && normalizedType === "image/jpg")
-    || ((expectedType === "image/heic" || expectedType === "image/heif") && (normalizedType === "image/heic" || normalizedType === "image/heif" || normalizedType === "image/x-heic" || normalizedType === "image/x-heif"));
+    || ((extension === "heic" || extension === "heif") && (normalizedType.startsWith("image/heic") || normalizedType.startsWith("image/heif") || normalizedType === "image/x-heic" || normalizedType === "image/x-heif"));
 }
