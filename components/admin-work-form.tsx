@@ -21,7 +21,7 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
   const router = useRouter();
   const [title, setTitle] = useState(work?.title ?? "");
   const [slug, setSlug] = useState(work?.slug ?? "");
-  const [slugTouched, setSlugTouched] = useState(mode === "edit");
+  const [slugTouched, setSlugTouched] = useState(Boolean(work?.slug && work.slug !== slugify(work.title)));
   const [year, setYear] = useState(String(work?.year ?? new Date().getFullYear()));
   const [seriesId, setSeriesId] = useState(work?.series_id ?? "");
   const [newSeriesName, setNewSeriesName] = useState("");
@@ -119,7 +119,6 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!title.trim() || !year || !Number(year)) return setError("Title and year are required.");
-    if (!slug.trim()) return setError("Please add a slug.");
     const supabase = createClient();
     if (!supabase) return setError("Supabase is not configured.");
     setBusy(true); setError("");
@@ -134,9 +133,10 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
     }
 
     const workId = work?.id ?? crypto.randomUUID();
+    const finalSlug = slug.trim() || slugify(title) || `work-${workId.slice(0, 8)}`;
     const payload = {
       id: workId,
-      title: title.trim(), slug: slug.trim(), year: Number(year), series_id: selectedSeriesId,
+      title: title.trim(), slug: finalSlug, year: Number(year), series_id: selectedSeriesId,
       month: numberOrNull(month), medium: medium.trim() || null, width: numberOrNull(width), height: numberOrNull(height), depth: numberOrNull(depth), dimension_unit: unit,
       description: description.trim() || null, price_php: numberOrNull(pricePhp), price_usd: numberOrNull(priceUsd), price_on_request: priceOnRequest,
       status: "draft" as WorkStatus, is_new: isNew, is_featured: isFeatured,
@@ -173,7 +173,7 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
     <form className="admin-work-form" onSubmit={submit}>
       <section className="admin-form-section"><h2>Identity</h2><div className="admin-form-grid">
         <Hint id="title"><label className="field-wide">Title *<input required value={title} onChange={(event) => updateTitle(event.target.value)} /></label></Hint>
-        <Hint id="slug"><label>Slug *<input required value={slug} onChange={(event) => { setSlugTouched(true); setSlug(slugify(event.target.value)); }} /></label></Hint>
+        <Hint id="slug"><label>Slug (auto-generated)<input placeholder="Generated from title" value={slug} onChange={(event) => { setSlugTouched(true); setSlug(slugify(event.target.value)); }} /></label></Hint>
         <Hint id="year"><label>Year *<input required min="1900" type="number" value={year} onChange={(event) => setYear(event.target.value)} /></label></Hint>
         <Hint id="month"><label>Month<select value={month} onChange={(event) => setMonth(event.target.value)}><option value="">Not set</option>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{new Date(2020, index, 1).toLocaleString("en", { month: "long" })}</option>)}</select></label></Hint>
         <Hint id="series"><label>Series<select value={seriesId} onChange={(event) => { setSeriesId(event.target.value); setNewSeriesName(""); }}><option value="">Unassigned</option>{series.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label></Hint>
@@ -204,7 +204,15 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
 
 function numberValue(value: number | null | undefined) { return value === null || value === undefined ? "" : String(value); }
 function numberOrNull(value: string) { return value.trim() ? Number(value) : null; }
-function slugify(value: string) { return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+function slugify(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
 function titleCase(value: string) { return value.charAt(0).toUpperCase() + value.slice(1); }
 function isCompatibleImageType(declaredType: string, expectedType: string | undefined) {
   if (!expectedType) return false;
