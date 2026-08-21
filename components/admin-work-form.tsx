@@ -72,7 +72,7 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
     const additions = Array.from(files).flatMap((file, index) => {
       const extension = file.name.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] ?? "";
       const expectedType = imageTypes.get(extension);
-      const typeMatches = !file.type || file.type === expectedType;
+      const typeMatches = isCompatibleImageType(file.type, expectedType);
       if (!expectedType || !typeMatches || file.size <= 0 || file.size > MAX_IMAGE_BYTES) {
         rejected.push(file.name);
         return [];
@@ -206,6 +206,11 @@ function numberValue(value: number | null | undefined) { return value === null |
 function numberOrNull(value: string) { return value.trim() ? Number(value) : null; }
 function slugify(value: string) { return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
 function titleCase(value: string) { return value.charAt(0).toUpperCase() + value.slice(1); }
+function isCompatibleImageType(declaredType: string, expectedType: string | undefined) {
+  if (!expectedType) return false;
+  const normalizedType = declaredType.trim().toLowerCase();
+  return !normalizedType || normalizedType === expectedType || (expectedType === "image/jpeg" && normalizedType === "image/jpg");
+}
 
 function DraftImagePreview({ alt, src, fileName }: { alt: string; src: string; fileName?: string }) {
   const [failed, setFailed] = useState(false);

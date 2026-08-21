@@ -1,5 +1,6 @@
 "use server";
 
+import { createAdminClient } from "../../lib/supabase/admin";
 import { createClient } from "../../lib/supabase/server";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -13,7 +14,7 @@ export async function uploadArtworkImage(input: { workId: string; file: File; al
   const storageExtension = filenameExtension === "jpeg" ? "jpg" : filenameExtension;
   const hasFileData = Boolean(file && typeof file.size === "number" && typeof file.arrayBuffer === "function");
   if (!UUID_PATTERN.test(input.workId) || !hasFileData || file.size <= 0 || file.size > MAX_IMAGE_BYTES) return { ok: false, error: "Images must be smaller than 10 MB." };
-  if (!contentType || (file.type && file.type !== contentType)) return { ok: false, error: "Use a JPG, PNG, WebP, GIF, HEIC, or HEIF image." };
+  if (!isCompatibleImageType(file.type, contentType)) return { ok: false, error: "Use a JPG, PNG, WebP, GIF, HEIC, or HEIF image." };
   const supabase = await createClient();
   if (!supabase) return { ok: false, error: "Supabase is not configured." };
   const { data: isAdmin } = await supabase.rpc("is_admin");
@@ -27,4 +28,44 @@ export async function uploadArtworkImage(input: { workId: string; file: File; al
     return { ok: false, error: "The image uploaded but could not be recorded." };
   }
   return { ok: true, id: data.id };
+}
+
+export async function deleteCatalogueWork(workId: string) {
+  if (!UUID_PATTERN.test(workId)) return { ok: false, error: "Invalid work." };
+  const caller = await createClient();
+  if (!caller) return { ok: false, error: "Supabase is not configured." };
+  const { data: isAdmin } = await caller.rpc("is_admin");
+  if (!isAdmin) return { ok: false, error: "Not authorized." };
+  const admin = createAdminClient();
+  if (!admin) return { ok: false, error: "The server catalogue service is not configured." };
+
+  const { count: orderCount, error: orderError } = await admin
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("work_id", workId);
+  if (orderError) return { ok: false, error: "Could not verify the work’s sales history." };
+  if ((orderCount ?? 0) > 0) return { ok: false, error: "Works with sales history cannot be deleted. Mark them sold instead." };
+
+  const { data: images, error: imageError } = await admin
+    .from("work_images")
+    .select("storage_path")
+    .eq("work_id", workId);
+  if (imageError) return { ok: false, error: "Could not prepare the work for deletion." };
+
+  const { error: workError } = await admin.from("works").delete().eq("id", workId);
+  if (workError) return { ok: false, error: "Could not delete that work." };
+
+  const paths = (images ?? []).map((image) => image.storage_path);
+  if (paths.length) {
+    const { error: storageError } = await admin.storage.from("artwork").remove(paths);
+    if (storageError) return { ok: true, warning: "The work was deleted, but some image files need storage cleanup." };
+  }
+
+  return { ok: true };
+}
+
+function isCompatibleImageType(declaredType: string, expectedType: string | undefined) {
+  if (!expectedType) return false;
+  const normalizedType = declaredType.trim().toLowerCase();
+  return !normalizedType || normalizedType === expectedType || (expectedType === "image/jpeg" && normalizedType === "image/jpg");
 }

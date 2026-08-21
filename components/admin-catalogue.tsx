@@ -7,6 +7,7 @@ import { formatPrice, getArtworkUrl } from "../lib/catalogue";
 import { createClient } from "../lib/supabase/client";
 import type { Series, Work, WorkImage, WorkStatus } from "../lib/supabase/types";
 import { Hint } from "./studio-hint";
+import { deleteCatalogueWork } from "../app/actions/admin-catalogue";
 
 export type AdminCatalogueImage = Pick<WorkImage, "id" | "work_id" | "storage_path" | "alt" | "display_order" | "is_primary"> & { url: string };
 export type AdminCatalogueSeries = Pick<Series, "id" | "name" | "slug" | "year">;
@@ -152,7 +153,7 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
       const { error: workError } = await supabase.from("works").insert({ id, title, slug, year: new Date().getFullYear(), status: "draft", is_new: false, is_featured: false });
       if (workError) { failedFiles.push(file.name); continue; }
       const path = `works/${id}/${id}-${safeExtension(file.name)}`;
-      const { error: uploadError } = await supabase.storage.from("artwork").upload(path, file, { contentType: file.type || contentTypeFor(file.name), upsert: false });
+      const { error: uploadError } = await supabase.storage.from("artwork").upload(path, file, { contentType: contentTypeFor(file.name), upsert: false });
       if (uploadError) {
         await supabase.from("works").delete().eq("id", id);
         failedFiles.push(file.name);
@@ -182,6 +183,20 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
       router.refresh();
     }
     if (quickAddRef.current) quickAddRef.current.value = "";
+  }
+
+  async function deleteWork(work: AdminCatalogueWork) {
+    if (!window.confirm(`Delete “${work.title}” and its images? This cannot be undone.`)) return;
+    setBusy(true); setError(""); setMessage("");
+    const result = await deleteCatalogueWork(work.id);
+    if (!result.ok) {
+      setError(result.error ?? "Could not delete that work.");
+    } else {
+      setWorks((current) => current.filter((item) => item.id !== work.id));
+      setSelected((current) => { const next = new Set(current); next.delete(work.id); return next; });
+      setMessage(result.warning ?? `${work.title} deleted.`);
+    }
+    setBusy(false);
   }
 
   return (
@@ -236,13 +251,13 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
 
       <div className="admin-work-list">
         <div className="admin-list-header"><Hint id="selectAll"><label><input checked={filteredWorks.length > 0 && filteredWorks.every((work) => selected.has(work.id))} onChange={toggleAll} type="checkbox" /> Select all</label></Hint><span>{filteredWorks.length} shown · {works.length} total · newest first</span></div>
-        {filteredWorks.length ? filteredWorks.map((work) => <WorkRow key={work.id} work={work} selected={selected.has(work.id)} onSelect={() => toggleSelected(work.id)} onStatus={(status) => void setStatus(work.id, status)} />) : <div className="admin-empty-state">No works match these filters.</div>}
+        {filteredWorks.length ? filteredWorks.map((work) => <WorkRow key={work.id} work={work} selected={selected.has(work.id)} onSelect={() => toggleSelected(work.id)} onStatus={(status) => void setStatus(work.id, status)} onDelete={() => void deleteWork(work)} disabled={busy} />) : <div className="admin-empty-state">No works match these filters.</div>}
       </div>
     </section>
   );
 }
 
-function WorkRow({ work, selected, onSelect, onStatus }: { work: AdminCatalogueWork; selected: boolean; onSelect: () => void; onStatus: (status: WorkStatus) => void }) {
+function WorkRow({ work, selected, onSelect, onStatus, onDelete, disabled }: { work: AdminCatalogueWork; selected: boolean; onSelect: () => void; onStatus: (status: WorkStatus) => void; onDelete: () => void; disabled: boolean }) {
   const image = work.images.find((item) => item.is_primary) ?? work.images[0];
   return (
     <article className="admin-work-row">
@@ -251,7 +266,8 @@ function WorkRow({ work, selected, onSelect, onStatus }: { work: AdminCatalogueW
       <div className="admin-work-summary"><Hint id="viewWork"><Link href={`/studio/catalogue/${work.id}`}>{work.title}</Link></Hint><span>{work.year}{work.month ? ` · ${monthName(work.month)}` : ""} · {work.series_name ?? "Unassigned"}</span></div>
       <span className={`admin-status-badge status-${work.status}`}>{titleCase(work.status)}{work.is_new ? " · New" : ""}</span>
       <span className="admin-work-price">{formatPrice(work)}</span>
-      <Hint id="rowStatus"><select aria-label={`Set status for ${work.title}`} className="admin-row-status" value={work.status} onChange={(event) => onStatus(event.target.value as WorkStatus)}>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select></Hint>
+      <Hint id="rowStatus"><select aria-label={`Set status for ${work.title}`} className="admin-row-status" disabled={disabled} value={work.status} onChange={(event) => onStatus(event.target.value as WorkStatus)}>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select></Hint>
+      <button className="admin-small-button admin-danger-button" disabled={disabled} onClick={onDelete} type="button">Delete</button>
     </article>
   );
 }
