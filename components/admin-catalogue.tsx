@@ -7,7 +7,7 @@ import { formatPrice, getArtworkUrl } from "../lib/catalogue";
 import { createClient } from "../lib/supabase/client";
 import type { Series, Work, WorkImage, WorkStatus } from "../lib/supabase/types";
 import { Hint } from "./studio-hint";
-import { deleteCatalogueWork } from "../app/actions/admin-catalogue";
+import { deleteCatalogueWork, uploadArtworkImage } from "../app/actions/admin-catalogue";
 
 export type AdminCatalogueImage = Pick<WorkImage, "id" | "work_id" | "storage_path" | "alt" | "display_order" | "is_primary"> & { url: string };
 export type AdminCatalogueSeries = Pick<Series, "id" | "name" | "slug" | "year">;
@@ -152,16 +152,8 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
       const slug = `${slugify(title) || "untitled-work"}-${id.slice(0, 8)}`;
       const { error: workError } = await supabase.from("works").insert({ id, title, slug, year: new Date().getFullYear(), status: "draft", is_new: false, is_featured: false });
       if (workError) { failedFiles.push(file.name); continue; }
-      const path = `works/${id}/${id}-${safeExtension(file.name)}`;
-      const { error: uploadError } = await supabase.storage.from("artwork").upload(path, file, { contentType: contentTypeFor(file.name), upsert: false });
-      if (uploadError) {
-        await supabase.from("works").delete().eq("id", id);
-        failedFiles.push(file.name);
-        continue;
-      }
-      const { error: imageError } = await supabase.from("work_images").insert({ work_id: id, storage_path: path, alt: title, display_order: 0, is_primary: true });
-      if (imageError) {
-        await supabase.storage.from("artwork").remove([path]);
+      const upload = await uploadArtworkImage({ workId: id, file, alt: title, displayOrder: 0, isPrimary: true });
+      if (!upload.ok) {
         await supabase.from("works").delete().eq("id", id);
         failedFiles.push(file.name);
         continue;
@@ -199,6 +191,23 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
     setBusy(false);
   }
 
+  async function deleteSelectedWorks() {
+    const selectedWorks = works.filter((work) => selected.has(work.id));
+    if (!selectedWorks.length || !window.confirm(`Delete ${selectedWorks.length} selected work${selectedWorks.length === 1 ? "" : "s"} and their images? This cannot be undone.`)) return;
+    setBusy(true); setError(""); setMessage("");
+    const results = await Promise.all(selectedWorks.map(async (work) => ({ work, result: await deleteCatalogueWork(work.id) })));
+    const deletedIds = results.filter(({ result }) => result.ok).map(({ work }) => work.id);
+    const failed = results.filter(({ result }) => !result.ok);
+    setWorks((current) => current.filter((work) => !deletedIds.includes(work.id)));
+    setSelected(new Set(failed.map(({ work }) => work.id)));
+    if (failed.length) {
+      setError(`Could not delete ${failed.map(({ work }) => work.title).join(", ")}. Works with sales history must be marked sold instead.`);
+    } else {
+      setMessage(`${deletedIds.length} work${deletedIds.length === 1 ? "" : "s"} deleted.`);
+    }
+    setBusy(false);
+  }
+
   return (
     <section className="admin-catalogue-tools">
       <div className="admin-catalogue-toolbar">
@@ -214,6 +223,7 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
         <Hint id="bulkSeries"><select aria-label="Bulk series" value={batchSeries} onChange={(event) => setBatchSeries(event.target.value)}><option value="">Assign series…</option><option value="__none__">No series</option>{initialSeries.map((series) => <option key={series.id} value={series.id}>{series.name}</option>)}</select></Hint>
         <Hint id="createSeries"><input aria-label="Create new series" placeholder="Or create new series…" value={batchNewSeriesName} onChange={(event) => { setBatchNewSeriesName(event.target.value); setBatchSeries(""); }} /></Hint>
         <Hint id="applyBulk"><button className="admin-action-button" disabled={busy || (!batchStatus && !batchSeries && !batchNewSeriesName.trim())} onClick={() => void applyBatch()} type="button"><span className="admin-action-label">Apply status / series</span></button></Hint>
+        <button className="admin-small-button admin-danger-button" disabled={busy} onClick={() => void deleteSelectedWorks()} type="button">Delete selected</button>
       </div>}
       {selected.size > 0 && <section className="admin-batch-details">
         <div><h2>Batch edit details</h2><p>Only filled fields change. Leave fields blank to keep each work’s current value.</p></div>
@@ -273,8 +283,6 @@ function WorkRow({ work, selected, onSelect, onStatus, onDelete, disabled }: { w
 }
 
 function slugify(value: string) { return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
-function safeExtension(value: string) { const extension = value.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif|heic|heif)$/)?.[1] ?? "jpg"; return `${crypto.randomUUID()}.${extension}`; }
-function contentTypeFor(value: string) { const extension = value.toLowerCase().match(/\.(jpg|jpeg|png|webp|gif|heic|heif)$/)?.[1]; return extension === "heic" ? "image/heic" : extension === "heif" ? "image/heif" : extension === "png" ? "image/png" : extension === "webp" ? "image/webp" : extension === "gif" ? "image/gif" : "image/jpeg"; }
 function isSupportedArtworkFile(file: File) { return /\.(jpg|jpeg|png|webp|gif|heic|heif)$/i.test(file.name) && file.size > 0 && file.size <= 10 * 1024 * 1024; }
 function titleCase(value: string) { return value.charAt(0).toUpperCase() + value.slice(1); }
 function monthName(value: number) { return new Date(2020, value - 1, 1).toLocaleString("en", { month: "short" }); }
