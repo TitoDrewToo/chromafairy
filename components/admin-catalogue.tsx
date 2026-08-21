@@ -274,10 +274,12 @@ function WorkRow({ work, selected, onSelect, onStatus, onDelete, disabled }: { w
       <input aria-label={`Select ${work.title}`} checked={selected} onChange={onSelect} type="checkbox" />
       <div className="admin-work-thumb">{image ? <img alt={image.alt ?? work.title} src={image.url} /> : <span>No image</span>}</div>
       <div className="admin-work-summary"><Hint id="viewWork"><Link href={`/studio/catalogue/${work.id}`}>{work.title}</Link></Hint><span>{work.year}{work.month ? ` · ${monthName(work.month)}` : ""} · {work.series_name ?? "Unassigned"}</span></div>
-      <span className={`admin-status-badge status-${work.status}`}>{titleCase(work.status)}{work.is_new ? " · New" : ""}</span>
-      <span className="admin-work-price">{formatPrice(work)}</span>
-      <Hint id="rowStatus"><select aria-label={`Set status for ${work.title}`} className="admin-row-status" disabled={disabled} value={work.status} onChange={(event) => onStatus(event.target.value as WorkStatus)}>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select></Hint>
-      <button className="admin-small-button admin-danger-button" disabled={disabled} onClick={onDelete} type="button">Delete</button>
+      <div className="admin-work-actions">
+        <span className={`admin-status-badge status-${work.status}`}>{titleCase(work.status)}{work.is_new ? " · New" : ""}</span>
+        <span className="admin-work-price">{formatPrice(work)}</span>
+        <Hint id="rowStatus"><select aria-label={`Set status for ${work.title}`} className="admin-row-status" disabled={disabled} value={work.status} onChange={(event) => onStatus(event.target.value as WorkStatus)}>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select></Hint>
+        <button className="admin-small-button admin-danger-button" disabled={disabled} onClick={onDelete} type="button">Delete</button>
+      </div>
     </article>
   );
 }
