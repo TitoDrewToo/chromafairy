@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "../../lib/supabase/server";
-import { convertHeicToJpeg } from "../../lib/server-image-conversion";
+import { convertHeicToJpeg, isHeicFile } from "../../lib/server-image-conversion";
 import type { LandingItemType, LandingMedia, LandingSectionKey } from "../../lib/supabase/types";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -68,7 +68,7 @@ export async function uploadLandingImage(input: { sectionKey: LandingSectionKey;
   const auth = await authorize();
   if (!auth.ok) return auth;
   const extension = input.file?.name?.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] ?? "";
-  const isHeic = extension === "heic" || extension === "heif";
+  const isHeic = isHeicFile(input.file);
   const declaredType = input.file?.type?.toLowerCase() ?? "";
   const typeMatches = !declaredType || IMAGE_TYPES.has(declaredType) || (isHeic && (declaredType.startsWith("image/heic") || declaredType.startsWith("image/heif")));
   if (!isSectionKey(input.sectionKey) || !input.file || input.file.size <= 0 || input.file.size > MAX_IMAGE_BYTES || !typeMatches || !["jpg", "jpeg", "png", "webp", "gif", "heic", "heif"].includes(extension)) return { ok: false, error: "Use a JPG, PNG, WebP, GIF, HEIC, or HEIF image up to 10 MB." };

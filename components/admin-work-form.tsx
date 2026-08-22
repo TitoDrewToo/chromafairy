@@ -246,6 +246,6 @@ function isCompatibleImageType(declaredType: string, expectedType: string | unde
 
 function DraftImagePreview({ alt, src, fileName }: { alt: string; src: string; fileName?: string }) {
   const [failed, setFailed] = useState(false);
-  if (failed || /\.(heic|heif)$/i.test(fileName ?? "")) return <div className="admin-image-preview-fallback"><strong>HEIC</strong><span>{fileName ? "Preview appears after save" : "Preview unavailable"}</span></div>;
+  if (failed) return <div className="admin-image-preview-fallback"><strong>{/\.(heic|heif)$/i.test(fileName ?? "") ? "HEIC" : "IMAGE"}</strong><span>{fileName ? "Preview unavailable in this browser" : "Preview unavailable"}</span></div>;
   return <img alt={alt} onError={() => setFailed(true)} src={src} />;
 }
