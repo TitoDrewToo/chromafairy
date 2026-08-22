@@ -55,7 +55,7 @@ export default function ShopCatalogue({ works }: { works: CatalogueWork[] }) {
   const years = useMemo(() => Array.from(new Set(works.map((work) => work.year))).sort((a, b) => b - a), [works]);
   const [showAvailable, setShowAvailable] = useState(true);
   const [showArchive, setShowArchive] = useState(true);
-  const [expandedYears, setExpandedYears] = useState<Set<number>>(() => new Set());
+  const [expandedYears, setExpandedYears] = useState<Set<number> | null>(null);
 
   const filteredWorks = useMemo(() => works.filter((work) => {
     const isAvailable = work.status === "available";
@@ -81,16 +81,16 @@ export default function ShopCatalogue({ works }: { works: CatalogueWork[] }) {
       })
       .filter((group) => group.monthGroups.some((monthGroup) => monthGroup.works.length));
     return { year, seriesGroups };
-  }), [filteredWorks, years]);
-  const firstVisibleYear = yearGroups.find((group) => group.seriesGroups.length)?.year;
+  }), [filteredWorks, years]).filter((group) => group.seriesGroups.length > 0);
+  const firstVisibleYear = yearGroups[0]?.year;
 
-  const allExpanded = years.length > 0 && years.every((year) => expandedYears.has(year));
+  const allExpanded = yearGroups.length > 0 && yearGroups.every((group) => expandedYears ? expandedYears.has(group.year) : group.year === firstVisibleYear);
   const toggleYear = (year: number) => setExpandedYears((current) => {
-    const next = new Set(current);
+    const next = new Set(current ?? (firstVisibleYear === undefined ? [] : [firstVisibleYear]));
     if (next.has(year)) next.delete(year); else next.add(year);
     return next;
   });
-  const expandAll = () => setExpandedYears(allExpanded ? new Set() : new Set(years));
+  const expandAll = () => setExpandedYears(allExpanded ? new Set() : new Set(yearGroups.map((group) => group.year)));
 
   return (
     <>
@@ -107,8 +107,8 @@ export default function ShopCatalogue({ works }: { works: CatalogueWork[] }) {
         <span className="shop-result-count">{filteredWorks.length} works</span>
       </div>
 
-      {yearGroups.some((group) => group.seriesGroups.length) ? yearGroups.map((yearGroup) => {
-        const expanded = expandedYears.has(yearGroup.year) || (expandedYears.size === 0 && yearGroup.year === firstVisibleYear);
+      {yearGroups.length ? yearGroups.map((yearGroup) => {
+        const expanded = expandedYears ? expandedYears.has(yearGroup.year) : yearGroup.year === firstVisibleYear;
         return (
           <section className="shop-group" key={yearGroup.year}>
             <button aria-expanded={expanded} className="shop-year-toggle chroma-text" onClick={() => toggleYear(yearGroup.year)} type="button">

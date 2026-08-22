@@ -11,16 +11,19 @@ export function injectLandingMarkup(markup: string, content: LandingPageContent)
 }
 
 function renderCollections(section?: LandingPageContent["sections"][number]) {
+  if (!section) return "";
   const items = (section?.items ?? []).filter((item) => item.item_type === "collection").slice(0, 3);
   return `<section id="collections" class="stage light"><div class="head reveal"><div class="script">${text(section?.title || "Eternal Flow")}</div><div class="eyebrow">${text(section?.eyebrow || "Portfolio · Works")}</div>${paragraph(section?.body)}</div>${items.map((entry) => `<div class="wallrow reveal">${entry.media.slice(0, 3).map((image) => collectionPiece(image)).join("")}</div>`).join("")}</section>`;
 }
 
 function renderExhibitions(section?: LandingPageContent["sections"][number]) {
+  if (!section) return "";
   const items = (section?.items ?? []).filter((item) => item.item_type === "exhibition").slice(0, 3);
   return `<section id="exhibitions" class="stage light"><div class="head reveal"><div class="eyebrow">${text(section?.eyebrow || "Exhibitions")}</div><h2>${text(section?.title || "On View")}</h2></div>${items.map((entry, index) => exhibitionEntry(entry, index)).join("")}</section>`;
 }
 
 function renderGallery(section?: LandingPageContent["sections"][number]) {
+  if (!section) return "";
   const items = (section?.items ?? []).filter((item) => item.item_type === "gallery").slice(0, 3);
   const first = items[0];
   const rest = items.slice(1, 3);
@@ -28,6 +31,7 @@ function renderGallery(section?: LandingPageContent["sections"][number]) {
 }
 
 function renderPress(section?: LandingPageContent["sections"][number]) {
+  if (!section) return "";
   const entries = (section?.items ?? []).slice(0, 9);
   const imageEntries = entries.filter((entry) => entry.item_type === "press_image");
   const textEntries = entries.filter((entry) => entry.item_type === "press_text");

@@ -27,15 +27,18 @@ export async function upsertLandingItem(input: ItemInput) {
   const auth = await authorize();
   if (!auth.ok) return auth;
   if (!UUID_PATTERN.test(input.id) || !UUID_PATTERN.test(input.sectionId) || !isSectionKey(input.sectionKey) || !SECTION_TYPES[input.sectionKey].includes(input.itemType)) return { ok: false, error: "Invalid landing entry." };
+  const { data: section, error: sectionError } = await auth.supabase.from("landing_sections").select("section_key").eq("id", input.sectionId).maybeSingle();
+  if (sectionError || !section || section.section_key !== input.sectionKey) return { ok: false, error: "That landing section could not be verified." };
   const { count, error: countError } = await auth.supabase.from("landing_items").select("id", { count: "exact", head: true }).eq("section_id", input.sectionId);
   if (countError) return { ok: false, error: "Could not verify landing entry limits." };
-  const { data: existing } = await auth.supabase.from("landing_items").select("id").eq("id", input.id).maybeSingle();
+  const { data: existing } = await auth.supabase.from("landing_items").select("id, section_id").eq("id", input.id).maybeSingle();
+  if (existing && existing.section_id !== input.sectionId) return { ok: false, error: "That landing entry belongs to another section." };
   if (!existing && (count ?? 0) >= SECTION_LIMITS[input.sectionKey]) return { ok: false, error: `This section is limited to ${SECTION_LIMITS[input.sectionKey]} entries.` };
   if (!validLink(input.linkUrl)) return { ok: false, error: "Links must begin with https://, http://, /, or #." };
   const media = normalizeMedia(input.media, input.sectionKey, input.itemType);
   if (!media.ok) return media;
-  const { error } = await auth.supabase.from("landing_items").upsert({ id: input.id, section_id: input.sectionId, item_type: input.itemType, eyebrow: clean(input.eyebrow, 160), title: clean(input.title, 240), subtitle: clean(input.subtitle, 500), body: clean(input.body, 4000), source: clean(input.source, 240), link_url: clean(input.linkUrl, 1000), link_label: clean(input.linkLabel, 240), media: media.value, display_order: Math.max(0, Math.floor(input.displayOrder)), is_published: Boolean(input.isPublished) });
-  return error ? { ok: false, error: "Could not save that landing entry." } : { ok: true };
+  const { data, error } = await auth.supabase.from("landing_items").upsert({ id: input.id, section_id: input.sectionId, item_type: input.itemType, eyebrow: clean(input.eyebrow, 160), title: clean(input.title, 240), subtitle: clean(input.subtitle, 500), body: clean(input.body, 4000), source: clean(input.source, 240), link_url: clean(input.linkUrl, 1000), link_label: clean(input.linkLabel, 240), media: media.value, display_order: Math.max(0, Math.floor(input.displayOrder)), is_published: Boolean(input.isPublished) }).select("created_at").single();
+  return error || !data ? { ok: false, error: "Could not save that landing entry." } : { ok: true, createdAt: data.created_at };
 }
 
 export async function deleteLandingItem(itemId: string) {

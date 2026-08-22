@@ -29,7 +29,11 @@ export default function AdminLandingPage({ initialContent }: { initialContent: L
   async function saveItem(section: typeof sections[number], entry: LandingItem) {
     setBusy(`item-${entry.id}`); clearStatus();
     const result = await upsertLandingItem({ id: entry.id, sectionId: section.id, sectionKey: section.section_key, itemType: entry.item_type, eyebrow: entry.eyebrow, title: entry.title, subtitle: entry.subtitle, body: entry.body, source: entry.source, linkUrl: entry.link_url, linkLabel: entry.link_label, media: entry.media, displayOrder: entry.display_order, isPublished: entry.is_published });
-    setBusy(""); result.ok ? setMessage(`${entry.title || "Entry"} saved.`) : setError(result.error ?? "Could not save that entry.");
+    setBusy("");
+    if (result.ok) {
+      updateItem(section.id, entry.id, { created_at: result.createdAt ?? (entry.created_at || new Date().toISOString()) });
+      setMessage(`${entry.title || "Entry"} saved.`);
+    } else setError(result.error ?? "Could not save that entry.");
   }
 
   function addItem(section: typeof sections[number]) {
@@ -54,6 +58,10 @@ export default function AdminLandingPage({ initialContent }: { initialContent: L
   async function moveItem(section: typeof sections[number], index: number, direction: -1 | 1) {
     const nextIndex = index + direction;
     if (nextIndex < 0 || nextIndex >= section.items.length) return;
+    if (section.items.some((item) => !item.created_at)) {
+      setError("Save new entries before reordering this section.");
+      return;
+    }
     const items = [...section.items]; [items[index], items[nextIndex]] = [items[nextIndex], items[index]];
     const ordered = items.map((item, order) => ({ ...item, display_order: order }));
     setSections((current) => current.map((item) => item.id === section.id ? { ...item, items: ordered } : item));
@@ -97,7 +105,7 @@ export default function AdminLandingPage({ initialContent }: { initialContent: L
 function LandingItemEditor({ section, entry, index, busy, onChange, onImage, onMove, onRemove, onSave }: { section: LandingPageContent["sections"][number]; entry: LandingItem; index: number; busy: string; onChange: (patch: Partial<LandingItem>) => void; onImage: (index: number, file: File) => void; onMove: (direction: -1 | 1) => void; onRemove: () => void; onSave: () => void }) {
   const imageSlots = section.section_key === "collections" ? 3 : 1;
   return <article className="admin-landing-item">
-    <div className="admin-landing-item-heading"><strong>{index + 1}. {entry.title || "Untitled entry"}</strong><div className="admin-landing-item-actions"><button className="admin-small-button" disabled={index === 0 || Boolean(busy)} onClick={() => onMove(-1)} type="button">↑</button><button className="admin-small-button" disabled={index === section.items.length - 1 || Boolean(busy)} onClick={() => onMove(1)} type="button">↓</button>{section.section_key !== "gallery" && <button className="admin-small-button admin-danger-button" disabled={Boolean(busy)} onClick={onRemove} type="button">Remove</button>}</div></div>
+    <div className="admin-landing-item-heading"><strong>{index + 1}. {entry.title || "Untitled entry"}</strong><div className="admin-landing-item-actions"><button className="admin-small-button" disabled={index === 0 || Boolean(busy) || !entry.created_at || section.items.some((item) => !item.created_at)} onClick={() => onMove(-1)} title={!entry.created_at ? "Save this entry before reordering" : undefined} type="button">↑</button><button className="admin-small-button" disabled={index === section.items.length - 1 || Boolean(busy) || !entry.created_at || section.items.some((item) => !item.created_at)} onClick={() => onMove(1)} title={!entry.created_at ? "Save this entry before reordering" : undefined} type="button">↓</button>{section.section_key !== "gallery" && <button className="admin-small-button admin-danger-button" disabled={Boolean(busy)} onClick={onRemove} type="button">Remove</button>}</div></div>
     {section.section_key === "press" && <label>Entry format<select value={entry.item_type} onChange={(event) => onChange({ item_type: event.target.value as LandingItemType, media: event.target.value === "press_text" ? [] : entry.media })}><option value="press_image">Image feature</option><option value="press_text">Text / link</option></select></label>}
     <div className="admin-landing-item-fields"><label>Eyebrow<input value={entry.eyebrow} onChange={(event) => onChange({ eyebrow: event.target.value })} /></label><label>Title<input value={entry.title} onChange={(event) => onChange({ title: event.target.value })} /></label><label>Subtitle / metadata<textarea rows={2} value={entry.subtitle} onChange={(event) => onChange({ subtitle: event.target.value })} /></label><label>Copy<textarea rows={3} value={entry.body} onChange={(event) => onChange({ body: event.target.value })} /></label><label>Source<input value={entry.source} onChange={(event) => onChange({ source: event.target.value })} /></label><label>Link URL<input value={entry.link_url} onChange={(event) => onChange({ link_url: event.target.value })} /></label><label>Link label<input value={entry.link_label} onChange={(event) => onChange({ link_label: event.target.value })} /></label><label className="admin-landing-publish"><input checked={entry.is_published} onChange={(event) => onChange({ is_published: event.target.checked })} type="checkbox" /> Published</label></div>
     {entry.item_type !== "press_text" && <div className="admin-landing-media-grid">{Array.from({ length: imageSlots }, (_, mediaIndex) => <LandingMediaEditor entry={entry} index={mediaIndex} key={mediaIndex} busy={busy} onChange={onChange} onImage={onImage} />)}</div>}

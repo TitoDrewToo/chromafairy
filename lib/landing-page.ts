@@ -45,11 +45,11 @@ export async function getLandingPageContent(options: { publishedOnly?: boolean }
   const fallback = defaultLandingPage();
   const supabase = await createClient();
   if (!supabase) return fallback;
+  const publishedOnly = options.publishedOnly ?? true;
   const sectionQuery = supabase.from("landing_sections").select("*").order("section_key");
   const itemQuery = supabase.from("landing_items").select("*").order("display_order").order("created_at");
   const [{ data: sections, error: sectionError }, { data: items, error: itemError }] = await Promise.all([sectionQuery, itemQuery]);
-  if (sectionError || itemError || !sections?.length) return fallback;
-  const publishedOnly = options.publishedOnly ?? true;
+  if (sectionError || itemError || !sections || (publishedOnly ? sections.length === 0 : sections.length !== 4)) return fallback;
   const visibleSections = (sections as LandingSection[]).filter((section) => !publishedOnly || section.is_published);
   const visibleSectionIds = new Set(visibleSections.map((section) => section.id));
   const itemsBySection = new Map<string, LandingItem[]>();
@@ -58,7 +58,7 @@ export async function getLandingPageContent(options: { publishedOnly?: boolean }
     itemsBySection.set(entry.section_id, [...(itemsBySection.get(entry.section_id) ?? []), normalizeItem(entry, supabase)]);
   });
   const result = visibleSections.map((section) => ({ ...section, items: itemsBySection.get(section.id) ?? [] }));
-  return result.length === 4 ? { sections: result } : fallback;
+  return { sections: result };
 }
 
 export function resolveLandingMedia(supabase: SupabaseClient<Database> | null, value: LandingMedia): LandingMedia {
