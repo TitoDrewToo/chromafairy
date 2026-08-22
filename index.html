@@ -146,7 +146,8 @@
   .press-instagram-modal-card .instagram-media{min-width:0!important;width:100%!important;margin:0!important}
   .press-instagram-fallback{margin:15px 6px 4px;text-align:center;font:11px var(--sans);letter-spacing:.1em;text-transform:uppercase}
   .press-instagram-fallback a{color:#4b5a62;text-decoration-color:var(--teal);text-underline-offset:4px}
-  .press-modal[hidden]{display:none}
+  /* Keep dialog fallbacks out of normal document flow until a card opens them. */
+  .press-modal[hidden]{display:none!important;visibility:hidden;pointer-events:none}
   .press-modal{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:22px;background:rgba(5,15,22,.72);backdrop-filter:blur(12px);animation:press-modal-in .35s ease both}
   .press-modal-card{position:relative;max-width:min(780px,92vw);max-height:92vh;padding:10px;background:rgba(246,243,236,.96);box-shadow:0 30px 90px rgba(0,0,0,.45);animation:press-card-in .45s cubic-bezier(.2,.7,.2,1) both}
   .press-modal-card img{display:block;max-width:100%;max-height:calc(92vh - 62px);width:auto;height:auto;object-fit:contain}
