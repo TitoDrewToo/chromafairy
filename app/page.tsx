@@ -3,6 +3,8 @@ import path from "node:path";
 import type { Metadata } from "next";
 import HomeClient from "../components/home-client";
 import { absoluteUrl } from "../lib/site";
+import { getLandingPageContent } from "../lib/landing-page";
+import { injectLandingMarkup } from "../lib/landing-page-html";
 
 export const metadata: Metadata = {
   title: "Chroma Fairy",
@@ -25,6 +27,8 @@ function getHomeSource() {
   return { styles, markup };
 }
 
-export default function HomePage() {
-  return <HomeClient {...getHomeSource()} />;
+export default async function HomePage() {
+  const source = getHomeSource();
+  const content = await getLandingPageContent({ publishedOnly: true });
+  return <HomeClient {...source} markup={injectLandingMarkup(source.markup, content)} />;
 }

@@ -8,6 +8,7 @@ import { createClient } from "../../../lib/supabase/server";
 import "../admin.css";
 
 const staffAreas = [
+  ["Landing page", "/studio/landing-page", "navLandingPage"],
   ["Catalogue", "/studio/catalogue", "navCatalogue"],
   ["Inquiries", "/studio/inquiries", "navInquiries"],
   ["Sales / Orders", "/studio/sales", "navSales"],

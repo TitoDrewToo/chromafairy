@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AnimatedFairy from "./animated-fairy";
-import HomeAudio from "./home-audio";
 import InquiryForm from "./inquiry-form";
 import { PAINTING_TEXTURES, isPaintingBackgroundVariant, type PaintingBackgroundVariant } from "./backgrounds/painting-textures";
 
@@ -79,6 +78,41 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     setFairyMount(root.querySelector<HTMLElement>("#animated-fairy-mount"));
     setCommissionMount(root.querySelector<HTMLElement>("#commission-form-mount"));
   }, []);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const deferredMedia = [
+      ...Array.from(root.querySelectorAll<HTMLImageElement>("img[data-src]")),
+      ...Array.from(root.querySelectorAll<HTMLVideoElement>("video[data-poster]")),
+    ];
+    if (!deferredMedia.length) return;
+    const loadMedia = (element: HTMLImageElement | HTMLVideoElement) => {
+      if (element instanceof HTMLImageElement) {
+        const src = element.dataset.src;
+        if (src) element.src = src;
+        element.closest<HTMLElement>("[data-deferred-footer]")?.classList.add("is-shimmer-ready");
+        return;
+      }
+      const poster = element.dataset.poster;
+      if (!poster) return;
+      element.poster = poster;
+      element.preload = "metadata";
+    };
+    if (typeof IntersectionObserver === "undefined") {
+      const fallbackTimer = window.setTimeout(() => deferredMedia.forEach(loadMedia), 4000);
+      return () => window.clearTimeout(fallbackTimer);
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        observer.unobserve(entry.target);
+        loadMedia(entry.target as HTMLImageElement | HTMLVideoElement);
+      });
+    }, { rootMargin: "480px 0px" });
+    deferredMedia.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, [markup]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -446,11 +480,9 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
         bright: gl.getUniformLocation(program, "uBright"),
         topExtend: gl.getUniformLocation(program, "uTopExtend"),
       };
-      const sceneStops = [
-        { id: "home", scene: 0.0 }, { id: "collections", scene: 0.7 }, { id: "exhibitions", scene: 1.4 },
-        { id: "gallery", scene: 2.2 }, { id: "commission", scene: 2.9 }, { id: "press", scene: 3.4 },
-        { id: "about", scene: 3.7 }, { id: "contact", scene: 4.0 },
-      ]
+      const sceneStopIds = ["home", "collections", "exhibitions", "gallery", "commission", "press", "about", "contact"];
+      const sceneStops = sceneStopIds
+        .map((id, index) => ({ id, scene: index / Math.max(1, sceneStopIds.length - 1) }))
         .map((stop) => ({ el: root.querySelector<HTMLElement>(`#${stop.id}`), scene: stop.scene }))
         .filter((stop): stop is { el: HTMLElement; scene: number } => Boolean(stop.el));
       const sceneValue = () => {
@@ -524,7 +556,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       const startedAt = performance.now();
       const frame = (now: number) => {
         if (disposed || document.hidden) { frameId = 0; return; }
-        const target = sceneValue() / 4;
+        const target = sceneValue();
         currentScroll += (target - currentScroll) * (holdStill ? 1 : 0.06);
         const vh = Math.max(1, window.innerHeight);
         const rawTopExtend = 1 - (window.scrollY / vh) / 0.9;
@@ -608,16 +640,9 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     window.addEventListener("mousemove", onMouseMove);
     resize();
 
-    const sceneStops = [
-      { id: "home", scene: 0.0 },
-      { id: "collections", scene: 0.7 },
-      { id: "exhibitions", scene: 1.4 },
-      { id: "gallery", scene: 2.2 },
-      { id: "commission", scene: 2.9 },
-      { id: "press", scene: 3.4 },
-      { id: "about", scene: 3.7 },
-      { id: "contact", scene: 4.0 },
-    ]
+    const sceneStopIds = ["home", "collections", "exhibitions", "gallery", "commission", "press", "about", "contact"];
+    const sceneStops = sceneStopIds
+      .map((id, index) => ({ id, scene: index / Math.max(1, sceneStopIds.length - 1) }))
       .map((stop) => ({ el: root.querySelector<HTMLElement>(`#${stop.id}`), scene: stop.scene }))
       .filter((stop): stop is { el: HTMLElement; scene: number } => Boolean(stop.el));
 
@@ -640,7 +665,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     let frameId = 0;
     const start = performance.now();
     const frame = (now: number) => {
-      currentScroll += (sceneValue() / 4 - currentScroll) * 0.04;
+      currentScroll += (sceneValue() - currentScroll) * 0.04;
       gl.uniform2f(uniforms.res, canvas.width, canvas.height);
       gl.uniform1f(uniforms.time, (now - start) / 1000);
       gl.uniform1f(uniforms.scroll, currentScroll);
@@ -662,7 +687,6 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     <div className="home-shell" ref={rootRef}>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <div dangerouslySetInnerHTML={{ __html: markup }} />
-      <HomeAudio />
       {backgroundMount ? createPortal(<><canvas id="art" /><div id="artFallback" /></>, backgroundMount) : null}
       {fairyMount ? createPortal(<AnimatedFairy />, fairyMount) : null}
       {commissionMount ? createPortal(<InquiryForm kind="commission" />, commissionMount) : null}

@@ -13,6 +13,36 @@ export type AppointmentMode = "video" | "call" | "in_person";
 export type ErrorLevel = "error" | "warn" | "info";
 export type ErrorGroupStatus = "new" | "triaged" | "resolved";
 export type ReviewVerdict = "matched" | "partial" | "wrong";
+export type LandingSectionKey = "collections" | "exhibitions" | "press" | "gallery";
+export type LandingItemType = "collection" | "exhibition" | "press_image" | "press_text" | "gallery";
+export type LandingMedia = { path: string; alt: string; label: string };
+export type LandingSection = {
+  id: string;
+  section_key: LandingSectionKey;
+  eyebrow: string;
+  title: string;
+  body: string;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+export type LandingItem = {
+  id: string;
+  section_id: string;
+  item_type: LandingItemType;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  body: string;
+  source: string;
+  link_url: string;
+  link_label: string;
+  media: LandingMedia[];
+  display_order: number;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+};
 
 export type Work = {
   id: string;
@@ -340,6 +370,18 @@ export type Database = {
         Insert: Partial<Omit<StudioBoardPost, "id" | "created_at">> &
           Partial<Pick<StudioBoardPost, "id" | "created_at">>;
         Update: Partial<StudioBoardPost>;
+        Relationships: [];
+      };
+      landing_sections: {
+        Row: LandingSection;
+        Insert: Partial<LandingSection>;
+        Update: Partial<LandingSection>;
+        Relationships: [];
+      };
+      landing_items: {
+        Row: LandingItem;
+        Insert: Partial<LandingItem>;
+        Update: Partial<LandingItem>;
         Relationships: [];
       };
     };

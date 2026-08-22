@@ -1,6 +1,7 @@
 export const studioHints = {
   wordmark: "Back to your Studio overview.",
   navCatalogue: "Add, edit, and arrange your artworks — these are the pieces shown in your public shop.",
+  navLandingPage: "Edit the public Collections, Exhibitions, Press, and Gallery sections while keeping their visual layouts safe.",
   navInquiries: "Messages from people interested in a specific piece or a commission.",
   navSales: "Record a sale to mark a piece sold and build your revenue history.",
   navCustomers: "Everyone who's bought or enquired, with their history in one place.",

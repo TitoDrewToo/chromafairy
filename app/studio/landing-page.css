@@ -1,0 +1,33 @@
+.admin-landing-page { max-width: 1120px; }
+.admin-landing-editor { display: grid; gap: 24px; margin-top: 34px; }
+.admin-landing-notice { display: grid; gap: 5px; padding: 14px 16px; border: 1px solid #ded9cf; background: #fbfaf7; color: #77736b; font-size: 12px; line-height: 1.5; }
+.admin-landing-notice strong { color: #765b2d; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; }
+.admin-landing-section { display: grid; gap: 18px; padding: 24px; border: 1px solid #ded9cf; background: rgba(255,255,255,.58); }
+.admin-landing-section-heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; }
+.admin-landing-section-heading h2 { margin: 0; font-family: "Cormorant Garamond", Georgia, serif; font-size: 32px; font-weight: 500; }
+.admin-landing-section-heading .admin-eyebrow { margin-bottom: 4px; }
+.admin-landing-section-heading .admin-muted { margin: 4px 0 0; font-size: 11px; }
+.admin-landing-publish { display: flex; align-items: center; gap: 8px; color: #77736b; font-size: 11px; white-space: nowrap; }
+.admin-landing-copy, .admin-landing-item-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.admin-landing-copy label, .admin-landing-item-fields label, .admin-landing-media label, .admin-landing-item > label { display: grid; gap: 6px; color: #77736b; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.admin-landing-copy input, .admin-landing-copy textarea, .admin-landing-item-fields input, .admin-landing-item-fields textarea, .admin-landing-media input, .admin-landing-item > label select { box-sizing: border-box; width: 100%; padding: 9px 10px; border: 1px solid #cfc8bb; background: #fff; color: #171715; font: 13px "Jost", sans-serif; letter-spacing: normal; text-transform: none; }
+.admin-landing-copy .field-wide { grid-column: span 2; }
+.admin-landing-items { display: grid; gap: 14px; }
+.admin-landing-item { display: grid; gap: 14px; padding: 16px; border: 1px solid #ded9cf; background: #fff; }
+.admin-landing-item-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; color: #765b2d; font-size: 13px; }
+.admin-landing-item-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.admin-landing-item-fields .admin-landing-publish { align-self: end; padding: 10px 0; }
+.admin-landing-media-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.admin-landing-media { display: grid; gap: 8px; }
+.admin-landing-media-preview { display: grid; width: 100%; aspect-ratio: 4 / 3; place-items: center; overflow: hidden; border: 1px solid #ded9cf; background: #eeeae2; color: #999288; font-size: 10px; text-align: center; }
+.admin-landing-media-preview img { width: 100%; height: 100%; object-fit: contain; }
+.admin-landing-add { justify-self: start; }
+.press-row-text { margin-top: 28px; }
+@media (max-width: 700px) {
+  .admin-landing-section { padding: 18px; }
+  .admin-landing-section-heading { display: grid; }
+  .admin-landing-copy, .admin-landing-item-fields { display: block; }
+  .admin-landing-copy label, .admin-landing-item-fields label { margin-bottom: 12px; }
+  .admin-landing-copy .field-wide { grid-column: auto; }
+  .admin-landing-media-grid { grid-template-columns: 1fr; }
+}
