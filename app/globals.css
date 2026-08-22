@@ -59,8 +59,7 @@ textarea:focus-visible {
   gap: 8px;
 }
 
-.home-audio-toggle,
-.home-audio-wave {
+.home-audio-toggle {
   min-height: 34px;
   padding: 8px 12px;
   border: 1px solid rgba(255, 255, 255, .62);
@@ -78,9 +77,7 @@ textarea:focus-visible {
 
 .home-audio-toggle:hover,
 .home-audio-toggle:focus-visible,
-.home-audio-toggle.is-on,
-.home-audio-wave:hover,
-.home-audio-wave:focus-visible {
+.home-audio-toggle.is-on {
   border-color: rgba(255, 255, 255, .96);
   background: rgba(12, 19, 27, .52);
   transform: translateY(-2px);
