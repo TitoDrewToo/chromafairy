@@ -56,7 +56,7 @@ function pressImageCard(entry: LandingItem) {
   const image = entry.media[0];
   const modalId = `landing-press-${entry.id.replace(/[^a-z0-9_-]/gi, "-")}`;
   const socialClass = `press-social-art-${slug(entry.title)}`;
-  const socialTile = `<span class="press-instagram-tile press-social-art ${attr(socialClass)}" aria-hidden="true"><span class="press-social-veil"></span><span class="press-social-ring press-social-ring-one"></span><span class="press-social-ring press-social-ring-two"></span><span class="press-social-center"><span class="press-social-mark">✦</span><strong>${text(entry.title)}</strong><span>${text(entry.eyebrow || "Social feature")}</span></span></span>`;
+  const socialTile = `<span class="press-instagram-tile press-social-art ${attr(socialClass)}" aria-hidden="true"><span class="press-social-veil"></span><span class="press-social-dust press-social-dust-one"></span><span class="press-social-dust press-social-dust-two"></span><span class="press-social-dust press-social-dust-three"></span><span class="press-social-center"><strong>${text(entry.title)}</strong><span>${text(entry.eyebrow || "Social feature")}</span></span></span>`;
   return `<div class="quote adb-feature"><button class="press-cover-trigger" type="button" aria-haspopup="dialog" aria-controls="${attr(modalId)}">${image ? `<img loading="lazy" class="press-cover-image" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : socialTile}<span class="press-cover-caption">${text(image?.label || entry.link_label || "Open feature")}</span></button>${entry.body ? `<p>${linkText(entry.body, entry.link_url)}</p>` : ""}<div class="src">${text(entry.source)}</div></div>`;
 }
 
