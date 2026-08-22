@@ -55,7 +55,9 @@ function galleryRoom(entry: LandingItem) {
 function pressImageCard(entry: LandingItem) {
   const image = entry.media[0];
   const modalId = `landing-press-${entry.id.replace(/[^a-z0-9_-]/gi, "-")}`;
-  return `<div class="quote adb-feature"><button class="press-cover-trigger" type="button" aria-haspopup="dialog" aria-controls="${attr(modalId)}">${image ? `<img loading="lazy" class="press-cover-image" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : `<span class="press-instagram-tile"><span><strong>${text(entry.title)}</strong><span>${text(entry.eyebrow)}</span></span></span>`}<span class="press-cover-caption">${text(image?.label || entry.link_label || "Open feature")}</span></button>${entry.body ? `<p>${linkText(entry.body, entry.link_url)}</p>` : ""}<div class="src">${text(entry.source)}</div></div>`;
+  const socialClass = `press-social-art-${slug(entry.title)}`;
+  const socialTile = `<span class="press-instagram-tile press-social-art ${attr(socialClass)}" aria-hidden="true"><span class="press-social-veil"></span><span class="press-social-ring press-social-ring-one"></span><span class="press-social-ring press-social-ring-two"></span><span class="press-social-center"><span class="press-social-mark">✦</span><strong>${text(entry.title)}</strong><span>${text(entry.eyebrow || "Social feature")}</span></span></span>`;
+  return `<div class="quote adb-feature"><button class="press-cover-trigger" type="button" aria-haspopup="dialog" aria-controls="${attr(modalId)}">${image ? `<img loading="lazy" class="press-cover-image" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : socialTile}<span class="press-cover-caption">${text(image?.label || entry.link_label || "Open feature")}</span></button>${entry.body ? `<p>${linkText(entry.body, entry.link_url)}</p>` : ""}<div class="src">${text(entry.source)}</div></div>`;
 }
 
 function pressTextCard(entry: LandingItem) {
@@ -77,3 +79,4 @@ function paragraph(value?: string) { return value ? `<p class="body" style="marg
 function paragraphText(value: string) { return text(value).replace(/\n/g, "<br />"); }
 function text(value: string) { return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
 function attr(value: string) { return text(value); }
+function slug(value: string) { return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }

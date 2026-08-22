@@ -123,9 +123,24 @@
   .press-cover-image{display:block;width:100%;height:230px;object-fit:cover;object-position:center;filter:saturate(.94);box-shadow:0 18px 34px -24px rgba(0,10,20,.7);transition:transform .7s cubic-bezier(.2,.7,.2,1),filter .7s ease}
   .press-cover-trigger:hover .press-cover-image,.press-cover-trigger:focus-visible .press-cover-image{transform:scale(1.035);filter:saturate(1.08)}
   .press-cover-caption{display:block;margin-top:12px;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6a7680}
-  .press-instagram-tile{display:flex;min-height:230px;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 30% 20%,#d9edf0 0,#8bbec6 30%,#274d59 72%,#142b35 100%);color:#fff;text-align:center;text-shadow:0 2px 16px rgba(0,0,0,.35)}
-  .press-instagram-tile strong{display:block;font:500 clamp(28px,4vw,42px) var(--serif);letter-spacing:.03em}
-  .press-instagram-tile span{display:block;margin-top:8px;font:10px var(--sans);letter-spacing:.2em;text-transform:uppercase;opacity:.85}
+  .press-instagram-tile{display:flex;min-height:230px;align-items:center;justify-content:center;padding:24px;color:#f8f3e8;text-align:center;text-shadow:0 2px 20px rgba(0,0,0,.35)}
+  .press-social-art{position:relative;isolation:isolate;overflow:hidden;background:#0b2635;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 18px 34px -24px rgba(0,10,20,.8)}
+  .press-social-art::before,.press-social-art::after{content:"";position:absolute;inset:-35%;pointer-events:none}
+  .press-social-art::before{z-index:-2;background:conic-gradient(from 16deg at 45% 48%,#ef765e,#e9c36e 17%,#5bb9a9 39%,#174c66 59%,#7e669b 78%,#ef765e);filter:blur(18px);opacity:.96;transform:rotate(-13deg) scale(1.08);transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+  .press-social-art::after{z-index:-1;background:radial-gradient(circle at 52% 42%,transparent 0 22%,rgba(4,24,35,.12) 23% 37%,rgba(4,24,35,.74) 72%),linear-gradient(120deg,rgba(255,255,255,.14),transparent 38% 62%,rgba(3,18,27,.38));mix-blend-mode:multiply}
+  .press-cover-trigger:hover .press-social-art::before,.press-cover-trigger:focus-visible .press-social-art::before{transform:rotate(9deg) scale(1.18)}
+  .press-social-veil{position:absolute;inset:-25%;background:repeating-linear-gradient(112deg,transparent 0 18px,rgba(255,255,255,.13) 19px 20px,transparent 21px 42px);filter:blur(1px);opacity:.65;transform:rotate(-15deg);mix-blend-mode:screen}
+  .press-social-ring{position:absolute;border:1px solid rgba(255,248,230,.58);border-radius:50%;transform:rotate(-26deg);box-shadow:0 0 28px rgba(255,217,148,.18);transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+  .press-social-ring-one{width:190px;height:82px;left:calc(50% - 95px);top:calc(50% - 41px)}
+  .press-social-ring-two{width:220px;height:112px;left:calc(50% - 110px);top:calc(50% - 56px);transform:rotate(48deg);opacity:.6}
+  .press-cover-trigger:hover .press-social-ring-one,.press-cover-trigger:focus-visible .press-social-ring-one{transform:rotate(-9deg) scale(1.08)}
+  .press-cover-trigger:hover .press-social-ring-two,.press-cover-trigger:focus-visible .press-social-ring-two{transform:rotate(31deg) scale(1.05)}
+  .press-social-center{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:6px;max-width:90%;margin-top:2px}
+  .press-social-center strong{display:block;font:500 clamp(27px,4vw,42px) var(--serif);letter-spacing:.03em;line-height:.95}
+  .press-social-center>span:last-child{display:block;margin-top:5px;font:10px var(--sans);letter-spacing:.2em;text-transform:uppercase;opacity:.9}
+  .press-social-mark{display:grid;place-items:center;width:30px;height:30px;border:1px solid rgba(255,248,230,.65);border-radius:50%;font:16px var(--serif);color:#fff4c9;box-shadow:0 0 24px rgba(255,222,154,.32)}
+  .press-social-art-the-weigh{background:#132d37}
+  .press-social-art-xavier-artfest{background:#263048}
   .press-instagram-modal-card{width:min(560px,92vw);max-height:92vh;overflow:auto}
   .press-instagram-modal-card .instagram-media{min-width:0!important;width:100%!important;margin:0!important}
   .press-instagram-fallback{margin:15px 6px 4px;text-align:center;font:11px var(--sans);letter-spacing:.1em;text-transform:uppercase}
@@ -272,7 +287,7 @@
   footer .footer-logo-option-wrap{position:relative;display:block;width:min(153px,62vw);height:108px;margin:0 auto 18px;transform-origin:center}
   footer .footer-logo-option{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 5px 9px rgba(166,132,77,.2));transition:filter .3s ease,transform .3s ease}
   footer .footer-logo-option-wrap.is-v2{animation:footer-fairy-life 4.8s ease-in-out infinite}
-  footer .footer-logo-option-wrap.is-v2::after{position:absolute;inset:0;display:block;background:var(--chroma-gradient);background-size:260% 100%;mix-blend-mode:screen;opacity:.62;pointer-events:none;content:"";mask:url('/fairy-logo-option-v2.png') center/contain no-repeat;-webkit-mask:url('/fairy-logo-option-v2.png') center/contain no-repeat;animation:footer-fairy-shimmer 3.94s linear infinite}
+  footer .footer-logo-option-wrap.is-v2.is-shimmer-ready::after{position:absolute;inset:0;display:block;background:var(--chroma-gradient);background-size:260% 100%;mix-blend-mode:screen;opacity:.62;pointer-events:none;content:"";mask:url('/fairy-logo-option-v2.png') center/contain no-repeat;-webkit-mask:url('/fairy-logo-option-v2.png') center/contain no-repeat;animation:footer-fairy-shimmer 3.94s linear infinite}
   @keyframes footer-fairy-life{0%,100%{filter:drop-shadow(0 5px 9px rgba(166,132,77,.2));transform:scale(1)}50%{filter:drop-shadow(0 6px 14px rgba(87,232,255,.34)) drop-shadow(0 0 11px rgba(255,102,196,.2));transform:scale(1.025)}}
   @keyframes footer-fairy-shimmer{from{background-position:120% 50%}to{background-position:-20% 50%}}
   @media(prefers-reduced-motion:reduce){footer .footer-logo-option-wrap,footer .footer-logo-option,footer .footer-logo-option-wrap::after{animation:none;transition:none}}
@@ -376,7 +391,7 @@
       <div class="head reveal"><div class="eyebrow">Exhibitions</div><h2>On View</h2></div>
       <div class="duo reveal" style="margin-bottom:clamp(24px,4vh,44px)">
         <div class="room" style="min-height:460px">
-          <img class="photo" src="assets/sel-exhibitA.jpg" alt="Waves of Being — gallery installation" />
+          <img loading="lazy" class="photo" src="assets/sel-exhibitA.jpg" alt="Waves of Being — gallery installation" />
           <div class="scrim"></div>
           <div class="roomcap">Galeria Lienzo · Bacolod City</div>
         </div>
@@ -395,7 +410,7 @@
           <p class="body" style="margin-top:16px">Fluid panels set against tropical light — the paintings meeting the sea and sky that inspired them.</p>
         </div>
         <div class="room" style="min-height:460px;order:2">
-          <img class="photo" src="assets/sel-siargao.jpg" alt="Open-air installation, Siargao" />
+          <img loading="lazy" class="photo" src="assets/sel-siargao.jpg" alt="Open-air installation, Siargao" />
           <div class="scrim"></div>
           <div class="roomcap">Open-air · Siargao</div>
         </div>
@@ -412,7 +427,7 @@
 
       <div class="single reveal" style="margin-bottom:clamp(20px,3vh,36px)">
         <div class="room" style="min-height:520px">
-          <img class="photo" src="assets/sel-roomGrey.jpg" alt="Eternal Flow in a living room" />
+          <img loading="lazy" class="photo" src="assets/sel-roomGrey.jpg" alt="Eternal Flow in a living room" />
           <div class="scrim"></div>
           <div class="roomcap">In a Living Room</div>
         </div>
@@ -420,12 +435,12 @@
 
       <div class="duo reveal">
         <div class="room" style="min-height:460px">
-          <img class="photo" src="assets/sel-roomBaby.jpg" alt="A commissioned piece at home" />
+          <img loading="lazy" class="photo" src="assets/sel-roomBaby.jpg" alt="A commissioned piece at home" />
           <div class="scrim"></div>
           <div class="roomcap">A Commission at Home</div>
         </div>
         <div class="room" style="min-height:460px">
-          <img class="photo" src="assets/sel-roomRed.jpg" alt="A piece in a lounge" />
+          <img loading="lazy" class="photo" src="assets/sel-roomRed.jpg" alt="A piece in a lounge" />
           <div class="scrim"></div>
           <div class="roomcap">In a Lounge</div>
         </div>
@@ -460,9 +475,9 @@
         <div class="eyebrow">Events &amp; Features</div>
         <h2>In Print &amp; On View</h2>
         <div class="press-row">
-          <div class="quote adb-feature"><button class="press-cover-trigger" type="button" aria-haspopup="dialog" aria-controls="adb-cover-modal"><img class="press-cover-image" src="assets/adb-outlook-cover.jpeg" alt="Asian Development Outlook April 2024 featuring Samantha Ty's artwork" /><span class="press-cover-caption">Open cover artwork</span></button><p>Cover artwork for the <em>Asian Development Outlook 2024</em>.</p><div class="src">Asian Development Bank</div></div>
-          <div class="quote adb-feature"><button class="press-cover-trigger press-instagram-trigger" type="button" aria-haspopup="dialog" aria-controls="xavier-modal"><span class="press-instagram-tile"><span><strong>Xavier Artfest</strong><span>2024 · Group exhibition</span></span></span><span class="press-cover-caption">Open Instagram profile</span></button><p>Exhibited at <em>Xavier Artfest 2024</em>.</p><div class="src">Group Exhibition</div></div>
-          <div class="quote adb-feature"><button class="press-cover-trigger press-instagram-trigger" type="button" aria-haspopup="dialog" aria-controls="weigh-modal"><span class="press-instagram-tile"><span><strong>The Weigh+</strong><span>Featured artist</span></span></span><span class="press-cover-caption">Open Instagram feature</span></button><p>Featured artist, <em>The Weigh+</em>.</p><div class="src">Jan–March 2024</div></div>
+          <div class="quote adb-feature"><button class="press-cover-trigger" type="button" aria-haspopup="dialog" aria-controls="adb-cover-modal"><img loading="lazy" class="press-cover-image" src="assets/adb-outlook-cover.jpeg" alt="Asian Development Outlook April 2024 featuring Samantha Ty's artwork" /><span class="press-cover-caption">Open cover artwork</span></button><p>Cover artwork for the <em>Asian Development Outlook 2024</em>.</p><div class="src">Asian Development Bank</div></div>
+          <div class="quote adb-feature"><button class="press-cover-trigger press-instagram-trigger" type="button" aria-haspopup="dialog" aria-controls="xavier-modal"><span class="press-instagram-tile press-social-art press-social-art-xavier-artfest" aria-hidden="true"><span class="press-social-veil"></span><span class="press-social-ring press-social-ring-one"></span><span class="press-social-ring press-social-ring-two"></span><span class="press-social-center"><span class="press-social-mark">✦</span><strong>Xavier Artfest</strong><span>2024 · Group exhibition</span></span></span><span class="press-cover-caption">Open Instagram profile</span></button><p>Exhibited at <em>Xavier Artfest 2024</em>.</p><div class="src">Group Exhibition</div></div>
+          <div class="quote adb-feature"><button class="press-cover-trigger press-instagram-trigger" type="button" aria-haspopup="dialog" aria-controls="weigh-modal"><span class="press-instagram-tile press-social-art press-social-art-the-weigh" aria-hidden="true"><span class="press-social-veil"></span><span class="press-social-ring press-social-ring-one"></span><span class="press-social-ring press-social-ring-two"></span><span class="press-social-center"><span class="press-social-mark">✦</span><strong>The Weigh+</strong><span>Featured artist</span></span></span><span class="press-cover-caption">Open Instagram feature</span></button><p>Featured artist, <em>The Weigh+</em>.</p><div class="src">Jan–March 2024</div></div>
           <div class="quote"><p><a href="https://www.linkedin.com/pulse/adb-raises-developing-asia-pacifics-economic-growth-vdj5c/" target="_blank" rel="noopener noreferrer">Featured in the Asian Development Bank's LinkedIn newsletter.</a></p><div class="src">ADB · Feature</div></div>
           <div class="quote"><p>"Philippine's Finest" at the House of Representatives.</p><div class="src">Exhibition</div></div>
           <div class="quote"><p><a href="https://charliesartgallery.com/exhibit/waves-of-being-samantha-ty/" target="_blank" rel="noopener noreferrer"><em>Waves of Being</em> — solo exhibit, Charlie's Art Gallery.</a></p><div class="src">Bacolod City · 2025</div></div>
@@ -472,7 +487,7 @@
 
     <div id="adb-cover-modal" class="press-modal" role="dialog" aria-modal="true" aria-labelledby="adb-cover-modal-title" hidden>
       <figure class="press-modal-card">
-        <img src="assets/adb-outlook-cover.jpeg" alt="Asian Development Outlook April 2024 featuring Samantha Ty's artwork" />
+        <img loading="lazy" src="assets/adb-outlook-cover.jpeg" alt="Asian Development Outlook April 2024 featuring Samantha Ty's artwork" />
         <figcaption id="adb-cover-modal-title">Asian Development Outlook · April 2024 · Asian Development Bank</figcaption>
       </figure>
     </div>
@@ -517,7 +532,7 @@
     </section>
   </main>
 
-  <footer><div class="footer-logo-option-wrap is-v2"><img class="footer-logo-option" src="/fairy-logo-option-v2.png" alt="Chroma Fairy logo, version 2"></div><div class="brand2">Samantha Ty</div><div style="margin-top:8px">Fluid abstract artist · Philippines · © 2026</div></footer>
+  <footer><div class="footer-logo-option-wrap is-v2" data-deferred-footer><img loading="lazy" class="footer-logo-option" data-src="/fairy-logo-option-v2.png" alt="Chroma Fairy logo, version 2"></div><div class="brand2">Samantha Ty</div><div style="margin-top:8px">Fluid abstract artist · Philippines · © 2026</div></footer>
 
 <script>
 /* =========================================================
