@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import AnimatedFairy from "./animated-fairy";
+import HomeAudio from "./home-audio";
 
 type BufferPhase = "loading" | "leaving" | "ready";
 
@@ -115,6 +116,7 @@ export default function GlobalPageTransition({ children }: { children: ReactNode
   return (
     <>
       <div aria-hidden="true" id="global-background-layer" />
+      {pathname === "/" ? <HomeAudio /> : null}
       <div className={frameClass}>{children}</div>
       {showBuffer && (
         <div aria-label="Loading Chroma Fairy" className={`global-fairy-buffer ${bufferPhase === "leaving" ? "is-leaving" : ""}`} role="status">
