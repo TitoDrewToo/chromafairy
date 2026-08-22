@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "../../lib/supabase/admin";
 import { createClient } from "../../lib/supabase/server";
+import { convertHeicToJpeg } from "../../lib/server-image-conversion";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
@@ -24,8 +25,7 @@ export async function uploadArtworkImage(input: { workId: string; file: File; al
   let uploadContentType = contentType;
   if (isHeic) {
     try {
-      const sharp = (await import("sharp")).default;
-      uploadBody = await sharp(Buffer.from(await file.arrayBuffer())).jpeg({ quality: 92 }).toBuffer();
+      uploadBody = await convertHeicToJpeg(file);
       uploadContentType = "image/jpeg";
     } catch (error) {
       console.error("[catalogue-upload] HEIC conversion failed", {

@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "../../lib/supabase/server";
+import { convertHeicToJpeg } from "../../lib/server-image-conversion";
 import type { LandingItemType, LandingMedia, LandingSectionKey } from "../../lib/supabase/types";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -8,7 +9,7 @@ const SECTION_LIMITS: Record<LandingSectionKey, number> = { collections: 3, exhi
 const SECTION_TYPES: Record<LandingSectionKey, LandingItemType[]> = {
   collections: ["collection"], exhibitions: ["exhibition"], press: ["press_image", "press_text"], gallery: ["gallery"],
 };
-const IMAGE_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"]);
+const IMAGE_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif", "image/x-heic", "image/x-heif", "application/octet-stream"]);
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
 type SectionInput = { sectionId: string; sectionKey: LandingSectionKey; eyebrow: string; title: string; body: string; isPublished: boolean };
@@ -64,9 +65,24 @@ export async function uploadLandingImage(input: { sectionKey: LandingSectionKey;
   const auth = await authorize();
   if (!auth.ok) return auth;
   const extension = input.file?.name?.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] ?? "";
-  if (!isSectionKey(input.sectionKey) || !input.file || input.file.size <= 0 || input.file.size > MAX_IMAGE_BYTES || !IMAGE_TYPES.has(input.file.type.toLowerCase()) || !["jpg", "jpeg", "png", "webp", "gif"].includes(extension)) return { ok: false, error: "Use a JPG, PNG, WebP, or GIF image up to 10 MB." };
-  const path = `landing/${input.sectionKey}/${crypto.randomUUID()}.jpg`;
-  const { error } = await auth.supabase.storage.from("artwork").upload(path, input.file, { contentType: "image/jpeg", upsert: false });
+  const isHeic = extension === "heic" || extension === "heif";
+  const declaredType = input.file?.type?.toLowerCase() ?? "";
+  const typeMatches = !declaredType || IMAGE_TYPES.has(declaredType) || (isHeic && (declaredType.startsWith("image/heic") || declaredType.startsWith("image/heif")));
+  if (!isSectionKey(input.sectionKey) || !input.file || input.file.size <= 0 || input.file.size > MAX_IMAGE_BYTES || !typeMatches || !["jpg", "jpeg", "png", "webp", "gif", "heic", "heif"].includes(extension)) return { ok: false, error: "Use a JPG, PNG, WebP, GIF, HEIC, or HEIF image up to 10 MB." };
+  let uploadBody: File | Buffer = input.file;
+  let uploadContentType = input.file.type || "image/jpeg";
+  if (isHeic) {
+    try {
+      uploadBody = await convertHeicToJpeg(input.file);
+      uploadContentType = "image/jpeg";
+    } catch (error) {
+      console.error("[landing-upload] HEIC conversion failed", { fileName: input.file.name, error });
+      return { ok: false, error: "HEIC could not be converted. Please try a JPG or PNG copy of the image." };
+    }
+  }
+  const storageExtension = isHeic || extension === "jpeg" ? "jpg" : extension;
+  const path = `landing/${input.sectionKey}/${crypto.randomUUID()}.${storageExtension}`;
+  const { error } = await auth.supabase.storage.from("artwork").upload(path, uploadBody, { contentType: uploadContentType, upsert: false });
   return error ? { ok: false, error: "Could not upload that landing image." } : { ok: true, path };
 }
 

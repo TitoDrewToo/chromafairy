@@ -7,6 +7,7 @@ const WAVE_TRACKS = [
   { label: "Wave 2", src: "/audio/mixkit-distant-sea-humming-ambiance-1191.mp3" },
   { label: "Wave 3", src: "/audio/mixkit-sea-waves-ambience-1189.mp3" },
 ] as const;
+const DEFAULT_WAVE_INDEX = 1;
 const EFFECT_TRACKS = {
   sparkle: "/audio/mixkit-fairy-magic-sparkle-871.mp3",
   glitter: "/audio/mixkit-fairy-glitter-867.mp3",
@@ -20,7 +21,6 @@ export default function HomeAudio() {
   const effectRefs = useRef<Record<AudioEffectName, HTMLAudioElement | null>>({ sparkle: null, glitter: null, whoosh: null });
   const enabledRef = useRef(true);
   const [enabled, setEnabled] = useState(true);
-  const [waveIndex, setWaveIndex] = useState(0);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -62,7 +62,13 @@ export default function HomeAudio() {
     const onEffect = (event: Event) => {
       const name = (event as CustomEvent<{ name?: AudioEffectName; volume?: number }>).detail?.name;
       const effect = name ? effects[name] : null;
-      if (!enabledRef.current || !effect) return;
+      if (!enabledRef.current) return;
+
+      // Navigation and form interactions dispatch this event from a real user
+      // gesture. Use that same activation to start ambient audio if autoplay
+      // did not get through during initial loading.
+      startAmbient();
+      if (!effect) return;
 
       effect.currentTime = 0;
       effect.volume = Math.min(1, Math.max(0, event instanceof CustomEvent && event.detail.volume ? event.detail.volume : 0.12));
@@ -104,30 +110,9 @@ export default function HomeAudio() {
     }
   };
 
-  const cycleWave = async () => {
-    const nextIndex = (waveIndex + 1) % WAVE_TRACKS.length;
-    const audio = audioRef.current;
-    setWaveIndex(nextIndex);
-    if (!audio || !enabled) return;
-
-    audio.pause();
-    audio.src = WAVE_TRACKS[nextIndex].src;
-    audio.load();
-    const resume = () => {
-      if (enabledRef.current) void audio.play().catch(() => {});
-    };
-    audio.addEventListener("canplay", resume, { once: true });
-    try {
-      await audio.play();
-    } catch {
-      // The new track may still be loading. The canplay listener above
-      // resumes it without changing the user's enabled preference.
-    }
-  };
-
   return (
     <>
-      <audio data-home-ambient="true" ref={audioRef} loop preload="auto" src={WAVE_TRACKS[waveIndex].src} />
+      <audio autoPlay data-home-ambient="true" ref={audioRef} loop preload="auto" src={WAVE_TRACKS[DEFAULT_WAVE_INDEX].src} />
       {Object.entries(EFFECT_TRACKS).map(([name, src]) => (
         <audio
           key={name}
@@ -137,15 +122,6 @@ export default function HomeAudio() {
         />
       ))}
       <div className="home-audio-controls">
-        <button
-          aria-label={`Switch ambient wave. Currently ${WAVE_TRACKS[waveIndex].label}`}
-          className="home-audio-wave"
-          onClick={() => void cycleWave()}
-          title="Switch ambient wave"
-          type="button"
-        >
-          {WAVE_TRACKS[waveIndex].label} / 3
-        </button>
         <button
           aria-pressed={enabled}
           aria-label={enabled ? "Turn ambient sound off" : "Turn ambient sound on"}
