@@ -71,7 +71,7 @@ function pressTextCard(entry: LandingItem) {
 function pressModal(entry: LandingItem) {
   const image = entry.media[0];
   const modalId = `landing-press-${entry.id.replace(/[^a-z0-9_-]/gi, "-")}`;
-  return `<div id="${attr(modalId)}" class="press-modal" role="dialog" aria-modal="true" aria-labelledby="${attr(modalId)}-title" hidden><figure class="press-modal-card ${image ? "" : "press-instagram-modal-card"}">${image ? `<img loading="lazy" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : ""}<div id="${attr(modalId)}-title" class="eyebrow">${text(entry.title)}</div>${entry.link_url ? `<p class="press-instagram-fallback"><a href="${attr(entry.link_url)}" target="_blank" rel="noopener noreferrer">${text(entry.link_label || "Open feature")}</a></p>` : ""}</figure></div>`;
+  return `<div id="${attr(modalId)}" class="press-modal" role="dialog" aria-modal="true" aria-labelledby="${attr(modalId)}-title" hidden><figure class="press-modal-card ${image ? "" : "press-instagram-modal-card"}">${image ? `<img loading="lazy" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : ""}<div id="${attr(modalId)}-title" class="eyebrow">${text(entry.title)}</div></figure></div>`;
 }
 
 function linkText(value: string, url: string) {
