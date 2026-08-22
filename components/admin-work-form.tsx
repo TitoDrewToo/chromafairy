@@ -6,6 +6,7 @@ import { uploadArtworkImage } from "../app/actions/admin-catalogue";
 import type { Series, Work, WorkImage, WorkStatus } from "../lib/supabase/types";
 import { Hint } from "./studio-hint";
 import { createClient } from "../lib/supabase/client";
+import { prepareArtworkFile } from "../lib/client-image-conversion";
 
 type FormMode = "create" | "edit";
 type SeriesOption = Pick<Series, "id" | "name" | "slug" | "year">;
@@ -67,35 +68,46 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
     if (!slugTouched) setSlug(slugify(value));
   }
 
-  function addFiles(files: FileList | File[]) {
+  async function addFiles(files: FileList | File[]) {
     const rejected: string[] = [];
-    const additions = Array.from(files).flatMap((file, index) => {
+    const additions: ImageDraft[] = [];
+    for (const [index, file] of Array.from(files).entries()) {
       const extension = file.name.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] ?? "";
       const expectedType = imageTypes.get(extension);
       const typeMatches = isCompatibleImageType(file.type, expectedType, extension);
       if (!expectedType || !typeMatches || file.size <= 0 || file.size > MAX_IMAGE_BYTES) {
         rejected.push(file.name);
-        return [];
+        continue;
       }
-      const previewUrl = URL.createObjectURL(file);
-      return [{
-      id: `new-${crypto.randomUUID()}`,
-      work_id: work?.id ?? "",
-      storage_path: "",
-      alt: title || file.name,
-      display_order: imageDrafts.length + index,
-      is_primary: !hasPrimary && imageDrafts.length === 0 && index === 0,
-      url: previewUrl,
-      file,
-      previewUrl,
-      }];
-    });
+      try {
+        const preparedFile = await prepareArtworkFile(file);
+        if (preparedFile.size <= 0 || preparedFile.size > MAX_IMAGE_BYTES) {
+          rejected.push(`${file.name} (converted file is over 10 MB)`);
+          continue;
+        }
+        const previewUrl = URL.createObjectURL(preparedFile);
+        additions.push({
+          id: `new-${crypto.randomUUID()}`,
+          work_id: work?.id ?? "",
+          storage_path: "",
+          alt: title || file.name,
+          display_order: imageDrafts.length + additions.length + index,
+          is_primary: !hasPrimary && imageDrafts.length === 0 && additions.length === 0,
+          url: previewUrl,
+          file: preparedFile,
+          previewUrl,
+        });
+      } catch (conversionError) {
+        console.error("[catalogue-work-form] HEIC preview conversion failed", conversionError);
+        rejected.push(`${file.name} (HEIC conversion failed)`);
+      }
+    }
     if (rejected.length) setError(`Could not preview ${rejected.join(", ")}. Use a JPG, PNG, WebP, GIF, HEIC, or HEIF image up to 10 MB.`);
     setImageDrafts((current) => [...current, ...additions]);
   }
 
   function dropFiles(event: DragEvent<HTMLDivElement>) {
-    event.preventDefault(); setDragging(false); addFiles(event.dataTransfer.files);
+    event.preventDefault(); setDragging(false); void addFiles(event.dataTransfer.files);
   }
 
   function setPrimary(id: string) { setImageDrafts((current) => current.map((image) => ({ ...image, is_primary: image.id === id }))); }
@@ -122,6 +134,8 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
     const supabase = createClient();
     if (!supabase) return setError("Supabase is not configured.");
     setBusy(true); setError("");
+
+    try {
 
     let selectedSeriesId = seriesId || null;
     if (newSeriesName.trim()) {
@@ -166,7 +180,13 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
     if (finalUpdate.error) imageErrors.push("status");
     setBusy(false);
     if (imageErrors.length) return setError("The work was saved as a draft, but some image changes need attention.");
-    router.push("/studio/catalogue"); router.refresh();
+      router.push("/studio/catalogue"); router.refresh();
+    } catch (submitError) {
+      console.error("[catalogue-work-form] save failed", submitError);
+      setError("The work could not finish saving. Please try again, or save without the HEIC/HEIF file and add it separately.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -194,7 +214,7 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
 
       <section className="admin-form-section"><h2>Shipping (optional)</h2><div className="admin-form-grid"><label>Packed weight kg<input min="0" step="0.01" type="number" value={packedWeight} onChange={(event) => setPackedWeight(event.target.value)} /></label><label>Packed length<input min="0" step="0.01" type="number" value={packedL} onChange={(event) => setPackedL(event.target.value)} /></label><label>Packed width<input min="0" step="0.01" type="number" value={packedW} onChange={(event) => setPackedW(event.target.value)} /></label><label>Packed height<input min="0" step="0.01" type="number" value={packedH} onChange={(event) => setPackedH(event.target.value)} /></label><label className="admin-check"><input checked={shipRolled} onChange={(event) => setShipRolled(event.target.checked)} type="checkbox" /> Can ship rolled</label></div></section>
 
-      <section className="admin-form-section"><h2>Images</h2><div className={`admin-dropzone ${dragging ? "is-dragging" : ""}`} onDragEnter={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDragOver={(event) => event.preventDefault()} onDrop={dropFiles}><strong>Drop artwork images here</strong><span>or choose files below</span><input accept=".jpg,.jpeg,.png,.webp,.gif,.heic,.heif,image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" multiple onChange={(event) => { addFiles(event.target.files ?? []); event.currentTarget.value = ""; }} type="file" /></div>{imageDrafts.length > 0 && <div className="admin-image-list">{imageDrafts.map((image, index) => <div className="admin-image-item" key={image.id}><DraftImagePreview alt={image.alt ?? title} src={image.previewUrl ?? image.url} fileName={image.file?.name} /><div><strong>{index + 1}. {image.alt || "Artwork image"}</strong><div className="admin-image-actions"><button className="admin-small-button" onClick={() => setPrimary(image.id)} type="button">{image.is_primary ? "Primary" : "Make primary"}</button><button className="admin-small-button" disabled={index === 0} onClick={() => moveImage(index, -1)} type="button">↑</button><button className="admin-small-button" disabled={index === imageDrafts.length - 1} onClick={() => moveImage(index, 1)} type="button">↓</button><button className="admin-small-button admin-danger-button" onClick={() => removeImage(image)} type="button">Remove</button></div></div></div>)}</div>}{!hasPrimary && imageDrafts.length > 0 && <p className="admin-form-note">The first image will be used as primary.</p>}</section>
+      <section className="admin-form-section"><h2>Images</h2><div className={`admin-dropzone ${dragging ? "is-dragging" : ""}`} onDragEnter={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDragOver={(event) => event.preventDefault()} onDrop={dropFiles}><strong>Drop artwork images here</strong><span>or choose files below</span><input accept=".jpg,.jpeg,.png,.webp,.gif,.heic,.heif,image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif" multiple onChange={(event) => { void addFiles(event.target.files ?? []); event.currentTarget.value = ""; }} type="file" /></div>{imageDrafts.length > 0 && <div className="admin-image-list">{imageDrafts.map((image, index) => <div className="admin-image-item" key={image.id}><DraftImagePreview alt={image.alt ?? title} src={image.previewUrl ?? image.url} fileName={image.file?.name} /><div><strong>{index + 1}. {image.alt || "Artwork image"}</strong><div className="admin-image-actions"><button className="admin-small-button" onClick={() => setPrimary(image.id)} type="button">{image.is_primary ? "Primary" : "Make primary"}</button><button className="admin-small-button" disabled={index === 0} onClick={() => moveImage(index, -1)} type="button">↑</button><button className="admin-small-button" disabled={index === imageDrafts.length - 1} onClick={() => moveImage(index, 1)} type="button">↓</button><button className="admin-small-button admin-danger-button" onClick={() => removeImage(image)} type="button">Remove</button></div></div></div>)}</div>}{!hasPrimary && imageDrafts.length > 0 && <p className="admin-form-note">The first image will be used as primary.</p>}</section>
 
       {error && <p className="admin-error" role="alert">{error}</p>}
       <div className="admin-form-actions"><Hint id="save"><button className="admin-action-button" disabled={busy} type="submit"><span className="admin-action-label">{busy ? "Saving…" : mode === "create" ? "Create work" : "Save changes"}</span></button></Hint><Hint id="cancel"><button className="admin-secondary-button" onClick={() => router.push("/studio/catalogue")} type="button">Cancel</button></Hint></div>

@@ -8,6 +8,7 @@ import { createClient } from "../lib/supabase/client";
 import type { Series, Work, WorkImage, WorkStatus } from "../lib/supabase/types";
 import { Hint } from "./studio-hint";
 import { deleteCatalogueWork, uploadArtworkImage } from "../app/actions/admin-catalogue";
+import { prepareArtworkFile } from "../lib/client-image-conversion";
 
 export type AdminCatalogueImage = Pick<WorkImage, "id" | "work_id" | "storage_path" | "alt" | "display_order" | "is_primary"> & { url: string };
 export type AdminCatalogueSeries = Pick<Series, "id" | "name" | "slug" | "year">;
@@ -139,42 +140,51 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
     const supabase = createClient();
     if (!supabase) return setError("Supabase is not configured.");
     setBusy(true); setError(""); setMessage("");
-    let added = 0;
-    const addedIds: string[] = [];
-    const failedFiles: string[] = [];
-    for (const file of Array.from(files)) {
-      if (!isSupportedArtworkFile(file)) {
-        failedFiles.push(file.name);
-        continue;
-      }
-      const id = crypto.randomUUID();
-      const title = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]+/g, " ").trim() || "Untitled work";
-      const slug = `${slugify(title) || "untitled-work"}-${id.slice(0, 8)}`;
-      const { error: workError } = await supabase.from("works").insert({ id, title, slug, year: new Date().getFullYear(), status: "draft", is_new: false, is_featured: false });
-      if (workError) { failedFiles.push(file.name); continue; }
-      const upload = await uploadArtworkImage({ workId: id, file, alt: title, displayOrder: 0, isPrimary: true });
-      if (!upload.ok) {
+    try {
+      let added = 0;
+      const addedIds: string[] = [];
+      const failedFiles: string[] = [];
+      for (const file of Array.from(files)) {
+        if (!isSupportedArtworkFile(file)) {
+          failedFiles.push(file.name);
+          continue;
+        }
+        const id = crypto.randomUUID();
+        const title = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]+/g, " ").trim() || "Untitled work";
+        const slug = `${slugify(title) || "untitled-work"}-${id.slice(0, 8)}`;
+        const { error: workError } = await supabase.from("works").insert({ id, title, slug, year: new Date().getFullYear(), status: "draft", is_new: false, is_featured: false });
+        if (workError) { failedFiles.push(`${file.name} (work record)`); continue; }
+        try {
+        const preparedFile = await prepareArtworkFile(file);
+        const upload = await uploadArtworkImage({ workId: id, file: preparedFile, alt: title, displayOrder: 0, isPrimary: true });
+          if (!upload.ok) failedFiles.push(`${file.name} (${upload.error ?? "upload failed"})`);
+          else { added += 1; addedIds.push(id); continue; }
+        } catch (uploadError) {
+          console.error("[catalogue-batch-upload] upload failed", uploadError);
+          failedFiles.push(`${file.name} (upload error)`);
+        }
         await supabase.from("works").delete().eq("id", id);
-        failedFiles.push(file.name);
-        continue;
       }
-      added += 1; addedIds.push(id);
+      setMessage(`${added} draft${added === 1 ? "" : "s"} added.`);
+      if (failedFiles.length) setError(`Could not add ${failedFiles.join(", ")}. Check the file type, size, and Studio permissions.`);
+      if (addedIds.length) {
+        const [{ data: newWorks }, { data: newImages }] = await Promise.all([
+          supabase.from("works").select("*").in("id", addedIds),
+          supabase.from("work_images").select("id, work_id, storage_path, alt, display_order, is_primary").in("work_id", addedIds),
+        ]);
+        const imageMap = new Map<string, AdminCatalogueImage[]>();
+        (newImages ?? []).forEach((image) => imageMap.set(image.work_id, [...(imageMap.get(image.work_id) ?? []), { ...image, url: getArtworkUrl(supabase, image.storage_path) }]));
+        setWorks((current) => [...current, ...(newWorks ?? []).map((work) => ({ ...work, series_name: null, images: imageMap.get(work.id) ?? [] }))]);
+        setSelected(new Set(addedIds));
+        router.refresh();
+      }
+    } catch (batchError) {
+      console.error("[catalogue-batch-upload] batch failed", batchError);
+      setError("The batch upload stopped unexpectedly. Please try one file first and check the browser console for details.");
+    } finally {
+      setBusy(false);
+      if (quickAddRef.current) quickAddRef.current.value = "";
     }
-    setBusy(false);
-    setMessage(`${added} draft${added === 1 ? "" : "s"} added.`);
-    if (failedFiles.length) setError(`Could not add ${failedFiles.join(", ")}. Check the file type, size, and Studio permissions.`);
-    if (addedIds.length) {
-      const [{ data: newWorks }, { data: newImages }] = await Promise.all([
-        supabase.from("works").select("*").in("id", addedIds),
-        supabase.from("work_images").select("id, work_id, storage_path, alt, display_order, is_primary").in("work_id", addedIds),
-      ]);
-      const imageMap = new Map<string, AdminCatalogueImage[]>();
-      (newImages ?? []).forEach((image) => imageMap.set(image.work_id, [...(imageMap.get(image.work_id) ?? []), { ...image, url: getArtworkUrl(supabase, image.storage_path) }]));
-      setWorks((current) => [...current, ...(newWorks ?? []).map((work) => ({ ...work, series_name: null, images: imageMap.get(work.id) ?? [] }))]);
-      setSelected(new Set(addedIds));
-      router.refresh();
-    }
-    if (quickAddRef.current) quickAddRef.current.value = "";
   }
 
   async function deleteWork(work: AdminCatalogueWork) {
