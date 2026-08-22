@@ -156,7 +156,7 @@
   #contact input,#contact textarea{font-family:var(--sans);font-size:14px;padding:14px 16px;border:1px solid var(--line);
     background:rgba(255,255,255,.8);border-radius:1px;color:var(--ink)}
   #contact textarea{min-height:120px;resize:vertical}
-  #contact .socials{margin-top:28px;display:flex;gap:26px;justify-content:center;font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+  #contact .socials{margin-top:28px;display:flex;justify-content:center;font-size:12px;letter-spacing:.2em;text-transform:uppercase}
   #contact .socials a{color:var(--teal);text-decoration:none}
   .note{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a97a0;text-align:center;margin-top:24px;font-weight:300}
 
@@ -284,13 +284,22 @@
   .showtext .meta{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8fa1ab;margin-top:12px;font-weight:300}
 
   footer{position:relative;z-index:10;text-align:center;padding:44px;background:var(--ink);color:rgba(255,255,255,.6);font-size:12px;letter-spacing:.14em}
+  footer .footer-instagram{position:absolute;left:clamp(20px,5vw,64px);top:50%;display:grid;place-items:center;width:46px;height:46px;transform:translateY(-50%);border:1px solid rgba(255,255,255,.26);border-radius:50%;color:rgba(255,255,255,.78);text-decoration:none;transition:color .35s ease,border-color .35s ease,transform .35s ease,box-shadow .35s ease}
+  footer .footer-instagram::before{content:"";position:absolute;inset:-7px;border-radius:inherit;background:var(--chroma-gradient);background-size:260% 100%;filter:blur(10px);opacity:0;z-index:-1;transition:opacity .35s ease;animation:footer-instagram-chroma 3.8s linear infinite}
+  footer .footer-instagram::after{content:"";position:absolute;inset:3px;border:1px solid rgba(255,255,255,.1);border-radius:inherit;opacity:.8;transition:inset .35s ease,border-color .35s ease}
+  footer .footer-instagram:hover,footer .footer-instagram:focus-visible{color:#fff;border-color:rgba(255,255,255,.7);transform:translateY(-50%) scale(1.08);box-shadow:0 0 24px rgba(87,232,255,.28),0 0 42px rgba(255,102,196,.16)}
+  footer .footer-instagram:hover::before,footer .footer-instagram:focus-visible::before{opacity:.9}
+  footer .footer-instagram:hover::after,footer .footer-instagram:focus-visible::after{inset:6px;border-color:rgba(255,255,255,.42)}
+  footer .footer-instagram svg{position:relative;z-index:1;width:20px;height:20px;transition:filter .35s ease,transform .35s ease}
+  footer .footer-instagram:hover svg,footer .footer-instagram:focus-visible svg{filter:drop-shadow(0 0 5px rgba(255,255,255,.8));transform:rotate(-8deg) scale(1.08)}
+  @keyframes footer-instagram-chroma{from{background-position:0% 50%}to{background-position:260% 50%}}
   footer .footer-logo-option-wrap{position:relative;display:block;width:min(153px,62vw);height:108px;margin:0 auto 18px;transform-origin:center}
   footer .footer-logo-option{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 5px 9px rgba(166,132,77,.2));transition:filter .3s ease,transform .3s ease}
   footer .footer-logo-option-wrap.is-v2{animation:footer-fairy-life 4.8s ease-in-out infinite}
   footer .footer-logo-option-wrap.is-v2.is-shimmer-ready::after{position:absolute;inset:0;display:block;background:var(--chroma-gradient);background-size:260% 100%;mix-blend-mode:screen;opacity:.62;pointer-events:none;content:"";mask:url('/fairy-logo-option-v2.png') center/contain no-repeat;-webkit-mask:url('/fairy-logo-option-v2.png') center/contain no-repeat;animation:footer-fairy-shimmer 3.94s linear infinite}
   @keyframes footer-fairy-life{0%,100%{filter:drop-shadow(0 5px 9px rgba(166,132,77,.2));transform:scale(1)}50%{filter:drop-shadow(0 6px 14px rgba(87,232,255,.34)) drop-shadow(0 0 11px rgba(255,102,196,.2));transform:scale(1.025)}}
   @keyframes footer-fairy-shimmer{from{background-position:120% 50%}to{background-position:-20% 50%}}
-  @media(prefers-reduced-motion:reduce){footer .footer-logo-option-wrap,footer .footer-logo-option,footer .footer-logo-option-wrap::after{animation:none;transition:none}}
+  @media(prefers-reduced-motion:reduce){footer .footer-logo-option-wrap,footer .footer-logo-option,footer .footer-logo-option-wrap::after,footer .footer-instagram::before{animation:none;transition:none}}
   footer .brand2{font-family:var(--hero-script);font-size:26px;color:#fff}
 
   @media(max-width:860px){
@@ -527,12 +536,12 @@
         <h2>Let's create something</h2>
         <p class="lead" style="margin:0 auto">For commissions, exhibitions, and press.</p>
         <div id="commission-form-mount"></div>
-        <div class="socials"><a href="https://www.instagram.com/chroma_fairy/" target="_blank" rel="noopener">Instagram</a><a href="#home">Back to top</a></div>
+        <div class="socials"><a href="#home">Back to top</a></div>
       </div>
     </section>
   </main>
 
-  <footer><div class="footer-logo-option-wrap is-v2" data-deferred-footer><img loading="lazy" class="footer-logo-option" data-src="/fairy-logo-option-v2.png" alt="Chroma Fairy logo, version 2"></div><div class="brand2">Samantha Ty</div><div style="margin-top:8px">Fluid abstract artist · Philippines · © 2026</div></footer>
+  <footer><a class="footer-instagram" href="https://www.instagram.com/chroma_fairy/" target="_blank" rel="noopener noreferrer" aria-label="Chroma Fairy on Instagram"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.55" cy="6.55" r=".8" fill="currentColor" stroke="none"/></svg></a><div class="footer-logo-option-wrap is-v2" data-deferred-footer><img loading="lazy" class="footer-logo-option" data-src="/fairy-logo-option-v2.png" alt="Chroma Fairy logo, version 2"></div><div class="brand2">Samantha Ty</div><div style="margin-top:8px">Fluid abstract artist · Philippines · © 2026</div></footer>
 
 <script>
 /* =========================================================
