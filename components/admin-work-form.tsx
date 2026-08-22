@@ -94,7 +94,10 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
           display_order: imageDrafts.length + additions.length + index,
           is_primary: !hasPrimary && imageDrafts.length === 0 && additions.length === 0,
           url: previewUrl,
-          file: preparedFile,
+          // Keep the original HEIC for the server action. The converted file
+          // is only for the local preview; sending the expanded JPEG can
+          // exceed request-body limits before server-side conversion runs.
+          file,
           previewUrl,
         });
       } catch (conversionError) {

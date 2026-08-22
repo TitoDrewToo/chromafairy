@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
+  },
   serverExternalPackages: ["heic-convert"],
   outputFileTracingIncludes: {
     "/**": ["./docs/System_Journal.md"],

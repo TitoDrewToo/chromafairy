@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { deleteLandingItem, reorderLandingItems, updateLandingSection, uploadLandingImage, upsertLandingItem } from "../app/actions/admin-landing-page";
-import { prepareArtworkFile } from "../lib/client-image-conversion";
 import { getArtworkUrl } from "../lib/catalogue";
 import { createClient } from "../lib/supabase/client";
 import type { LandingPageContent } from "../lib/landing-page";
@@ -73,8 +72,7 @@ export default function AdminLandingPage({ initialContent }: { initialContent: L
   async function replaceImage(section: typeof sections[number], entry: LandingItem, index: number, file: File) {
     setBusy(`image-${entry.id}-${index}`); clearStatus();
     try {
-      const prepared = await prepareArtworkFile(file);
-      const result = await uploadLandingImage({ sectionKey: section.section_key, file: prepared });
+      const result = await uploadLandingImage({ sectionKey: section.section_key, file });
       if (!result.ok) return setError(result.error ?? "Could not upload that image.");
       if (!result.path) return setError("The image uploaded without a storage path.");
       const client = createClient();
