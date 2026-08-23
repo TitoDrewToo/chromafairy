@@ -49,7 +49,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
 
   const displayName = profile?.full_name || user.email || "Studio user";
   const role = profile?.role ?? "admin";
-  const { data: canViewSystems } = await supabase.rpc("is_user_manager");
+  const { data: canManageStudio } = await supabase.rpc("is_user_manager");
 
   return (
     <div className="admin-shell">
@@ -57,7 +57,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
         <Hint id="wordmark"><Link className="admin-wordmark" href="/studio">Chroma Fairy<span>Studio</span></Link></Hint>
         <nav id="admin-sidebar-nav" className="admin-nav" aria-label="Studio areas">
           {staffAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
-          {canViewSystems && managerAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
+          {canManageStudio && managerAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
         </nav>
         <Hint id="viewSite"><Link className="admin-site-link" href="/">← View site</Link></Hint>
       </aside>
