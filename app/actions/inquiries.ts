@@ -66,6 +66,7 @@ export async function submitInquiry(input: InquiryInput): Promise<{ ok: boolean;
     timeline: null,
     source: input.kind === "piece" ? "shop" : "home",
     status: "new",
+    archived_at: null,
     notified_at: null,
   });
   if (error) return { ok: false, error: "We couldn’t send that just now. Please try again." };

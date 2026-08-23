@@ -114,6 +114,7 @@ export type Inquiry = {
   timeline: string | null;
   source: string | null;
   status: InquiryStatus;
+  archived_at: string | null;
   notified_at: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -298,8 +299,8 @@ export type Database = {
       };
       inquiries: {
         Row: Inquiry;
-        Insert: Omit<Inquiry, "id" | "created_at" | "updated_at" | "status" | "notified_at"> &
-          Partial<Pick<Inquiry, "id" | "created_at" | "updated_at" | "status" | "notified_at">>;
+        Insert: Omit<Inquiry, "id" | "created_at" | "updated_at" | "status" | "archived_at" | "notified_at"> &
+          Partial<Pick<Inquiry, "id" | "created_at" | "updated_at" | "status" | "archived_at" | "notified_at">>;
         Update: Partial<Inquiry>;
         Relationships: [];
       };

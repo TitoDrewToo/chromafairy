@@ -32,6 +32,15 @@ export default function InquiryAdmin({ initialInquiries }: { initialInquiries: A
     setInquiries((current) => current.map((item) => item.id === inquiry.id ? { ...item, status: next } : item));
   }
 
+  async function archiveInquiry(inquiry: AdminInquiry) {
+    const supabase = createClient();
+    if (!supabase) return setError("Supabase is not configured.");
+    const archivedAt = new Date().toISOString();
+    const { error: archiveError } = await supabase.from("inquiries").update({ archived_at: archivedAt }).eq("id", inquiry.id);
+    if (archiveError) return setError("Could not archive inquiry.");
+    setInquiries((current) => current.filter((item) => item.id !== inquiry.id));
+  }
+
   const nextStatus = (inquiry: AdminInquiry) => statuses[Math.min(statuses.indexOf(inquiry.status) + 1, statuses.length - 1)];
 
   return <section className="admin-operation-list">
@@ -47,6 +56,7 @@ export default function InquiryAdmin({ initialInquiries }: { initialInquiries: A
         <span className={`admin-status-badge status-${inquiry.status}`}>{inquiry.status}</span>
         <Hint id="replyEmail"><a className="admin-small-button" href={gmailComposeUrl(inquiry)} target="_blank" rel="noopener noreferrer" onClick={() => { if (inquiry.status === "new") void setStatus(inquiry, "replied"); }}>Reply in Gmail</a></Hint>
         <Hint id="closeInquiry"><button className="admin-action-button" disabled={inquiry.status === "closed"} onClick={() => void setStatus(inquiry, nextStatus(inquiry))} type="button"><span className="admin-action-label">{inquiry.status === "new" ? "Mark replied" : inquiry.status === "replied" ? "Close inquiry" : "Closed"}</span></button></Hint>
+        <Hint id="archiveInquiry"><button className="admin-small-button admin-danger-button" onClick={() => void archiveInquiry(inquiry)} type="button">Archive</button></Hint>
       </div>
     </article>) : <div className="admin-empty-state">No inquiries yet.</div>}
   </section>;

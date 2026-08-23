@@ -9,7 +9,7 @@ export default async function AdminInquiriesPage() {
   const supabase = await createClient();
   if (!supabase) return <AdminMessage message="Supabase is not configured." />;
   const [{ data: inquiries, error }, { data: works }] = await Promise.all([
-    supabase.from("inquiries").select("*").order("created_at", { ascending: false }),
+    supabase.from("inquiries").select("*").is("archived_at", null).order("created_at", { ascending: false }),
     supabase.from("works").select("id, title, slug"),
   ]);
   if (error) return <AdminMessage message="Inquiries could not be loaded." />;

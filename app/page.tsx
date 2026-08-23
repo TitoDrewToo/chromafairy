@@ -10,8 +10,8 @@ export const metadata: Metadata = {
   title: "Chroma Fairy",
   description: "Discover Samantha Ty’s fluid abstract paintings, commissions, exhibitions, and original works from the Philippines.",
   alternates: { canonical: "/" },
-  openGraph: { title: "Chroma Fairy", description: "Fluid abstract paintings shaped by water, movement, and nature.", url: absoluteUrl("/"), images: [{ url: absoluteUrl("/fairy-logo.png"), alt: "Chroma Fairy" }] },
-  twitter: { card: "summary_large_image", title: "Chroma Fairy", description: "Fluid abstract paintings shaped by water, movement, and nature.", images: [absoluteUrl("/fairy-logo.png")] },
+  openGraph: { title: "Chroma Fairy", description: "Fluid abstract paintings shaped by water, movement, and nature.", url: absoluteUrl("/"), images: [{ url: absoluteUrl("/fairy-logo-option-v2.png"), alt: "Chroma Fairy" }] },
+  twitter: { card: "summary_large_image", title: "Chroma Fairy", description: "Fluid abstract paintings shaped by water, movement, and nature.", images: [absoluteUrl("/fairy-logo-option-v2.png")] },
 };
 
 function getHomeSource() {

@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { data: work } = await supabase.from("works").select("id, title, year, description, slug").eq("slug", slug).neq("status", "draft").maybeSingle();
   if (!work) return { title: "Work not found" };
   const { data: image } = await supabase.from("work_images").select("storage_path, alt").eq("work_id", work.id).order("is_primary", { ascending: false }).order("display_order").limit(1).maybeSingle();
-  const imageUrl = image ? getArtworkUrl(supabase, image.storage_path) : absoluteUrl("/fairy-logo.png");
+  const imageUrl = image ? getArtworkUrl(supabase, image.storage_path) : absoluteUrl("/fairy-logo-option-v2.png");
   const description = work.description || `${work.title}, an original fluid abstract painting by Samantha Ty from ${work.year}.`;
   return { title: work.title, description, alternates: { canonical: `/shop/${work.slug}` }, openGraph: { type: "website", title: `${work.title} · Chroma Fairy`, description, url: absoluteUrl(`/shop/${work.slug}`), images: [{ url: imageUrl, alt: image?.alt || work.title }] }, twitter: { card: "summary_large_image", title: `${work.title} · Chroma Fairy`, description, images: [imageUrl] } };
 }

@@ -49,11 +49,11 @@
   opacity: 0;
   pointer-events: none;
   mix-blend-mode: screen;
-  mask-image: url('/fairy-logo.png');
+  mask-image: url('/fairy-logo-option-v2.png');
   mask-position: center;
   mask-repeat: no-repeat;
   mask-size: contain;
-  -webkit-mask-image: url('/fairy-logo.png');
+  -webkit-mask-image: url('/fairy-logo-option-v2.png');
   -webkit-mask-position: center;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: contain;

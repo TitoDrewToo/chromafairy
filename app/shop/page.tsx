@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   title: "Original Fluid Art",
   description: "Browse original fluid abstract paintings by Samantha Ty, including available, reserved, and sold works.",
   alternates: { canonical: "/shop" },
-  openGraph: { title: "Original Fluid Art · Chroma Fairy", description: "Browse Samantha Ty’s original fluid abstract paintings.", url: absoluteUrl("/shop"), images: [{ url: absoluteUrl("/fairy-logo.png"), alt: "Chroma Fairy" }] },
-  twitter: { card: "summary_large_image", title: "Original Fluid Art · Chroma Fairy", description: "Browse Samantha Ty’s original fluid abstract paintings.", images: [absoluteUrl("/fairy-logo.png")] },
+  openGraph: { title: "Original Fluid Art · Chroma Fairy", description: "Browse Samantha Ty’s original fluid abstract paintings.", url: absoluteUrl("/shop"), images: [{ url: absoluteUrl("/fairy-logo-option-v2.png"), alt: "Chroma Fairy" }] },
+  twitter: { card: "summary_large_image", title: "Original Fluid Art · Chroma Fairy", description: "Browse Samantha Ty’s original fluid abstract paintings.", images: [absoluteUrl("/fairy-logo-option-v2.png")] },
 };
 
 export default function ShopPage() {
@@ -24,7 +24,7 @@ export default function ShopPage() {
           <header className="shop-header">
             <Link className="shop-back chroma-text" href="/">← Back home</Link>
             <Link aria-label="Chroma Fairy home" className="shop-brand chroma-text" href="/">
-              <img alt="Chroma Fairy" src="/fairy-logo.png" />
+              <img alt="Chroma Fairy" src="/fairy-logo-option-v2.png" />
             </Link>
           </header>
           <section className="shop-intro">
