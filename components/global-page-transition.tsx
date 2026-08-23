@@ -8,10 +8,10 @@ import HomeAudio from "./home-audio";
 
 type BufferPhase = "loading" | "leaving" | "ready";
 
-const BUFFER_MIN_MS = 720;
-const BUFFER_READY_FADE_MS = 320;
-const BUFFER_MAX_MS = 3200;
-const ROUTE_TRANSITION_MS = 360;
+const BUFFER_MIN_MS = 1200;
+const BUFFER_READY_FADE_MS = 520;
+const BUFFER_MAX_MS = 4800;
+const ROUTE_TRANSITION_MS = 480;
 
 export default function GlobalPageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -116,8 +116,10 @@ export default function GlobalPageTransition({ children }: { children: ReactNode
   return (
     <>
       <div aria-hidden="true" id="global-background-layer" />
-      {pathname === "/" ? <HomeAudio /> : null}
-      <div className={frameClass}>{children}</div>
+      <div className={frameClass}>
+        {pathname === "/" ? <HomeAudio /> : null}
+        {children}
+      </div>
       {showBuffer && (
         <div aria-label="Loading Chroma Fairy" className={`global-fairy-buffer ${bufferPhase === "leaving" ? "is-leaving" : ""}`} role="status">
           <AnimatedFairy size={122} intensity={0.86} />

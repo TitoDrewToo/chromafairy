@@ -6,8 +6,8 @@
   --chroma-gradient: linear-gradient(105deg, #e4b84f 0%, #ff66c4 22%, #57e8ff 44%, #9cff57 63%, #ffd75c 80%, #ff66c4 100%);
   --chroma-size: 300% 100%;
   --chroma-duration: 4.8s;
-  --fairy-buffer-duration: 1640ms;
-  --page-transition-duration: 360ms;
+  --fairy-buffer-duration: 520ms;
+  --page-transition-duration: 480ms;
 }
 
 a:focus-visible,
