@@ -57,7 +57,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
         <Hint id="wordmark"><Link className="admin-wordmark" href="/studio">Chroma Fairy<span>Studio</span></Link></Hint>
         <nav id="admin-sidebar-nav" className="admin-nav" aria-label="Studio areas">
           {staffAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
-          {canViewSystems && <>{managerAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}<Hint id="navSystems"><Link href="/studio/systems">Systems</Link></Hint></>}
+          {canViewSystems && managerAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
         </nav>
         <Hint id="viewSite"><Link className="admin-site-link" href="/">← View site</Link></Hint>
       </aside>
