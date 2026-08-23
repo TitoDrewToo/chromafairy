@@ -35,11 +35,10 @@ function WorkCard({ work }: { work: CatalogueWork }) {
       <Link className="chroma-text" href={`/shop/${work.slug}`} aria-label={`View ${work.title}`}>
         <div className="shop-card-image">
           <ShopImage alt={image?.alt ?? work.title} src={image?.storage_path} />
-          <span className={`shop-card-badge ${work.status}`}>{statusLabel(work.status, work.is_new)}</span>
         </div>
       </Link>
       <div className="shop-card-copy">
-        <div className="shop-card-meta"><span>{work.series_name ?? "Original work"}</span><span>{work.year}</span></div>
+        <div className="shop-card-meta"><span>{work.series_name ?? "Original work"}</span><span className="shop-card-year-status"><span>{work.year}</span><span className={`shop-card-status ${work.status}`}>{statusLabel(work.status, work.is_new)}</span></span></div>
         <Link className="shop-card-title chroma-text" href={`/shop/${work.slug}`}>{work.title}</Link>
         <div className="shop-card-price">{formatPrice(work)}</div>
       </div>

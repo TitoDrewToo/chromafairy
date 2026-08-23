@@ -419,22 +419,23 @@
   letter-spacing: 0.04em;
 }
 
-.shop-card-badge {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  padding: 6px 9px;
-  background: rgba(251,250,247,.9);
-  color: var(--shop-gold-deep);
+.shop-card-status {
+  display: inline-block;
+  align-self: end;
+  padding: 4px 7px;
+  background: var(--chroma-gradient);
+  background-size: var(--chroma-size);
+  color: #fff;
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+  animation: chroma-shimmer var(--chroma-duration) linear infinite;
 }
 
-.shop-card-badge.sold,
-.shop-card-badge.reserved {
-  background: var(--shop-ink);
-  color: #fff;
+.shop-card-status.available {
+  background: transparent;
+  color: var(--shop-muted);
+  animation: none;
 }
 
 .shop-card-copy {
@@ -449,6 +450,14 @@
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.shop-card-year-status {
+  display: inline-flex;
+  align-items: end;
+  flex-direction: column;
+  gap: 6px;
+  text-align: right;
 }
 
 .shop-card-title {
