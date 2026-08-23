@@ -7,6 +7,7 @@ import type { Series, Work, WorkImage, WorkStatus } from "../lib/supabase/types"
 import { Hint } from "./studio-hint";
 import { createClient } from "../lib/supabase/client";
 import { prepareArtworkFile } from "../lib/client-image-conversion";
+import { imageContentType, imageExtension, isCompatibleImageType } from "../lib/image-types";
 
 type FormMode = "create" | "edit";
 type SeriesOption = Pick<Series, "id" | "name" | "slug" | "year">;
@@ -16,7 +17,6 @@ type ImageDraft = ExistingImage & { file?: File; previewUrl?: string };
 const statusOptions: WorkStatus[] = ["draft", "available", "reserved", "sold"];
 const unitOptions = ["cm", "in"] as const;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-const imageTypes = new Map([["jpg", "image/jpeg"], ["jpeg", "image/jpeg"], ["png", "image/png"], ["webp", "image/webp"], ["gif", "image/gif"], ["heic", "image/heic"], ["heif", "image/heif"]]);
 
 export default function WorkForm({ mode, work, images = [], series }: { mode: FormMode; work?: Work; images?: ExistingImage[]; series: SeriesOption[] }) {
   const router = useRouter();
@@ -72,8 +72,8 @@ export default function WorkForm({ mode, work, images = [], series }: { mode: Fo
     const rejected: string[] = [];
     const additions: ImageDraft[] = [];
     for (const [index, file] of Array.from(files).entries()) {
-      const extension = file.name.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] ?? "";
-      const expectedType = imageTypes.get(extension);
+      const extension = imageExtension(file.name);
+      const expectedType = imageContentType(extension);
       const typeMatches = isCompatibleImageType(file.type, expectedType, extension);
       if (!expectedType || !typeMatches || file.size <= 0 || file.size > MAX_IMAGE_BYTES) {
         rejected.push(file.name);
@@ -237,15 +237,6 @@ function slugify(value: string) {
     .replace(/^-|-$/g, "");
 }
 function titleCase(value: string) { return value.charAt(0).toUpperCase() + value.slice(1); }
-function isCompatibleImageType(declaredType: string, expectedType: string | undefined, extension?: string) {
-  if (!expectedType) return false;
-  const normalizedType = declaredType.trim().toLowerCase();
-  const isHeic = extension === "heic" || extension === "heif";
-  return !normalizedType
-    || normalizedType === expectedType
-    || (expectedType === "image/jpeg" && normalizedType === "image/jpg")
-    || (isHeic && (normalizedType === "application/octet-stream" || normalizedType.startsWith("image/heic") || normalizedType.startsWith("image/heif") || normalizedType === "image/x-heic" || normalizedType === "image/x-heif"));
-}
 
 function DraftImagePreview({ alt, src, fileName }: { alt: string; src: string; fileName?: string }) {
   const [failed, setFailed] = useState(false);

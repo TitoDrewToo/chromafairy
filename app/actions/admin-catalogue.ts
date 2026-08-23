@@ -3,15 +3,15 @@
 import { createAdminClient } from "../../lib/supabase/admin";
 import { createClient } from "../../lib/supabase/server";
 import { convertHeicToJpeg, isHeicFile } from "../../lib/server-image-conversion";
+import { imageContentType, imageExtension, isCompatibleImageType } from "../../lib/image-types";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-const imageTypes = new Map([["jpg", "image/jpeg"], ["jpeg", "image/jpeg"], ["png", "image/png"], ["webp", "image/webp"], ["gif", "image/gif"], ["heic", "image/heic"], ["heif", "image/heif"]]);
 
 export async function uploadArtworkImage(input: { workId: string; file: File; alt: string; displayOrder: number; isPrimary: boolean }) {
   const file = input.file;
-  const filenameExtension = file?.name?.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] ?? "";
-  const contentType = imageTypes.get(filenameExtension);
+  const filenameExtension = imageExtension(file?.name);
+  const contentType = imageContentType(filenameExtension);
   const isHeic = isHeicFile(file);
   const storageExtension = isHeic || filenameExtension === "jpeg" ? "jpg" : filenameExtension;
   const hasFileData = Boolean(file && typeof file.size === "number" && typeof file.arrayBuffer === "function");
@@ -22,7 +22,7 @@ export async function uploadArtworkImage(input: { workId: string; file: File; al
   const { data: isAdmin } = await supabase.rpc("is_admin");
   if (!isAdmin) return { ok: false, error: "Not authorized." };
   let uploadBody: File | Buffer = file;
-  let uploadContentType = contentType;
+  let uploadContentType = contentType ?? "application/octet-stream";
   if (isHeic) {
     try {
       uploadBody = await convertHeicToJpeg(file);
@@ -79,14 +79,4 @@ export async function deleteCatalogueWork(workId: string) {
   }
 
   return { ok: true };
-}
-
-function isCompatibleImageType(declaredType: string, expectedType: string | undefined, extension?: string) {
-  if (!expectedType) return false;
-  const normalizedType = declaredType.trim().toLowerCase();
-  return !normalizedType
-    || normalizedType === expectedType
-    || normalizedType === "application/octet-stream"
-    || (expectedType === "image/jpeg" && normalizedType === "image/jpg")
-    || ((extension === "heic" || extension === "heif") && (normalizedType.startsWith("image/heic") || normalizedType.startsWith("image/heif") || normalizedType === "image/x-heic" || normalizedType === "image/x-heif"));
 }
