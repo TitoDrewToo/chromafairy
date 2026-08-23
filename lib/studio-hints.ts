@@ -47,6 +47,8 @@ export const studioHints = {
   replyEmail: "Opens your email app to reply to this lead.",
   closeInquiry: "Mark this inquiry handled so it drops off your active list.",
   archiveInquiry: "Hide this inquiry from the active inbox while keeping it stored in your records.",
+  restoreInquiry: "Return this inquiry to the active Studio inbox.",
+  inquiryArchive: "Open inquiries that have been archived from the active inbox.",
   recordSale: "Log a completed sale — marks the piece Sold and adds it to revenue.",
   chooseWork: "Pick the piece that sold.",
   customer: "Links the buyer — matches an existing customer by email, or creates one.",

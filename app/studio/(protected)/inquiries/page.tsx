@@ -1,5 +1,6 @@
 import { createClient } from "../../../../lib/supabase/server";
 import InquiryAdmin, { type AdminInquiry } from "../../../../components/admin-inquiries";
+import Link from "next/link";
 import "../../admin.css";
 import "../../operations.css";
 
@@ -15,7 +16,9 @@ export default async function AdminInquiriesPage() {
   if (error) return <AdminMessage message="Inquiries could not be loaded." />;
   const worksById = new Map((works ?? []).map((work) => [work.id, work]));
   const rows: AdminInquiry[] = (inquiries ?? []).map((inquiry) => ({ ...inquiry, work: inquiry.work_id ? worksById.get(inquiry.work_id) ?? null : null }));
-  return <div className="admin-dashboard admin-operations-page"><p className="admin-eyebrow">Studio inbox</p><h1>Inquiries</h1><p className="admin-muted">Piece and commission leads from the public site.</p><InquiryAdmin initialInquiries={rows} /></div>;
+  return <div className="admin-dashboard admin-operations-page"><p className="admin-eyebrow">Studio inbox</p><h1>Inquiries</h1><p className="admin-muted">Piece and commission leads from the public site.</p><HintLink href="/studio/inquiries/archive">View archived inquiries</HintLink><InquiryAdmin initialInquiries={rows} /></div>;
 }
+
+function HintLink({ href, children }: { href: string; children: React.ReactNode }) { return <Link className="admin-archive-link" href={href}>{children} →</Link>; }
 
 function AdminMessage({ message }: { message: string }) { return <div className="admin-dashboard"><p className="admin-eyebrow">Studio inbox</p><h1>Inquiries</h1><p className="admin-muted">{message}</p></div>; }
