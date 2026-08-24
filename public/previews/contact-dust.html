@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chroma Fairy · contact · dust placeholders</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap');
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  body{ min-height:100vh; font-family:"Jost",system-ui,sans-serif; color:#12303f;
+        background:linear-gradient(160deg,#efe9e1 0%,#e9e0d5 55%,#e4dccf 100%); display:grid; place-items:center; padding:56px 20px; }
+  .wrap{ width:100%; max-width:760px; }
+  .eyebrow{ text-align:center; letter-spacing:.42em; text-transform:uppercase; font-size:13px; color:#3f7d86; font-weight:500; }
+  h1{ text-align:center; font-family:"Cormorant Garamond",Georgia,serif; font-weight:600; font-size:clamp(44px,7vw,84px); line-height:1.02; margin-top:16px; color:#12303f; }
+  .sub{ text-align:center; font-family:"Cormorant Garamond",serif; font-size:clamp(20px,2.4vw,26px); color:#4a5b66; margin-top:14px; }
+  form{ margin-top:40px; display:flex; flex-direction:column; gap:16px; }
+  .field{ position:relative; }
+  .field input, .field textarea{ width:100%; font-family:"Jost",sans-serif; font-size:17px; color:#12303f;
+        background:rgba(255,255,255,.72); border:1px solid rgba(30,50,60,.16); border-radius:4px; padding:19px 22px; outline:none;
+        transition:border-color .3s, background .3s, box-shadow .3s; }
+  .field textarea{ min-height:190px; resize:vertical; }
+  .field input:focus, .field textarea:focus{ border-color:#b99653; background:rgba(255,255,255,.92); box-shadow:0 0 0 3px rgba(185,150,83,.12); }
+  .field input::placeholder, .field textarea::placeholder{ color:transparent; }   /* we draw our own */
+  canvas.ph{ position:absolute; left:0; top:0; pointer-events:none; }
+  .req-note{ font-size:12.5px; letter-spacing:.06em; color:#6a7883; margin-top:6px; }
+  .req-note b{ color:#b99653; font-weight:500; }
+  .disclosure{ font-size:12.5px; line-height:1.5; color:#6a7883; max-width:520px; }
+  .disclosure a{ color:#3f7d86; }
+  .row{ display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-top:6px; }
+  button.send{ font-family:"Jost",sans-serif; letter-spacing:.24em; text-transform:uppercase; font-size:14px; color:#f3efe8;
+        background:#12303f; border:none; border-radius:4px; padding:20px 40px; cursor:pointer; transition:background .3s, transform .2s; }
+  button.send:hover{ background:#1c4759; transform:translateY(-1px); }
+  .footer{ text-align:center; margin-top:44px; letter-spacing:.22em; text-transform:uppercase; font-size:12px; color:#5a6a74; }
+  .hint{ text-align:center; margin-top:10px; font-size:12px; color:#9aa6ad; font-style:italic; font-family:"Cormorant Garamond",serif; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Contact</div>
+  <h1>Let&rsquo;s create something</h1>
+  <div class="sub">For commissions, exhibitions, and press.</div>
+  <form id="form" autocomplete="off" onsubmit="return false;">
+    <div class="field"><input id="f-name" type="text" data-ph="Your name *"><canvas class="ph"></canvas></div>
+    <div class="field"><input id="f-email" type="email" data-ph="Email *"><canvas class="ph"></canvas></div>
+    <div class="field"><input id="f-phone" type="text" data-ph="Phone (optional)"><canvas class="ph"></canvas></div>
+    <div class="field"><textarea id="f-msg" data-ph="Tell Samantha about your project&hellip; *"></textarea><canvas class="ph"></canvas></div>
+    <div class="req-note"><b>&lowast;</b> Required fields</div>
+    <div class="row">
+      <button class="send" type="submit">Send message</button>
+      <div class="disclosure">Your name, email, and note stay with the studio so Samantha can write back &mdash; never shared, never sold.</div>
+    </div>
+  </form>
+  <div class="footer">Instagram &nbsp;&nbsp; Back to top</div>
+  <div class="hint">Click a field to watch the placeholder dust away.</div>
+</div>
+
+<script>
+(function(){
+  const PH_COLOR=[138,148,160];                 // muted placeholder gray
+  const SPARKS=[[185,150,83],[63,125,134],[212,196,168]]; // gold / teal / sand shimmer
+  function setup(input, canvas){
+    const text=input.getAttribute("data-ph");
+    const isArea=input.tagName==="TEXTAREA";
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    let particles=[], state="idle", raf=0, t0=0;
+    const ctx=canvas.getContext("2d");
+
+    function sizeAndBuild(){
+      const w=input.clientWidth, h=input.clientHeight;
+      canvas.style.width=w+"px"; canvas.style.height=h+"px";
+      canvas.width=Math.floor(w*dpr); canvas.height=Math.floor(h*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.clearRect(0,0,w,h);
+      ctx.font='400 17px "Jost", sans-serif';
+      ctx.textBaseline="top";
+      const padX=22, padY=isArea?19:0;
+      const ty=isArea?padY:(h/2-9);
+      ctx.fillStyle="rgb("+PH_COLOR.join(",")+")";
+      ctx.fillText(text, padX, ty);
+      // sample text pixels into particles
+      const img=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+      particles=[];
+      const step=2;
+      for(let y=0;y<canvas.height;y+=step){
+        for(let x=0;x<canvas.width;x+=step){
+          const a=img[(y*canvas.width+x)*4+3];
+          if(a>110){
+            const hx=x/dpr, hy=y/dpr;
+            const spark=SPARKS[(Math.random()*SPARKS.length)|0];
+            particles.push({hx,hy,x:hx,y:hy,
+              vx:0.25+Math.random()*1.1, vy:-(0.15+Math.random()*0.5),
+              tur:Math.random()*6.28, col:Math.random()<0.5?PH_COLOR:spark,
+              delay:(hx/(w))*260 + Math.random()*90, a:1});
+          }
+        }
+      }
+      if(state==="idle") drawText(1);
+    }
+    function drawText(alpha){
+      const w=input.clientWidth,h=input.clientHeight;
+      ctx.clearRect(0,0,w,h);
+      const padX=22, ty=isArea?19:(h/2-9);
+      ctx.globalAlpha=alpha; ctx.font='400 17px "Jost", sans-serif'; ctx.textBaseline="top";
+      ctx.fillStyle="rgb("+PH_COLOR.join(",")+")"; ctx.fillText(text,padX,ty); ctx.globalAlpha=1;
+    }
+    function dust(){
+      if(state!=="idle") return;
+      state="dusting"; t0=performance.now();
+      // re-init each particle every dusting so repeated triggers behave identically
+      for(const p of particles){ p.x=p.hx; p.y=p.hy; p.a=1;
+        p.vx=0.25+Math.random()*1.1; p.vy=-(0.15+Math.random()*0.5); p.tur=Math.random()*6.28; }
+      loop();
+    }
+    function loop(){
+      const w=input.clientWidth,h=input.clientHeight;
+      const now=performance.now(), el=now-t0;
+      ctx.clearRect(0,0,w,h);
+      let alive=false;
+      for(const p of particles){
+        if(el<p.delay){ // not yet snapped — still solid
+          ctx.globalAlpha=1; ctx.fillStyle="rgb("+PH_COLOR.join(",")+")";
+          ctx.fillRect(p.hx,p.hy,1.6,1.6); alive=true; continue;
+        }
+        const lt=(el-p.delay)/900;                 // 0..1 local life
+        if(lt>=1){ continue; }
+        alive=true;
+        p.tur+=0.15;
+        p.x+=p.vx + Math.sin(p.tur)*0.35;
+        p.y+=p.vy; p.vy-=0.012;                     // buoyant rise
+        p.a=1-lt;
+        ctx.globalAlpha=Math.max(0,p.a);
+        ctx.fillStyle="rgb("+p.col.join(",")+")";
+        const s=1.4+lt*1.2;
+        ctx.fillRect(p.x,p.y,s,s);
+      }
+      ctx.globalAlpha=1;
+      if(alive){ raf=requestAnimationFrame(loop); } else { state="gone"; ctx.clearRect(0,0,w,h); }
+    }
+    function restore(){
+      if(state!=="gone") return;
+      state="restoring"; const s=performance.now();
+      (function fin(){
+        const k=Math.min(1,(performance.now()-s)/380);
+        drawText(k*1);
+        if(k<1){ requestAnimationFrame(fin); } else { state="idle"; }
+      })();
+    }
+    input.addEventListener("focus",()=>{ if(state==="idle") dust(); });
+    input.addEventListener("blur",()=>{ if(input.value==="" && state==="gone") restore(); });
+    input.addEventListener("input",()=>{ if(input.value!=="" && (state==="idle")) dust(); });
+    const ro=new ResizeObserver(()=>{ if(state==="idle"||state==="gone"){ sizeAndBuild(); if(state==="gone") ctx.clearRect(0,0,input.clientWidth,input.clientHeight);} });
+    ro.observe(input);
+    // fonts may load after first paint — rebuild once ready
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(sizeAndBuild); }
+    sizeAndBuild();
+  }
+  document.querySelectorAll(".field").forEach((f)=>{
+    const input=f.querySelector("input,textarea"), canvas=f.querySelector("canvas.ph");
+    setup(input,canvas);
+  });
+})();
+</script>
+</body>
+</html>

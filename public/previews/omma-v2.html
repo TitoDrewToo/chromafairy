@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Omma · V2 · cinematic</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap');
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html{ scroll-behavior:auto; }
+  body{ background:#03050a; color:#eef3f6; font-family:ui-sans-serif,system-ui,sans-serif; }
+  #c{ position:fixed; inset:0; width:100vw; height:100vh; z-index:0; display:block; }
+  #spacer{ position:relative; z-index:1; pointer-events:none; }
+  .fixed{ position:fixed; z-index:2; pointer-events:none; text-shadow:0 2px 26px rgba(0,0,0,.85); }
+  .top{ top:28px; left:34px; }
+  .kick{ font-size:11px; letter-spacing:.34em; text-transform:uppercase; color:#bfe0ec; opacity:.85; }
+  .title{ font-family:'Playfair Display',Georgia,serif; font-size:clamp(30px,5vw,54px); font-style:italic; margin-top:8px; }
+  .sub{ font-size:12.5px; color:#d6e5ea; opacity:.72; margin-top:8px; max-width:340px; line-height:1.6; }
+  .counter{ left:34px; bottom:28px; font-size:11px; letter-spacing:.2em; color:#cfe0e6; opacity:.75; }
+  .counter b{ color:#8fd0ec; font-weight:500; }
+  .hint{ left:50%; bottom:24px; transform:translateX(-50%); font-size:10px; letter-spacing:.3em; text-transform:uppercase; color:#9fb6c2; opacity:.7; }
+  .prog{ position:fixed; top:0; left:0; height:2px; background:#7fcbe6; width:0; z-index:5; }
+  .panel{ position:fixed; top:24px; right:24px; z-index:6; width:224px; pointer-events:auto;
+          background:rgba(6,12,22,.74); backdrop-filter:blur(14px); border:1px solid rgba(120,180,210,.18); border-radius:14px; padding:15px 15px 9px; }
+  .panel h4{ font-size:9px; letter-spacing:.24em; text-transform:uppercase; color:rgba(150,200,225,.6); margin:2px 0 11px; font-weight:500; }
+  .prow{ display:flex; justify-content:space-between; font-size:10.5px; color:rgba(190,215,228,.72); margin-bottom:3px; }
+  .prow .v{ color:rgba(130,205,235,.9); font-variant-numeric:tabular-nums; }
+  input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:3px; border-radius:2px; background:rgba(120,180,210,.16); outline:none; margin-bottom:11px; }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:rgba(120,200,235,.85); cursor:pointer; }
+  .btns{ display:flex; gap:7px; }
+  .btns button{ flex:1; margin-top:2px; padding:8px 0; font:11px/1 ui-sans-serif,system-ui,sans-serif; letter-spacing:.1em; text-transform:uppercase;
+         color:#eef3f6; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.22); border-radius:999px; cursor:pointer; }
+  .btns button.on{ background:#eef3f6; color:#0a2028; border-color:#eef3f6; }
+  #loader{ position:fixed; inset:0; z-index:20; display:grid; place-items:center; background:#03050a; color:#7f97a3;
+           font:12px/1 ui-sans-serif,system-ui,sans-serif; letter-spacing:.3em; text-transform:uppercase; transition:opacity .8s; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="prog" id="prog"></div>
+<div class="fixed top">
+  <div class="kick">Omma &middot; V2 &middot; cinematic</div>
+  <div class="title">The&nbsp;Collection</div>
+  <div class="sub">Scroll to travel through Sam&rsquo;s paintings. The camera pans across each canvas, dollies in and tilts through each dissolve, and defocuses in the in-between &mdash; then settles sharp on the next.</div>
+</div>
+<div class="fixed counter">Painting <b id="idx">1</b> / <span id="tot">11</span></div>
+<div class="fixed hint">Scroll</div>
+<div class="panel">
+  <h4>Camera</h4>
+  <div class="prow"><span>Base zoom</span><span class="v" id="vZoom">1.10</span></div><input type="range" id="sZoom" min="1" max="1.6" step="0.01" value="1.10">
+  <div class="prow"><span>Dolly (transition)</span><span class="v" id="vDolly">0.18</span></div><input type="range" id="sDolly" min="0" max="0.6" step="0.01" value="0.18">
+  <div class="prow"><span>Tilt&deg; (transition)</span><span class="v" id="vTilt">2.5</span></div><input type="range" id="sTilt" min="0" max="8" step="0.1" value="2.5">
+  <div class="prow"><span>Perspective</span><span class="v" id="vPersp">0.12</span></div><input type="range" id="sPersp" min="0" max="0.6" step="0.01" value="0.12">
+  <div class="prow"><span>Defocus</span><span class="v" id="vFocus">1.30</span></div><input type="range" id="sFocus" min="0" max="3" step="0.05" value="1.30">
+  <div class="prow"><span>Pan (ken burns)</span><span class="v" id="vPan">0.050</span></div><input type="range" id="sPan" min="0" max="0.14" step="0.005" value="0.05">
+  <div class="prow"><span>Flow</span><span class="v" id="vFlow">0.90</span></div><input type="range" id="sFlow" min="0" max="1.5" step="0.05" value="0.90">
+  <div class="prow"><span>Dissolve</span><span class="v" id="vDis">0.55</span></div><input type="range" id="sDis" min="0" max="1" step="0.02" value="0.55">
+  <div class="btns"><button id="auto">Auto-play</button><button id="reset">Reset</button></div>
+</div>
+<div id="spacer"></div>
+<div id="loader">Loading the collection</div>
+
+<script>const TEX = ["/assets/paintings/01_IMG_8693.jpg", "/assets/paintings/02_IMG_8661.jpg", "/assets/paintings/03_IMG_5909.jpg", "/assets/paintings/04_IMG_5923.jpg", "/assets/paintings/05_IMG_8645.jpg", "/assets/paintings/06_IMG_R_0239.jpg", "/assets/paintings/07_IMG_3835.jpg", "/assets/paintings/08_IMG_8704.jpg", "/assets/paintings/09_IMG_2797.jpg", "/assets/paintings/10_IMG_2742.jpg", "/assets/paintings/11_IMG_1663.jpg"]; const DIM = [null, null, null, null, null, null, null, null, null, null, null];</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const N = TEX.length;
+  document.getElementById('tot').textContent = N;
+  document.getElementById('spacer').style.height = (N*90) + 'vh';
+
+  const canvas=document.getElementById('c');
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  const scene=new THREE.Scene();
+  const cam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+
+  const u={ uTexA:{value:null}, uTexB:{value:null},
+    uTexResA:{value:new THREE.Vector2(1350,1800)}, uTexResB:{value:new THREE.Vector2(1350,1800)},
+    uRes:{value:new THREE.Vector2(1,1)}, uTime:{value:0}, uBlend:{value:0}, uDissolve:{value:0.55},
+    uZoom:{value:1.1}, uShadow:{value:1.0}, uAmp:{value:0.9}, uBright:{value:1.5},
+    uAngle:{value:0.0}, uFocus:{value:0.0}, uScrollBoost:{value:0.0}, uPersp:{value:0.0}, uPan:{value:new THREE.Vector2(0,0)} };
+
+  const frag=`
+    precision highp float; varying vec2 vUv;
+    uniform sampler2D uTexA,uTexB; uniform vec2 uTexResA,uTexResB,uRes,uPan;
+    uniform float uTime,uBlend,uDissolve,uZoom,uShadow,uAmp,uBright,uAngle,uFocus,uScrollBoost,uPersp;
+    float lum(vec3 c){ return dot(c,vec3(0.299,0.587,0.114)); }
+    vec2 coverUV(vec2 uv, vec2 tr){
+      vec2 r=vec2(min((uRes.x/uRes.y)/(tr.x/tr.y),1.0),min((uRes.y/uRes.x)/(tr.y/tr.x),1.0));
+      vec2 p=uv-0.5;
+      float c=cos(uAngle), s=sin(uAngle);
+      p=mat2(c,-s,s,c)*p;                 // roll
+      float z=1.0 + p.y*uPersp;           // perspective pitch: foreshorten with vertical position
+      p/=max(z,0.2);
+      p=p/uZoom*r;
+      p+=uPan;
+      return p+0.5;
+    }
+    float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+    float noise(vec2 p){ vec2 i=floor(p),f=fract(p),uu=f*f*(3.0-2.0*f);
+      return mix(mix(hash(i),hash(i+vec2(1,0)),uu.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),uu.x),uu.y); }
+    float fbm(vec2 p){ float v=0.0,a=0.5; for(int i=0;i<4;i++){v+=a*noise(p);p*=2.02;a*=0.5;} return v; }
+    vec3 sp(sampler2D t, vec2 uv){ return texture2D(t, clamp(uv,0.002,0.998)).rgb; }
+    vec3 spBlur(sampler2D t, vec2 uv, float rad){
+      if(rad<0.0009) return sp(t,uv);
+      vec3 acc=sp(t,uv);
+      for(int k=0;k<6;k++){ float a=1.0472*float(k); acc+=sp(t, uv+vec2(cos(a),sin(a))*rad); }
+      return acc/7.0;
+    }
+    vec3 living(sampler2D tex, vec2 tr){
+      vec2 base=coverUV(vUv,tr);
+      float t=uTime*0.05*max(uAmp,0.001);
+      vec2 warp=(vec2(fbm(base*3.0+t),fbm(base*3.0+vec2(4.7,2.1)-t))-0.5)*0.03*uAmp;
+      vec2 uv=base+warp;
+      float e=1.5/max(uRes.x,uRes.y);
+      float gx=lum(sp(tex,uv+vec2(e,0.0)))-lum(sp(tex,uv-vec2(e,0.0)));
+      float gy=lum(sp(tex,uv+vec2(0.0,e)))-lum(sp(tex,uv-vec2(0.0,e)));
+      vec2 flow=vec2(-gy,gx); float fl=length(flow); flow=fl>1e-4?flow/fl:vec2(0.0);
+      vec2 drift=vec2(fbm(base*2.0-t*0.5),fbm(base*2.0+vec2(9.1,3.3)+t*0.5))-0.5;
+      flow=normalize(flow+drift*0.8+1e-5);
+      float speed=(0.10+uScrollBoost)*uAmp, scale=0.05; float tt=uTime*speed;
+      float rad=uFocus*0.013;
+      return mix(spBlur(tex,uv-flow*fract(tt)*scale,rad), spBlur(tex,uv-flow*fract(tt+0.5)*scale,rad), abs(1.0-2.0*fract(tt)));
+    }
+    void main(){
+      vec3 a=living(uTexA,uTexResA);
+      vec3 b=living(uTexB,uTexResB);
+      float n=fbm(vUv*3.2 + uTime*0.04);
+      float w=max(uDissolve,0.001);
+      float m=smoothstep(0.0,1.0, clamp((uBlend*(1.0+w) - w*0.5) + (n-0.5)*w, 0.0, 1.0));
+      vec3 col=mix(a,b,m);
+      col=(col-0.5)*1.06+0.5; float l=lum(col); col=mix(vec3(l),col,1.14); col*=uBright;
+      vec2 d=vUv-0.5;
+      float vig=smoothstep(1.15,0.30,length(d*vec2(1.0,1.06)));
+      float topShade=mix(1.0,0.40,smoothstep(0.32,1.0,vUv.y));
+      col*=mix(1.0, vig*topShade, uShadow);
+      gl_FragColor=vec4(col,1.0);
+    }`;
+  scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2), new THREE.ShaderMaterial({uniforms:u,fragmentShader:frag,
+    vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }`})));
+
+  const texes=new Array(N).fill(null), dims=new Array(N).fill(null); let loaded=0;
+  const loader=new THREE.TextureLoader();
+  TEX.forEach((src,i)=>{ loader.load(src,(t)=>{ t.encoding=THREE.sRGBEncoding; t.minFilter=THREE.LinearFilter; t.magFilter=THREE.LinearFilter;
+    t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping; t.anisotropy=8; texes[i]=t;
+    dims[i]=(DIM[i]&&DIM[i][0])?DIM[i]:[t.image.width,t.image.height]; loaded++;
+    if(loaded===N){ const l=document.getElementById('loader'); l.style.opacity='0'; setTimeout(()=>l.style.display='none',800); } }); });
+
+  function resize(){ renderer.setSize(innerWidth,innerHeight); u.uRes.value.set(innerWidth,innerHeight); }
+  addEventListener('resize',resize); resize();
+
+  let target=0, curr=0, lastCurr=0, boost=0, auto=false;
+  addEventListener('scroll',()=>{ const s=document.documentElement.scrollHeight-innerHeight;
+    target = s>0 ? Math.min(1,Math.max(0, (pageYOffset||document.documentElement.scrollTop)/s)) : 0;
+    auto=false; document.getElementById('auto').classList.remove('on'); });
+
+  // tunables
+  let zoomBase=1.10, dolly=0.18, tiltDeg=2.5, maxBlur=1.30, panAmt=0.05, perspBase=0.12;
+  const smooth=(x)=>x*x*(3.0-2.0*x);
+
+  const idxEl=document.getElementById('idx'), progEl=document.getElementById('prog');
+  const clock=new THREE.Clock();
+  (function loop(){
+    requestAnimationFrame(loop);
+    u.uTime.value=clock.getElapsedTime();
+    if(auto){ target += 0.0009; if(target>1) target=0; }
+    curr += (target-curr)*0.06;
+    const dv=Math.abs(curr-lastCurr); lastCurr=curr;
+    boost = boost*0.9 + dv*7.0; u.uScrollBoost.value=Math.min(boost,0.6);
+    progEl.style.width=(curr*100)+'%';
+
+    const pos=curr*(N-1);
+    let i=Math.floor(pos); if(i>N-2)i=N-2; if(i<0)i=0;
+    const frac=Math.min(1,Math.max(0,pos-i));
+    const es=smooth(frac);
+    const trans=Math.sin(Math.PI*frac);
+    const tt=u.uTime.value;
+
+    const pax=Math.cos(i*2.399)*panAmt, pay=Math.sin(i*1.71)*panAmt;
+    const pbx=Math.cos((i+1)*2.399)*panAmt, pby=Math.sin((i+1)*1.71)*panAmt;
+    u.uPan.value.set(
+      pax*(1-es)+pbx*es + Math.sin(tt*0.03+i)*panAmt*0.3,
+      pay*(1-es)+pby*es + Math.cos(tt*0.025+i)*panAmt*0.3
+    );
+    u.uZoom.value = zoomBase + 0.03*Math.sin(tt*0.05+i) + trans*dolly;
+    const dir=(i%2===0)?1:-1;
+    u.uAngle.value = trans*(tiltDeg*Math.PI/180.0)*dir + Math.sin(tt*0.02+i)*0.003;
+    u.uFocus.value = trans*maxBlur + 0.06;
+    u.uPersp.value = perspBase + trans*0.10 + Math.sin(tt*0.02+i)*0.01;
+
+    const ta=texes[i], tb=texes[i+1];
+    if(ta&&tb){ u.uTexA.value=ta; u.uTexB.value=tb; u.uBlend.value=frac;
+      if(dims[i])u.uTexResA.value.set(dims[i][0],dims[i][1]); if(dims[i+1])u.uTexResB.value.set(dims[i+1][0],dims[i+1][1]);
+      idxEl.textContent=(frac<0.5?i:i+1)+1; renderer.render(scene,cam);
+    }
+  })();
+
+  function bindVar(id,vid,dec,setter){ const s=document.getElementById(id),v=document.getElementById(vid);
+    const on=()=>{ setter(parseFloat(s.value)); v.textContent=parseFloat(s.value).toFixed(dec); };
+    s.addEventListener('input',on); return s; }
+  const sZoom=bindVar('sZoom','vZoom',2,x=>zoomBase=x);
+  const sDolly=bindVar('sDolly','vDolly',2,x=>dolly=x);
+  const sTilt=bindVar('sTilt','vTilt',1,x=>tiltDeg=x);
+  const sPersp=bindVar('sPersp','vPersp',2,x=>perspBase=x);
+  const sFocus=bindVar('sFocus','vFocus',2,x=>maxBlur=x);
+  const sPan=bindVar('sPan','vPan',3,x=>panAmt=x);
+  const sFlow=bindVar('sFlow','vFlow',2,x=>u.uAmp.value=x);
+  const sDis=bindVar('sDis','vDis',2,x=>u.uDissolve.value=x);
+
+  const autoBtn=document.getElementById('auto');
+  autoBtn.onclick=()=>{ auto=!auto; autoBtn.classList.toggle('on',auto); };
+  document.getElementById('reset').onclick=()=>{
+    const d={sZoom:1.10,sDolly:0.18,sTilt:2.5,sPersp:0.12,sFocus:1.30,sPan:0.05,sFlow:0.90,sDis:0.55};
+    for(const k in d){ const el=document.getElementById(k); el.value=d[k]; el.dispatchEvent(new Event('input')); }
+  };
+})();
+</script>
+</body>
+</html>
