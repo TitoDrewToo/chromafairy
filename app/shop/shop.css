@@ -340,6 +340,8 @@
 
 .shop-card {
   min-width: 0;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
 }
 
 .shop-card-image {
@@ -368,6 +370,8 @@
   display: block;
   width: 100%;
   height: auto;
+  max-height: 100%;
+  object-fit: contain;
   opacity: 0;
   transition: opacity 650ms ease, transform 700ms cubic-bezier(.2, .65, .2, 1), filter 500ms ease;
 }

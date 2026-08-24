@@ -19,6 +19,8 @@ export type CatalogueWork = {
   price_on_request: boolean | null;
   series_id: string | null;
   series_name: string | null;
+  width: number | null;
+  height: number | null;
   images: CatalogueImage[];
 };
 
@@ -30,10 +32,11 @@ function statusLabel(status: CatalogueWork["status"], isNew: boolean | null) {
 
 function WorkCard({ work }: { work: CatalogueWork }) {
   const image = work.images[0];
+  const aspectRatio = work.width && work.height ? `${work.width} / ${work.height}` : "3 / 4";
   return (
     <article className="shop-card">
       <Link className="chroma-text" href={`/shop/${work.slug}`} aria-label={`View ${work.title}`}>
-        <div className="shop-card-image">
+        <div className="shop-card-image" style={{ aspectRatio }}>
           <ShopImage alt={image?.alt ?? work.title} src={image?.storage_path} />
         </div>
       </Link>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { getArtworkSrcSet, getArtworkTransformUrl } from "../lib/catalogue";
 
 type ShopImageProps = {
   src?: string;
@@ -8,9 +9,10 @@ type ShopImageProps = {
   className?: string;
   loading?: "lazy" | "eager";
   fetchPriority?: "high" | "low" | "auto";
+  sizes?: string;
 };
 
-export default function ShopImage({ src, alt, className = "", loading = "lazy", fetchPriority = "auto" }: ShopImageProps) {
+export default function ShopImage({ src, alt, className = "", loading = "lazy", fetchPriority = "auto", sizes = "(max-width: 760px) 50vw, (max-width: 1100px) 25vw, 300px" }: ShopImageProps) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   const usableSrc = src && !failed ? src : undefined;
@@ -26,7 +28,9 @@ export default function ShopImage({ src, alt, className = "", loading = "lazy", 
           loading={loading}
           onError={() => setFailed(true)}
           onLoad={() => setLoaded(true)}
-          src={usableSrc}
+          sizes={sizes}
+          src={getArtworkTransformUrl(usableSrc, 640)}
+          srcSet={getArtworkSrcSet(usableSrc)}
         />
       ) : (
         <div className="shop-placeholder">Chroma Fairy</div>

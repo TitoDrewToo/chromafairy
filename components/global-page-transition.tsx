@@ -13,6 +13,14 @@ const BUFFER_READY_FADE_MS = 520;
 const BUFFER_MAX_MS = 4800;
 const ROUTE_TRANSITION_MS = 480;
 
+function decodeViewportImages() {
+  const images = Array.from(document.images).filter((image) => {
+    const rect = image.getBoundingClientRect();
+    return rect.bottom > 0 && rect.top < window.innerHeight;
+  });
+  return Promise.all(images.map((image) => image.decode().catch(() => undefined)));
+}
+
 export default function GlobalPageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const previousPathname = useRef(pathname);
@@ -31,29 +39,31 @@ export default function GlobalPageTransition({ children }: { children: ReactNode
     }
 
     const isHome = window.location.pathname === "/";
-    if (!isHome) {
-      bufferLeaveTimer.current = window.setTimeout(() => setBufferPhase("leaving"), BUFFER_MIN_MS);
-      bufferReadyTimer.current = window.setTimeout(() => setBufferPhase("ready"), BUFFER_MIN_MS + BUFFER_READY_FADE_MS);
-      return () => {
-        if (bufferLeaveTimer.current !== null) window.clearTimeout(bufferLeaveTimer.current);
-        if (bufferReadyTimer.current !== null) window.clearTimeout(bufferReadyTimer.current);
-      };
-    }
-
     const startedAt = performance.now();
-    let backgroundReady = false;
-    let audioReady = false;
+    let imagesReady = false;
+    let imageReadinessStarted = false;
+    let backgroundReady = !isHome;
+    let audioReady = !isHome;
     let finished = false;
     const finishWhenReady = () => {
-      if (finished || !backgroundReady || !audioReady) return;
+      if (finished || !backgroundReady || !audioReady || !imagesReady) return;
       finished = true;
       const remainingMinTime = Math.max(0, BUFFER_MIN_MS - (performance.now() - startedAt));
       bufferLeaveTimer.current = window.setTimeout(() => setBufferPhase("leaving"), remainingMinTime);
       bufferReadyTimer.current = window.setTimeout(() => setBufferPhase("ready"), remainingMinTime + BUFFER_READY_FADE_MS);
     };
+    const markImagesReady = () => {
+      if (imageReadinessStarted || imagesReady) return;
+      imageReadinessStarted = true;
+      void decodeViewportImages().then(() => {
+        imagesReady = true;
+        finishWhenReady();
+      });
+    };
     const markBackgroundReady = () => { backgroundReady = true; finishWhenReady(); };
     const markAudioReady = () => { audioReady = true; finishWhenReady(); };
     const readinessProbe = window.setInterval(() => {
+      markImagesReady();
       const audio = document.querySelector<HTMLAudioElement>("audio[data-home-ambient]");
       const canvas = document.querySelector<HTMLCanvasElement>("#global-background-layer canvas#art");
       const fallback = document.querySelector<HTMLElement>("#global-background-layer #artFallback");
@@ -62,9 +72,11 @@ export default function GlobalPageTransition({ children }: { children: ReactNode
       finishWhenReady();
       if (finished) window.clearInterval(readinessProbe);
     }, 100);
+    markImagesReady();
     const failSafe = window.setTimeout(() => {
       backgroundReady = true;
       audioReady = true;
+      imagesReady = true;
       finishWhenReady();
     }, BUFFER_MAX_MS);
     window.addEventListener("cf-home-background-ready", markBackgroundReady);
@@ -93,17 +105,30 @@ export default function GlobalPageTransition({ children }: { children: ReactNode
     if (bufferReadyTimer.current !== null) window.clearTimeout(bufferReadyTimer.current);
     if (routeTimer.current !== null) window.clearTimeout(routeTimer.current);
 
-    if (pathname === "/") {
-      setRouteTransitioning(false);
-      setBufferPhase("loading");
-      bufferLeaveTimer.current = window.setTimeout(() => setBufferPhase("leaving"), BUFFER_MIN_MS);
-      bufferReadyTimer.current = window.setTimeout(() => setBufferPhase("ready"), BUFFER_MIN_MS + BUFFER_READY_FADE_MS);
-      return;
-    }
-
-    setBufferPhase("ready");
-    setRouteTransitioning(true);
-    routeTimer.current = window.setTimeout(() => setRouteTransitioning(false), ROUTE_TRANSITION_MS);
+    setBufferPhase("loading");
+    setRouteTransitioning(pathname !== "/");
+    const startedAt = performance.now();
+    let active = true;
+    let finished = false;
+    let failSafe: number | null = null;
+    const finish = () => {
+      if (!active || finished) return;
+      finished = true;
+      if (failSafe !== null) window.clearTimeout(failSafe);
+      const remainingMinTime = Math.max(0, BUFFER_MIN_MS - (performance.now() - startedAt));
+      bufferLeaveTimer.current = window.setTimeout(() => setBufferPhase("leaving"), remainingMinTime);
+      bufferReadyTimer.current = window.setTimeout(() => setBufferPhase("ready"), remainingMinTime + BUFFER_READY_FADE_MS);
+      routeTimer.current = window.setTimeout(() => setRouteTransitioning(false), ROUTE_TRANSITION_MS);
+    };
+    void decodeViewportImages().then(finish);
+    failSafe = window.setTimeout(finish, BUFFER_MAX_MS);
+    return () => {
+      active = false;
+      if (failSafe !== null) window.clearTimeout(failSafe);
+      if (bufferLeaveTimer.current !== null) window.clearTimeout(bufferLeaveTimer.current);
+      if (bufferReadyTimer.current !== null) window.clearTimeout(bufferReadyTimer.current);
+      if (routeTimer.current !== null) window.clearTimeout(routeTimer.current);
+    };
   }, [pathname]);
 
   const showBuffer = bufferPhase !== "ready";

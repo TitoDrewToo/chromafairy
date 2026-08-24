@@ -71,6 +71,8 @@ async function ShopData() {
     price_on_request: work.price_on_request,
     series_id: work.series_id,
     series_name: work.series_id ? seriesById.get(work.series_id)?.name ?? null : null,
+    width: work.width,
+    height: work.height,
     images: imagesByWork.get(work.id) ?? [],
   }));
 
