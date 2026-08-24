@@ -46,14 +46,14 @@ function collectionPiece(image: LandingMedia) {
 function exhibitionEntry(entry: LandingItem, index: number) {
   const image = entry.media[0];
   const imageFirst = index % 2 === 0;
-  const room = image ? `<div class="room" style="min-height:460px"><img loading="lazy" class="photo" src="${attr(image.path)}" alt="${attr(image.alt)}" /><div class="scrim"></div><div class="roomcap">${text(image.label)}</div></div>` : `<div class="room" style="min-height:460px"><div class="scrim"></div></div>`;
+  const room = image ? `<div class="room has-photo"><img loading="lazy" class="photo" src="${attr(image.path)}" alt="${attr(image.alt)}" /><div class="scrim"></div><div class="roomcap">${text(image.label)}</div></div>` : `<div class="room" style="min-height:460px"><div class="scrim"></div></div>`;
   const copy = `<div class="showtext"><div class="k">${text(entry.eyebrow)}</div><h3>${text(entry.title)}</h3><div class="meta">${paragraphText(entry.subtitle)}</div>${entry.body ? `<p class="body" style="margin-top:16px">${paragraphText(entry.body)}</p>` : ""}</div>`;
   return `<div class="duo reveal" style="margin-bottom:clamp(24px,4vh,44px)">${imageFirst ? room + copy : copy + room}</div>`;
 }
 
 function galleryRoom(entry: LandingItem) {
   const image = entry.media[0];
-  return `<div class="room" style="min-height:460px">${image ? `<img loading="lazy" class="photo" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : ""}<div class="scrim"></div><div class="roomcap">${text(image?.label || entry.title)}</div></div>`;
+  return `<div class="room${image ? " has-photo" : ""}"${image ? "" : " style=\"min-height:460px\""}>${image ? `<img loading="lazy" class="photo" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : ""}<div class="scrim"></div><div class="roomcap">${text(image?.label || entry.title)}</div></div>`;
 }
 
 function pressImageCard(entry: LandingItem) {
