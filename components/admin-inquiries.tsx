@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { Inquiry, InquiryStatus } from "../lib/supabase/types";
-import { createClient } from "../lib/supabase/client";
+import { updateAdminInquiry } from "../app/actions/admin-inquiries";
 import { Hint } from "./studio-hint";
 
 export type AdminInquiry = Inquiry & { work: { id: string; title: string; slug: string } | null };
@@ -50,20 +50,18 @@ export default function InquiryAdmin({ initialInquiries, archived = false }: { i
 
   async function setStatus(inquiry: AdminInquiry, next: InquiryStatus) {
     if (next === inquiry.status) return;
-    const supabase = createClient();
-    if (!supabase) return setError("Supabase is not configured.");
-    const { error: updateError } = await supabase.from("inquiries").update({ status: next }).eq("id", inquiry.id);
-    if (updateError) return setError("Could not update inquiry status.");
+    setError("");
+    const result = await updateAdminInquiry({ inquiryId: inquiry.id, status: next });
+    if (!result.ok) return setError(result.error ?? "Could not update inquiry status.");
     setInquiries((current) => current.map((item) => item.id === inquiry.id ? { ...item, status: next } : item));
     setSelectedInquiry((current) => current?.id === inquiry.id ? { ...current, status: next } : current);
     router.refresh();
   }
 
   async function setArchived(inquiry: AdminInquiry, nextArchived: boolean) {
-    const supabase = createClient();
-    if (!supabase) return setError("Supabase is not configured.");
-    const { error: archiveError } = await supabase.from("inquiries").update({ archived_at: nextArchived ? new Date().toISOString() : null }).eq("id", inquiry.id);
-    if (archiveError) return setError(nextArchived ? "Could not archive inquiry." : "Could not restore inquiry.");
+    setError("");
+    const result = await updateAdminInquiry({ inquiryId: inquiry.id, archived: nextArchived });
+    if (!result.ok) return setError(nextArchived ? "Could not archive inquiry." : "Could not restore inquiry.");
     const archivedAt = nextArchived ? new Date().toISOString() : null;
     setInquiries((current) => current.map((item) => item.id === inquiry.id ? { ...item, archived_at: archivedAt } : item));
     setSelectedInquiry((current) => current?.id === inquiry.id ? { ...current, archived_at: archivedAt } : current);
