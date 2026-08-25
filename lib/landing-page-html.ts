@@ -1,6 +1,5 @@
 import type { LandingItem, LandingMedia } from "./supabase/types";
 import type { LandingPageContent } from "./landing-page";
-import { getArtworkSrcSet, getArtworkTransformUrl } from "./catalogue";
 
 export function injectLandingMarkup(markup: string, content: LandingPageContent) {
   const sections = new Map(content.sections.map((section) => [section.section_key, section]));
@@ -41,20 +40,20 @@ function renderPress(section?: LandingPageContent["sections"][number]) {
 }
 
 function collectionPiece(image: LandingMedia) {
-  return `<div class="room spotlit" style="width:300px;height:400px"><div class="floorline"></div><div class="content"><div class="piece" style="width:264px"><div class="frame"><div class="mat"><img loading="lazy" ${imageAttrs(image.path, "(max-width: 760px) 80vw, 264px")} alt="${attr(image.alt)}" /></div></div><div class="plaque">${text(image.label)}</div></div></div></div>`;
+  return `<div class="room spotlit" style="width:300px;height:400px"><div class="floorline"></div><div class="content"><div class="piece" style="width:264px"><div class="frame"><div class="mat"><img loading="lazy" src="${attr(image.path)}" alt="${attr(image.alt)}" /></div></div><div class="plaque">${text(image.label)}</div></div></div></div>`;
 }
 
 function exhibitionEntry(entry: LandingItem, index: number) {
   const image = entry.media[0];
   const imageFirst = index % 2 === 0;
-  const room = image ? `<div class="room has-photo"><img loading="lazy" class="photo" ${imageAttrs(image.path, "(max-width: 760px) 100vw, 50vw")} alt="${attr(image.alt)}" /><div class="scrim"></div><div class="roomcap">${text(image.label)}</div></div>` : `<div class="room" style="min-height:460px"><div class="scrim"></div></div>`;
+  const room = image ? `<div class="room has-photo"><img loading="lazy" class="photo" src="${attr(image.path)}" alt="${attr(image.alt)}" /><div class="scrim"></div><div class="roomcap">${text(image.label)}</div></div>` : `<div class="room" style="min-height:460px"><div class="scrim"></div></div>`;
   const copy = `<div class="showtext"><div class="k">${text(entry.eyebrow)}</div><h3>${text(entry.title)}</h3><div class="meta">${paragraphText(entry.subtitle)}</div>${entry.body ? `<p class="body" style="margin-top:16px">${paragraphText(entry.body)}</p>` : ""}</div>`;
   return `<div class="duo reveal" style="margin-bottom:clamp(24px,4vh,44px)">${imageFirst ? room + copy : copy + room}</div>`;
 }
 
 function galleryRoom(entry: LandingItem) {
   const image = entry.media[0];
-  return `<div class="room${image ? " has-photo" : ""}"${image ? "" : " style=\"min-height:460px\""}>${image ? `<img loading="lazy" class="photo" ${imageAttrs(image.path, "(max-width: 760px) 100vw, 50vw")} alt="${attr(image.alt)}" />` : ""}<div class="scrim"></div><div class="roomcap">${text(image?.label || entry.title)}</div></div>`;
+  return `<div class="room${image ? " has-photo" : ""}"${image ? "" : " style=\"min-height:460px\""}>${image ? `<img loading="lazy" class="photo" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : ""}<div class="scrim"></div><div class="roomcap">${text(image?.label || entry.title)}</div></div>`;
 }
 
 function pressImageCard(entry: LandingItem) {
@@ -62,7 +61,7 @@ function pressImageCard(entry: LandingItem) {
   const modalId = `landing-press-${entry.id.replace(/[^a-z0-9_-]/gi, "-")}`;
   const socialClass = `press-social-art-${slug(entry.title)}`;
   const socialTile = `<span class="press-instagram-tile press-social-art ${attr(socialClass)}" aria-hidden="true"><span class="press-social-veil"></span><span class="press-social-dust press-social-dust-one"></span><span class="press-social-dust press-social-dust-two"></span><span class="press-social-dust press-social-dust-three"></span><span class="press-social-center"><strong>${text(entry.title)}</strong><span>${text(entry.eyebrow || "Social feature")}</span></span></span>`;
-  return `<div class="quote adb-feature"><button class="press-cover-trigger" type="button" aria-haspopup="dialog" aria-controls="${attr(modalId)}">${image ? `<img loading="lazy" class="press-cover-image" ${imageAttrs(image.path, "(max-width: 760px) 80vw, 260px")} alt="${attr(image.alt)}" />` : socialTile}<span class="press-cover-caption">${text(image?.label || entry.link_label || "Open feature")}</span></button>${entry.body ? `<p>${linkText(entry.body, entry.link_url)}</p>` : ""}<div class="src">${text(entry.source)}</div></div>`;
+  return `<div class="quote adb-feature"><button class="press-cover-trigger" type="button" aria-haspopup="dialog" aria-controls="${attr(modalId)}">${image ? `<img loading="lazy" class="press-cover-image" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : socialTile}<span class="press-cover-caption">${text(image?.label || entry.link_label || "Open feature")}</span></button>${entry.body ? `<p>${linkText(entry.body, entry.link_url)}</p>` : ""}<div class="src">${text(entry.source)}</div></div>`;
 }
 
 function pressTextCard(entry: LandingItem) {
@@ -72,13 +71,7 @@ function pressTextCard(entry: LandingItem) {
 function pressModal(entry: LandingItem) {
   const image = entry.media[0];
   const modalId = `landing-press-${entry.id.replace(/[^a-z0-9_-]/gi, "-")}`;
-  return `<div id="${attr(modalId)}" class="press-modal" role="dialog" aria-modal="true" aria-labelledby="${attr(modalId)}-title" hidden><figure class="press-modal-card ${image ? "" : "press-instagram-modal-card"}">${image ? `<img loading="lazy" ${imageAttrs(image.path, "(max-width: 760px) 90vw, 760px")} alt="${attr(image.alt)}" />` : ""}<div id="${attr(modalId)}-title" class="eyebrow">${text(entry.title)}</div></figure></div>`;
-}
-
-function imageAttrs(path: string, sizes: string) {
-  const src = getArtworkTransformUrl(path, 768);
-  const srcSet = getArtworkSrcSet(path);
-  return `src="${attr(src)}"${srcSet ? ` srcset="${attr(srcSet)}" sizes="${attr(sizes)}"` : ""}`;
+  return `<div id="${attr(modalId)}" class="press-modal" role="dialog" aria-modal="true" aria-labelledby="${attr(modalId)}-title" hidden><figure class="press-modal-card ${image ? "" : "press-instagram-modal-card"}">${image ? `<img loading="lazy" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : ""}<div id="${attr(modalId)}-title" class="eyebrow">${text(entry.title)}</div></figure></div>`;
 }
 
 function linkText(value: string, url: string) {
