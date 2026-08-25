@@ -353,13 +353,15 @@
 .shop-card-image img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
-  transition: transform 700ms cubic-bezier(.2, .65, .2, 1), filter 500ms ease;
+  transition: filter 500ms ease;
 }
 
 .shop-image {
   position: relative;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   background: var(--shop-soft);
 }
@@ -369,11 +371,10 @@
   z-index: 1;
   display: block;
   width: 100%;
-  height: auto;
-  max-height: 100%;
+  height: 100%;
   object-fit: contain;
   opacity: 0;
-  transition: opacity 650ms ease, transform 700ms cubic-bezier(.2, .65, .2, 1), filter 500ms ease;
+  transition: opacity 650ms ease, filter 500ms ease;
 }
 
 .shop-image.is-loaded img { opacity: 1; }
@@ -406,7 +407,6 @@
 }
 
 .shop-card:hover .shop-card-image img {
-  transform: scale(1.035);
   filter: saturate(1.04);
 }
 
@@ -574,7 +574,7 @@
 .shop-gallery-frame img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
 }
 
