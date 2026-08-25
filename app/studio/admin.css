@@ -66,6 +66,7 @@
 .admin-nav a:focus-visible,
 .admin-site-link:hover,
 .admin-site-link:focus-visible { background: #f1eee7; color: #765b2d; }
+.admin-nav-badge { margin-left: 5px; color: #a6844d; font-size: 10px; letter-spacing: .05em; }
 .admin-site-link { margin-top: auto; }
 .admin-content { min-width: 0; min-height: 0; height: 100svh; display: flex; flex-direction: column; overflow: hidden; }
 .admin-topbar { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 20px; padding: 22px clamp(20px, 5vw, 64px); border-bottom: 1px solid #ded9cf; background: rgba(251, 250, 247, .78); }

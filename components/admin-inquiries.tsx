@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import type { Inquiry, InquiryStatus } from "../lib/supabase/types";
 import { createClient } from "../lib/supabase/client";
@@ -21,6 +22,7 @@ function gmailComposeUrl(inquiry: AdminInquiry) {
 }
 
 export default function InquiryAdmin({ initialInquiries, archived = false }: { initialInquiries: AdminInquiry[]; archived?: boolean }) {
+  const router = useRouter();
   const [inquiries, setInquiries] = useState(initialInquiries);
   const [selectedInquiry, setSelectedInquiry] = useState<AdminInquiry | null>(null);
   const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>(archived ? "archived" : "active");
@@ -54,6 +56,7 @@ export default function InquiryAdmin({ initialInquiries, archived = false }: { i
     if (updateError) return setError("Could not update inquiry status.");
     setInquiries((current) => current.map((item) => item.id === inquiry.id ? { ...item, status: next } : item));
     setSelectedInquiry((current) => current?.id === inquiry.id ? { ...current, status: next } : current);
+    router.refresh();
   }
 
   async function setArchived(inquiry: AdminInquiry, nextArchived: boolean) {
@@ -64,6 +67,7 @@ export default function InquiryAdmin({ initialInquiries, archived = false }: { i
     const archivedAt = nextArchived ? new Date().toISOString() : null;
     setInquiries((current) => current.map((item) => item.id === inquiry.id ? { ...item, archived_at: archivedAt } : item));
     setSelectedInquiry((current) => current?.id === inquiry.id ? { ...current, archived_at: archivedAt } : current);
+    router.refresh();
   }
 
   function clearFilters() {

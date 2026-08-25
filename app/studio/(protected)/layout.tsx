@@ -49,14 +49,17 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
 
   const displayName = profile?.full_name || user.email || "Studio user";
   const role = profile?.role ?? "admin";
-  const { data: canManageStudio } = await supabase.rpc("is_user_manager");
+  const [{ data: canManageStudio }, { count: newInquiryCount }] = await Promise.all([
+    supabase.rpc("is_user_manager"),
+    supabase.from("inquiries").select("id", { count: "exact", head: true }).eq("status", "new").is("archived_at", null),
+  ]);
 
   return (
     <div className="admin-shell">
       <aside id="admin-sidebar" className="admin-sidebar">
         <Hint id="wordmark"><Link className="admin-wordmark" href="/studio">Chroma Fairy<span>Studio</span></Link></Hint>
         <nav id="admin-sidebar-nav" className="admin-nav" aria-label="Studio areas">
-          {staffAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
+          {staffAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}{href === "/studio/inquiries" && newInquiryCount ? <span className="admin-nav-badge" aria-label={`${newInquiryCount} new inquiries`}>({newInquiryCount})</span> : null}</Link></Hint>)}
           {canManageStudio && managerAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
         </nav>
         <Hint id="viewSite"><Link className="admin-site-link" href="/">← View site</Link></Hint>
