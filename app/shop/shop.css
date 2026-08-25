@@ -346,14 +346,18 @@
 
 .shop-card-image {
   position: relative;
+  aspect-ratio: .82;
   overflow: hidden;
   background: var(--shop-soft);
 }
 
 .shop-card-image img {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
+  max-height: 100%;
+  margin: 0 auto;
   object-fit: contain;
   transition: filter 500ms ease;
 }
@@ -361,6 +365,9 @@
 .shop-image {
   position: relative;
   width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
   overflow: hidden;
   background: var(--shop-soft);
 }
@@ -369,7 +376,8 @@
   position: relative;
   z-index: 1;
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
   max-height: 100%;
   object-fit: contain;
@@ -563,18 +571,23 @@
 
 .shop-gallery-frame {
   position: relative;
+  aspect-ratio: .82;
   overflow: hidden;
   background: var(--shop-soft);
 }
 
 .shop-gallery-frame:first-child {
   grid-column: span 2;
+  aspect-ratio: 1.1;
 }
 
 .shop-gallery-frame img {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
+  max-height: 100%;
+  margin: 0 auto;
   object-fit: contain;
 }
 
@@ -837,6 +850,6 @@
   .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 34px 14px; }
   .shop-card-title { font-size: 21px; }
   .shop-gallery { grid-template-columns: 1fr; }
-  .shop-gallery-frame:first-child { grid-column: auto; }
+  .shop-gallery-frame:first-child { grid-column: auto; aspect-ratio: .82; }
   .shop-product { padding-top: 32px; }
 }
