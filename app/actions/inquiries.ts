@@ -50,7 +50,9 @@ export async function submitInquiry(input: InquiryInput): Promise<{ ok: boolean;
   }
 
   const inquiryId = crypto.randomUUID();
-  const { error } = await supabase.from("inquiries").insert({
+  const admin = createAdminClient();
+  if (!admin) return { ok: false, error: "The inquiry form is temporarily unavailable." };
+  const { error } = await admin.from("inquiries").insert({
     id: inquiryId,
     type: input.kind,
     work_id: workId,
