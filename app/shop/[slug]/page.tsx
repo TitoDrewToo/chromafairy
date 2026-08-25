@@ -53,7 +53,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
         <Link className="shop-back shop-product-back chroma-text" href="/shop">← Back to catalogue</Link>
         <div className="shop-product-layout">
           <div className="shop-gallery">
-            {gallery.length ? gallery.map((image, index) => <div className="shop-gallery-frame" key={image.storage_path} style={{ aspectRatio: work.width && work.height ? `${work.width} / ${work.height}` : "3 / 4" }}><ShopImage alt={image.alt ?? work.title} fetchPriority={index === 0 ? "high" : "auto"} loading={index === 0 ? "eager" : "lazy"} sizes="(max-width: 860px) 100vw, 60vw" src={image.storage_path} /></div>) : <div className="shop-gallery-frame" style={{ aspectRatio: work.width && work.height ? `${work.width} / ${work.height}` : "3 / 4" }}><ShopImage alt={work.title} /></div>}
+            {gallery.length ? gallery.map((image, index) => <div className="shop-gallery-frame" key={image.storage_path}><ShopImage alt={image.alt ?? work.title} fetchPriority={index === 0 ? "high" : "auto"} loading={index === 0 ? "eager" : "lazy"} sizes="(max-width: 860px) 100vw, 60vw" src={image.storage_path} /></div>) : <div className="shop-gallery-frame"><ShopImage alt={work.title} /></div>}
           </div>
           <article className="shop-product-info">
             <div className="shop-eyebrow">{series?.name ?? "Original work"} · {work.year}</div>

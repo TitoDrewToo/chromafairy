@@ -32,11 +32,10 @@ function statusLabel(status: CatalogueWork["status"], isNew: boolean | null) {
 
 function WorkCard({ work }: { work: CatalogueWork }) {
   const image = work.images[0];
-  const aspectRatio = work.width && work.height ? `${work.width} / ${work.height}` : "3 / 4";
   return (
     <article className="shop-card">
       <Link className="chroma-text" href={`/shop/${work.slug}`} aria-label={`View ${work.title}`}>
-        <div className="shop-card-image" style={{ aspectRatio }}>
+        <div className="shop-card-image">
           <ShopImage alt={image?.alt ?? work.title} src={image?.storage_path} />
         </div>
       </Link>
