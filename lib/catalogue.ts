@@ -24,6 +24,7 @@ export function getArtworkTransformUrl(url: string, width: number, quality = 76)
   const transformed = new URL(url);
   transformed.pathname = transformed.pathname.replace(SUPABASE_OBJECT_PATH, SUPABASE_RENDER_PATH);
   transformed.searchParams.set("width", String(width));
+  transformed.searchParams.set("resize", "contain");
   transformed.searchParams.set("quality", String(quality));
   transformed.searchParams.set("format", "webp");
   return transformed.toString();
