@@ -1,6 +1,5 @@
 import { createClient } from "../../../../lib/supabase/server";
 import InquiryAdmin, { type AdminInquiry } from "../../../../components/admin-inquiries";
-import Link from "next/link";
 import "../../admin.css";
 import "../../operations.css";
 
@@ -9,16 +8,17 @@ export const dynamic = "force-dynamic";
 export default async function AdminInquiriesPage() {
   const supabase = await createClient();
   if (!supabase) return <AdminMessage message="Supabase is not configured." />;
-  const [{ data: inquiries, error }, { data: works }] = await Promise.all([
-    supabase.from("inquiries").select("*").is("archived_at", null).order("created_at", { ascending: false }),
-    supabase.from("works").select("id, title, slug"),
+  const [{ data: activeInquiries, error: activeError }, { data: archivedInquiries, error: archivedError }, { data: works, error: worksError }] = await Promise.all([
+    supabase.from("inquiries").select("*").is("archived_at", null).order("created_at", { ascending: false }).limit(500),
+    supabase.from("inquiries").select("*").not("archived_at", "is", null).order("created_at", { ascending: false }).limit(500),
+    supabase.from("works").select("id, title, slug").limit(500),
   ]);
-  if (error) return <AdminMessage message="Inquiries could not be loaded." />;
+  if (activeError || archivedError || worksError) return <AdminMessage message="Inquiries could not be loaded." />;
   const worksById = new Map((works ?? []).map((work) => [work.id, work]));
-  const rows: AdminInquiry[] = (inquiries ?? []).map((inquiry) => ({ ...inquiry, work: inquiry.work_id ? worksById.get(inquiry.work_id) ?? null : null }));
-  return <div className="admin-dashboard admin-operations-page"><p className="admin-eyebrow">Studio inbox</p><h1>Inquiries</h1><p className="admin-muted">Piece and commission leads from the public site.</p><HintLink href="/studio/inquiries/archive">View archived inquiries</HintLink><InquiryAdmin initialInquiries={rows} /></div>;
+  const rows: AdminInquiry[] = [...(activeInquiries ?? []), ...(archivedInquiries ?? [])]
+    .sort((a, b) => new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime())
+    .map((inquiry) => ({ ...inquiry, work: inquiry.work_id ? worksById.get(inquiry.work_id) ?? null : null }));
+  return <div className="admin-dashboard admin-operations-page"><p className="admin-eyebrow">Studio inbox</p><h1>Inquiries</h1><p className="admin-muted">Piece and commission leads from the public site.</p><InquiryAdmin initialInquiries={rows} /></div>;
 }
-
-function HintLink({ href, children }: { href: string; children: React.ReactNode }) { return <Link className="admin-archive-link" href={href}>{children} →</Link>; }
 
 function AdminMessage({ message }: { message: string }) { return <div className="admin-dashboard"><p className="admin-eyebrow">Studio inbox</p><h1>Inquiries</h1><p className="admin-muted">{message}</p></div>; }

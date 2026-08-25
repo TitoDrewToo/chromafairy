@@ -8,6 +8,8 @@ import { Hint } from "./studio-hint";
 
 export type AdminInquiry = Inquiry & { work: { id: string; title: string; slug: string } | null };
 const statuses: InquiryStatus[] = ["new", "replied", "closed"];
+type ArchiveFilter = "active" | "archived" | "all";
+type TypeFilter = "all" | Inquiry["type"];
 
 function gmailComposeUrl(inquiry: AdminInquiry) {
   const subject = inquiry.work ? `Re: ${inquiry.work.title} — Chroma Fairy` : "Re: your Chroma Fairy inquiry";
@@ -20,8 +22,29 @@ function gmailComposeUrl(inquiry: AdminInquiry) {
 
 export default function InquiryAdmin({ initialInquiries, archived = false }: { initialInquiries: AdminInquiry[]; archived?: boolean }) {
   const [inquiries, setInquiries] = useState(initialInquiries);
+  const [selectedInquiry, setSelectedInquiry] = useState<AdminInquiry | null>(null);
+  const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>(archived ? "archived" : "active");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [statusFilter, setStatusFilter] = useState<InquiryStatus | "all">("all");
+  const [search, setSearch] = useState("");
+  const [sortNewest, setSortNewest] = useState(true);
   const [error, setError] = useState("");
-  const newCount = useMemo(() => inquiries.filter((item) => item.status === "new").length, [inquiries]);
+
+  const newCount = useMemo(() => inquiries.filter((item) => item.status === "new" && !item.archived_at).length, [inquiries]);
+  const visibleInquiries = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase();
+    return inquiries
+      .filter((item) => archiveFilter === "all" || (archiveFilter === "archived" ? Boolean(item.archived_at) : !item.archived_at))
+      .filter((item) => typeFilter === "all" || item.type === typeFilter)
+      .filter((item) => statusFilter === "all" || item.status === statusFilter)
+      .filter((item) => !query || [item.name, item.email, item.message, item.work?.title, item.work_title_snapshot].some((value) => value?.toLocaleLowerCase().includes(query)))
+      .sort((a, b) => {
+        const difference = new Date(a.created_at ?? 0).getTime() - new Date(b.created_at ?? 0).getTime();
+        return sortNewest ? -difference : difference;
+      });
+  }, [archiveFilter, inquiries, search, sortNewest, statusFilter, typeFilter]);
+
+  const hasFilters = archiveFilter !== "active" || typeFilter !== "all" || statusFilter !== "all" || search.trim() !== "" || !sortNewest;
 
   async function setStatus(inquiry: AdminInquiry, next: InquiryStatus) {
     if (next === inquiry.status) return;
@@ -30,6 +53,7 @@ export default function InquiryAdmin({ initialInquiries, archived = false }: { i
     const { error: updateError } = await supabase.from("inquiries").update({ status: next }).eq("id", inquiry.id);
     if (updateError) return setError("Could not update inquiry status.");
     setInquiries((current) => current.map((item) => item.id === inquiry.id ? { ...item, status: next } : item));
+    setSelectedInquiry((current) => current?.id === inquiry.id ? { ...current, status: next } : current);
   }
 
   async function setArchived(inquiry: AdminInquiry, nextArchived: boolean) {
@@ -37,28 +61,43 @@ export default function InquiryAdmin({ initialInquiries, archived = false }: { i
     if (!supabase) return setError("Supabase is not configured.");
     const { error: archiveError } = await supabase.from("inquiries").update({ archived_at: nextArchived ? new Date().toISOString() : null }).eq("id", inquiry.id);
     if (archiveError) return setError(nextArchived ? "Could not archive inquiry." : "Could not restore inquiry.");
-    setInquiries((current) => current.filter((item) => item.id !== inquiry.id));
+    const archivedAt = nextArchived ? new Date().toISOString() : null;
+    setInquiries((current) => current.map((item) => item.id === inquiry.id ? { ...item, archived_at: archivedAt } : item));
+    setSelectedInquiry((current) => current?.id === inquiry.id ? { ...current, archived_at: archivedAt } : current);
+  }
+
+  function clearFilters() {
+    setArchiveFilter(archived ? "archived" : "active"); setTypeFilter("all"); setStatusFilter("all"); setSearch(""); setSortNewest(true);
   }
 
   const nextStatus = (inquiry: AdminInquiry) => statuses[Math.min(statuses.indexOf(inquiry.status) + 1, statuses.length - 1)];
+  const openButton = (inquiry: AdminInquiry) => <button className="admin-small-button" type="button" onClick={(event) => { event.stopPropagation(); setSelectedInquiry(inquiry); }}>Open</button>;
 
-  return <section className="admin-operation-list">
+  return <section className="admin-inquiry-workspace">
     {error && <p className="admin-error" role="alert">{error}</p>}
     {newCount > 0 && <p className="admin-muted admin-inquiry-count">{newCount} new {newCount === 1 ? "inquiry" : "inquiries"} to reply to.</p>}
-    {inquiries.length ? inquiries.map((inquiry) => <article className={`admin-inquiry-card${inquiry.status === "new" ? " admin-inquiry-new" : ""}`} key={inquiry.id}>
-      <div className="admin-inquiry-top"><span className="admin-type-badge">{inquiry.type}</span><span className="admin-operation-date">{formatDate(inquiry.created_at)}</span></div>
-      <h2>{inquiry.name} <span>· {inquiry.email}</span></h2>
-      {inquiry.phone && <p className="admin-muted">{inquiry.phone}</p>}
-      {inquiry.message && <p className="admin-inquiry-message">{inquiry.message}</p>}
-      <div className="admin-inquiry-meta">{inquiry.work ? <Hint id="viewWork"><Link href={`/shop/${inquiry.work.slug}`}>Work: {inquiry.work.title}</Link></Hint> : <span>General commission</span>}<span>Source: {inquiry.source ?? "—"}</span></div>
-      <div className="admin-card-actions">
-        <span className={`admin-status-badge status-${inquiry.status}`}>{inquiry.status}</span>
-        <Hint id="replyEmail"><a className="admin-small-button" href={gmailComposeUrl(inquiry)} target="_blank" rel="noopener noreferrer" onClick={() => { if (inquiry.status === "new") void setStatus(inquiry, "replied"); }}>Reply in Gmail</a></Hint>
-        <Hint id="closeInquiry"><button className="admin-action-button" disabled={inquiry.status === "closed"} onClick={() => void setStatus(inquiry, nextStatus(inquiry))} type="button"><span className="admin-action-label">{inquiry.status === "new" ? "Mark replied" : inquiry.status === "replied" ? "Close inquiry" : "Closed"}</span></button></Hint>
-        <Hint id={archived ? "restoreInquiry" : "archiveInquiry"}><button className="admin-small-button admin-danger-button" onClick={() => void setArchived(inquiry, !archived)} type="button">{archived ? "Restore" : "Archive"}</button></Hint>
+    <div className="admin-inquiry-toolbar">
+      <label className="admin-inquiry-search">Search inquiries<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Name, email, message or work" /></label>
+      <div className="admin-inquiry-filters" aria-label="Inquiry filters">
+        <label>View<select value={archiveFilter} onChange={(event) => setArchiveFilter(event.target.value as ArchiveFilter)}><option value="active">Active</option><option value="archived">Archived</option><option value="all">All</option></select></label>
+        <label>Type<select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value as TypeFilter)}><option value="all">All types</option><option value="piece">Piece</option><option value="commission">Commission</option></select></label>
+        <label>Status<select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as InquiryStatus | "all")}><option value="all">All statuses</option>{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>
+        <button className="admin-action-button admin-inquiry-sort" type="button" onClick={() => setSortNewest((current) => !current)}>Date: {sortNewest ? "newest first" : "oldest first"}</button>
+        {hasFilters && <button className="admin-small-button" type="button" onClick={clearFilters}>Clear all</button>}
       </div>
-    </article>) : <div className="admin-empty-state">No inquiries yet.</div>}
+    </div>
+    <p className="admin-inquiry-results">{visibleInquiries.length} {visibleInquiries.length === 1 ? "inquiry" : "inquiries"} shown <span>· {inquiries.length} loaded</span></p>
+    {inquiries.length === 0 ? <div className="admin-empty-state">There are no inquiries yet.</div> : visibleInquiries.length === 0 ? <div className="admin-empty-state">No inquiries match the current filters.</div> : <>
+      <div className="admin-inquiry-table-wrap"><table className="admin-inquiry-table"><thead><tr><th>Date</th><th>Name</th><th>Type</th><th>Work</th><th>Status</th><th><span className="sr-only">Action</span></th></tr></thead><tbody>
+        {visibleInquiries.map((inquiry) => <tr className={`admin-inquiry-row${inquiry.archived_at ? " is-archived" : ""}`} key={inquiry.id} onClick={() => setSelectedInquiry(inquiry)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedInquiry(inquiry); } }} role="button" tabIndex={0}>
+          <td>{formatDate(inquiry.created_at)}</td><td><strong>{inquiry.name}</strong><span className="admin-inquiry-email">{inquiry.email}</span><span className="admin-inquiry-preview">{inquiry.message || "No message"}</span></td><td><span className="admin-type-badge">{inquiry.type}</span></td><td>{inquiry.work ? <Hint id="viewWork"><Link href={`/shop/${inquiry.work.slug}`} onClick={(event) => event.stopPropagation()}>{inquiry.work.title}</Link></Hint> : inquiry.work_title_snapshot || "General commission"}</td><td><span className={`admin-status-badge status-${inquiry.status}`}>{inquiry.status}</span>{inquiry.archived_at && <span className="admin-inquiry-archived-label">Archived</span>}</td><td>{openButton(inquiry)}</td>
+        </tr>)}
+      </tbody></table></div>
+      <div className="admin-inquiry-mobile-list">{visibleInquiries.map((inquiry) => <article className={`admin-inquiry-mobile-card${inquiry.archived_at ? " is-archived" : ""}`} key={inquiry.id}><button className="admin-inquiry-mobile-open" type="button" onClick={() => setSelectedInquiry(inquiry)}><span>{formatDate(inquiry.created_at)}</span><strong>{inquiry.name}</strong><small>{inquiry.email}</small><span className="admin-inquiry-preview">{inquiry.message || "No message"}</span><span>{inquiry.work?.title || inquiry.work_title_snapshot || "General commission"}</span><span className="admin-inquiry-mobile-status"><span className={`admin-status-badge status-${inquiry.status}`}>{inquiry.status}</span>{inquiry.archived_at && <em>Archived</em>}</span></button>{openButton(inquiry)}</article>)}</div>
+    </>}
+    {selectedInquiry && <aside className="admin-inquiry-detail" aria-label="Inquiry details"><div className="admin-inquiry-detail-head"><div><p className="admin-eyebrow">Full inquiry</p><h2>{selectedInquiry.name}</h2><p className="admin-muted">{selectedInquiry.email} · {formatDateTime(selectedInquiry.created_at)}</p></div><button className="admin-small-button" type="button" onClick={() => setSelectedInquiry(null)}>Close</button></div><dl className="admin-inquiry-detail-grid"><div><dt>Type</dt><dd>{selectedInquiry.type}</dd></div><div><dt>Work</dt><dd>{selectedInquiry.work ? <Link href={`/shop/${selectedInquiry.work.slug}`}>{selectedInquiry.work.title}</Link> : selectedInquiry.work_title_snapshot || "General commission"}</dd></div><div><dt>Status</dt><dd>{selectedInquiry.status}</dd></div>{selectedInquiry.phone && <div><dt>Phone</dt><dd>{selectedInquiry.phone}</dd></div>}</dl><div className="admin-inquiry-detail-message">{selectedInquiry.message || "No message provided."}</div><div className="admin-card-actions"><Hint id="replyEmail"><a className="admin-small-button" href={gmailComposeUrl(selectedInquiry)} target="_blank" rel="noopener noreferrer" onClick={() => { if (selectedInquiry.status === "new") void setStatus(selectedInquiry, "replied"); }}>Reply in Gmail</a></Hint><Hint id="closeInquiry"><button className="admin-action-button" type="button" disabled={selectedInquiry.status === "closed"} onClick={() => void setStatus(selectedInquiry, nextStatus(selectedInquiry))}>{selectedInquiry.status === "new" ? "Mark replied" : selectedInquiry.status === "replied" ? "Close inquiry" : "Closed"}</button></Hint><Hint id={selectedInquiry.archived_at ? "restoreInquiry" : "archiveInquiry"}><button className="admin-small-button admin-danger-button" type="button" onClick={() => void setArchived(selectedInquiry, !selectedInquiry.archived_at)}>{selectedInquiry.archived_at ? "Restore" : "Archive"}</button></Hint></div></aside>}
   </section>;
 }
 
 function formatDate(value: string | null) { return value ? new Date(value).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" }) : "—"; }
+function formatDateTime(value: string | null) { return value ? new Date(value).toLocaleString("en-PH", { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—"; }
