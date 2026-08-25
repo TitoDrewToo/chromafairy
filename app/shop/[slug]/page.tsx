@@ -33,7 +33,7 @@ export default async function WorkPage({ params }: { params: Promise<{ slug: str
   const [{ data: images }, { data: series }, { data: paymentsFlag }] = await Promise.all([
     supabase.from("work_images").select("storage_path, alt, is_primary").eq("work_id", work.id).order("is_primary", { ascending: false }).order("display_order", { ascending: true }),
     work.series_id ? supabase.from("series").select("name").eq("id", work.series_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
-    supabase.from("feature_flags").select("enabled").eq("key", "payments").maybeSingle(),
+    supabase.from("public_feature_flags").select("enabled").eq("key", "payments").maybeSingle(),
   ]);
   const gallery = (images ?? []).map((image) => ({ ...image, storage_path: getArtworkUrl(supabase, image.storage_path) }));
   const dimensions = [work.width, work.height, work.depth].filter((dimension): dimension is number => dimension !== null).join(" × ");

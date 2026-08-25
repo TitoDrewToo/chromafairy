@@ -185,6 +185,7 @@ export type Shipment = {
 };
 
 export type FeatureFlag = { key: string; enabled: boolean; notes: string | null; updated_at: string | null };
+export type PublicFeatureFlag = Pick<FeatureFlag, "key" | "enabled">;
 
 export type Availability = {
   id: string;
@@ -386,7 +387,14 @@ export type Database = {
         Relationships: [];
       };
     };
-    Views: Record<string, never>;
+    Views: {
+      public_feature_flags: {
+        Row: PublicFeatureFlag;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+    };
     Functions: {
       is_admin: {
         Args: Record<string, never>;

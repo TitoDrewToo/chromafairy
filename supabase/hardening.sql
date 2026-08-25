@@ -139,8 +139,12 @@ begin
   ) into v_blocked;
   if v_blocked or exists (select 1 from public.appointments where starts_at < v_slot_end and ends_at > p_slot_start and status <> 'cancelled') then raise exception 'That slot is no longer available.'; end if;
 
-  insert into public.appointments (id, title, starts_at, ends_at, mode, status, notes)
-  values (v_appointment_id, 'Consultation request — ' || trim(p_name), p_slot_start, v_slot_end, 'video', 'requested', 'Name: ' || trim(p_name) || E'\nEmail: ' || lower(trim(p_email)) || E'\n\n' || coalesce(trim(p_message), ''));
+  begin
+    insert into public.appointments (id, title, starts_at, ends_at, mode, status, notes)
+    values (v_appointment_id, 'Consultation request — ' || trim(p_name), p_slot_start, v_slot_end, 'video', 'requested', 'Name: ' || trim(p_name) || E'\nEmail: ' || lower(trim(p_email)) || E'\n\n' || coalesce(trim(p_message), ''));
+  exception when exclusion_violation then
+    raise exception 'That slot is no longer available.' using errcode = 'P0001';
+  end;
   return v_appointment_id;
 end;
 $$;
