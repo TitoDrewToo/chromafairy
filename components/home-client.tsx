@@ -80,7 +80,7 @@ export default function HomeClient({ styles, markup, shopPreview }: HomeClientPr
     setBackgroundMount(document.getElementById("global-background-layer"));
     setFairyMount(root.querySelector<HTMLElement>("#animated-fairy-mount"));
     setCommissionMount(root.querySelector<HTMLElement>("#commission-form-mount"));
-    setShopPreviewMount(root.querySelector<HTMLElement>("#commission-shop-preview-mount"));
+    setShopPreviewMount(root.querySelector<HTMLElement>("#shop-preview-mount"));
   }, []);
 
   useEffect(() => {

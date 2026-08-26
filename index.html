@@ -43,7 +43,7 @@
   .menu-toggle{display:none}
 
   main{position:relative;z-index:10;display:flex;flex-direction:column}
-  /* Editorial flow: collections → exhibitions → press → gallery → commission → about → contact. */
+  /* Editorial flow: collections → exhibitions → press → gallery → commission → shop preview → about → contact. */
   main > #home{order:1}
   main > section:nth-of-type(2){order:2}
   main > #collections{order:3}
@@ -54,8 +54,9 @@
   main > #gallery{order:8}
   main > section:nth-of-type(8){order:9}
   main > #commission{order:10}
-  main > #about{order:11}
-  main > #contact{order:12}
+  main > #shop-preview{order:11}
+  main > #about{order:12}
+  main > #contact{order:13}
   section{position:relative}
   .reveal{opacity:0;transform:translateY(38px);transition:opacity 1.1s cubic-bezier(.2,.7,.2,1),transform 1.1s cubic-bezier(.2,.7,.2,1)}
   .reveal.in{opacity:1;transform:none}
@@ -110,7 +111,6 @@
   .btn{display:inline-block;font-size:12px;letter-spacing:.24em;text-transform:uppercase;text-decoration:none;color:#fff;
     background:var(--deep);padding:16px 40px;border:none;border-radius:1px;cursor:pointer;transition:background .4s,transform .3s}
   .btn:hover{background:var(--teal);transform:translateY(-2px)}
-  .commission-shop-prompt{margin:34px auto 18px;font-family:var(--serif);font-size:clamp(30px,4.5vw,54px);font-weight:600;line-height:1;color:#26333c}
   .commission-shop-preview{position:relative;width:calc(100% + clamp(38px,10vw,128px));margin:26px 0 24px calc(clamp(38px,5vw,64px) * -1);overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.18) 5%,#000 13%,#000 87%,rgba(0,0,0,.18) 95%,transparent 100%);mask-image:linear-gradient(to right,transparent 0%,rgba(0,0,0,.18) 5%,#000 13%,#000 87%,rgba(0,0,0,.18) 95%,transparent 100%)}
   .commission-shop-preview-track{display:flex;width:max-content;gap:24px;animation:commission-shop-ticker 42s linear infinite;pointer-events:none;user-select:none}
   .commission-shop-preview-group{display:flex;flex-shrink:0;gap:24px}
@@ -119,6 +119,11 @@
   .commission-shop-preview-card span{position:absolute;right:10px;bottom:9px;left:10px;color:rgba(14,26,36,.7);font:10px var(--sans);letter-spacing:.12em;text-align:left;text-transform:uppercase;text-shadow:0 1px 10px rgba(246,243,236,.95)}
   @keyframes commission-shop-ticker{from{transform:translateX(0)}to{transform:translateX(calc(-50% - 12px))}}
   .commission-shop-button{display:block;width:max-content;margin:0 auto}
+  #shop-preview{padding-top:clamp(56px,8vh,100px);padding-bottom:clamp(56px,8vh,100px)}
+  #shop-preview .head{margin-bottom:clamp(28px,4vh,44px)}
+  #shop-preview .single{max-width:1080px;margin:0 auto;padding:clamp(14px,2vw,24px);border:1px solid rgba(239,233,223,.9);border-radius:4px;background:radial-gradient(120% 80% at 50% -10%,#fbf8f2 0%,var(--wall) 55%,var(--wall2) 100%);box-shadow:0 24px 70px -38px rgba(0,10,20,.58)}
+  #shop-preview .commission-shop-preview{width:100%;margin:0}
+  #shop-preview .commission-shop-button{margin-top:clamp(18px,3vw,28px)}
   @media(prefers-reduced-motion:reduce){.commission-shop-preview-track{animation:none}}
   .press-row{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:38px;text-align:left}
   .quote{border-top:2px solid var(--teal);padding-top:20px}
@@ -485,8 +490,14 @@
           <div class="step"><div class="n">03</div><h4>It arrives</h4><p>Finished, sealed, and delivered — ready for its wall.</p></div>
         </div>
         <a href="#contact" class="btn">Start a commission</a>
-        <p class="commission-shop-prompt">Or find a piece already in flow —</p>
-        <div id="commission-shop-preview-mount"></div>
+      </div>
+    </section>
+
+    <!-- SHOP PREVIEW — Other Works pattern -->
+    <section id="shop-preview" class="stage light">
+      <div class="head reveal"><div class="script">Or find a piece already in flow —</div></div>
+      <div class="single reveal">
+        <div id="shop-preview-mount"></div>
         <a href="/shop" class="btn commission-shop-button">visit the shop</a>
       </div>
     </section>
