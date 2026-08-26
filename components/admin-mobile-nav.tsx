@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Hint } from "./studio-hint";
 
 const MOBILE_BREAKPOINT = 860;
 
@@ -69,7 +70,7 @@ export default function AdminMobileNav() {
 
   return (
     <>
-      <button
+      <Hint id="mobileMenu"><button
         ref={toggleRef}
         className="admin-mobile-nav-toggle"
         type="button"
@@ -80,7 +81,7 @@ export default function AdminMobileNav() {
         <span aria-hidden="true" />
         <span aria-hidden="true" />
         <span aria-hidden="true" />
-      </button>
+      </button></Hint>
       <div className="admin-mobile-nav-backdrop" aria-hidden="true" />
     </>
   );

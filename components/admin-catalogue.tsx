@@ -231,34 +231,34 @@ export default function CatalogueAdmin({ initialWorks, initialSeries }: { initia
         <Hint id="bulkSeries"><select aria-label="Bulk series" value={batchSeries} onChange={(event) => setBatchSeries(event.target.value)}><option value="">Assign series…</option><option value="__none__">No series</option>{initialSeries.map((series) => <option key={series.id} value={series.id}>{series.name}</option>)}</select></Hint>
         <Hint id="createSeries"><input aria-label="Create new series" placeholder="Or create new series…" value={batchNewSeriesName} onChange={(event) => { setBatchNewSeriesName(event.target.value); setBatchSeries(""); }} /></Hint>
         <Hint id="applyBulk"><button className="admin-action-button" disabled={busy || (!batchStatus && !batchSeries && !batchNewSeriesName.trim())} onClick={() => void applyBatch()} type="button"><span className="admin-action-label">Apply status / series</span></button></Hint>
-        <button className="admin-small-button admin-danger-button" disabled={busy} onClick={() => void deleteSelectedWorks()} type="button">Delete selected</button>
+        <Hint id="deleteSelected"><button className="admin-small-button admin-danger-button" disabled={busy} onClick={() => void deleteSelectedWorks()} type="button">Delete selected</button></Hint>
       </div>}
       {selected.size > 0 && <section className="admin-batch-details">
-        <div><h2>Batch edit details</h2><p>Only filled fields change. Leave fields blank to keep each work’s current value.</p></div>
+        <Hint id="batchDetails"><div><h2>Batch edit details</h2><p>Only filled fields change. Leave fields blank to keep each work’s current value.</p></div></Hint>
         <div className="admin-batch-details-grid">
-          <label>Year<input min="1900" type="number" value={batchDetails.year} onChange={(event) => setBatchDetails((current) => ({ ...current, year: event.target.value }))} /></label>
-          <label>Month<select value={batchDetails.month} onChange={(event) => setBatchDetails((current) => ({ ...current, month: event.target.value }))}><option value="">Leave unchanged</option>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{new Date(2020, index, 1).toLocaleString("en", { month: "long" })}</option>)}</select></label>
-          <label>Medium<input value={batchDetails.medium} onChange={(event) => setBatchDetails((current) => ({ ...current, medium: event.target.value }))} /></label>
-          <label>Price PHP<input min="0" step="0.01" type="number" value={batchDetails.pricePhp} onChange={(event) => setBatchDetails((current) => ({ ...current, pricePhp: event.target.value }))} /></label>
-          <label>Price USD<input min="0" step="0.01" type="number" value={batchDetails.priceUsd} onChange={(event) => setBatchDetails((current) => ({ ...current, priceUsd: event.target.value }))} /></label>
-          <label>Price on request<select value={batchDetails.priceOnRequest} onChange={(event) => setBatchDetails((current) => ({ ...current, priceOnRequest: event.target.value as TriState }))}><option value="">Leave unchanged</option><option value="true">Yes</option><option value="false">No</option></select></label>
-          <label>Mark as new<select value={batchDetails.isNew} onChange={(event) => setBatchDetails((current) => ({ ...current, isNew: event.target.value as TriState }))}><option value="">Leave unchanged</option><option value="true">Yes</option><option value="false">No</option></select></label>
-          <label>Featured<select value={batchDetails.isFeatured} onChange={(event) => setBatchDetails((current) => ({ ...current, isFeatured: event.target.value as TriState }))}><option value="">Leave unchanged</option><option value="true">Yes</option><option value="false">No</option></select></label>
-          <label className="field-wide">Description<textarea rows={3} value={batchDetails.description} onChange={(event) => setBatchDetails((current) => ({ ...current, description: event.target.value }))} /></label>
+          <Hint id="year"><label>Year<input min="1900" type="number" value={batchDetails.year} onChange={(event) => setBatchDetails((current) => ({ ...current, year: event.target.value }))} /></label></Hint>
+          <Hint id="month"><label>Month<select value={batchDetails.month} onChange={(event) => setBatchDetails((current) => ({ ...current, month: event.target.value }))}><option value="">Leave unchanged</option>{Array.from({ length: 12 }, (_, index) => <option key={index + 1} value={index + 1}>{new Date(2020, index, 1).toLocaleString("en", { month: "long" })}</option>)}</select></label></Hint>
+          <Hint id="medium"><label>Medium<input value={batchDetails.medium} onChange={(event) => setBatchDetails((current) => ({ ...current, medium: event.target.value }))} /></label></Hint>
+          <Hint id="price"><label>Price PHP<input min="0" step="0.01" type="number" value={batchDetails.pricePhp} onChange={(event) => setBatchDetails((current) => ({ ...current, pricePhp: event.target.value }))} /></label></Hint>
+          <Hint id="price"><label>Price USD<input min="0" step="0.01" type="number" value={batchDetails.priceUsd} onChange={(event) => setBatchDetails((current) => ({ ...current, priceUsd: event.target.value }))} /></label></Hint>
+          <Hint id="price"><label>Price on request<select value={batchDetails.priceOnRequest} onChange={(event) => setBatchDetails((current) => ({ ...current, priceOnRequest: event.target.value as TriState }))}><option value="">Leave unchanged</option><option value="true">Yes</option><option value="false">No</option></select></label></Hint>
+          <Hint id="workFlags"><label>Mark as new<select value={batchDetails.isNew} onChange={(event) => setBatchDetails((current) => ({ ...current, isNew: event.target.value as TriState }))}><option value="">Leave unchanged</option><option value="true">Yes</option><option value="false">No</option></select></label></Hint>
+          <Hint id="workFlags"><label>Featured<select value={batchDetails.isFeatured} onChange={(event) => setBatchDetails((current) => ({ ...current, isFeatured: event.target.value as TriState }))}><option value="">Leave unchanged</option><option value="true">Yes</option><option value="false">No</option></select></label></Hint>
+          <Hint id="description"><label className="field-wide">Description<textarea rows={3} value={batchDetails.description} onChange={(event) => setBatchDetails((current) => ({ ...current, description: event.target.value }))} /></label></Hint>
         </div>
         <Hint id="applyDetails"><button className="admin-action-button" disabled={busy || !hasBatchDetails(batchDetails)} onClick={() => void applyBatch()} type="button"><span className="admin-action-label">Apply details to {selected.size} works</span></button></Hint>
       </section>}
       {selected.size > 0 && <section className="admin-selected-editor">
-        <div><h2>Edit selected works</h2><p>These titles are the names customers see in the shop. Prices can be different for every painting.</p></div>
+        <Hint id="inlineDetails"><div><h2>Edit selected works</h2><p>These titles are the names customers see in the shop. Prices can be different for every painting.</p></div></Hint>
         <div className="admin-selected-editor-list">
           {works.filter((work) => selected.has(work.id)).map((work) => {
             const edit = inlineEdits[work.id] ?? inlineEditFor(work);
             const image = work.images.find((item) => item.is_primary) ?? work.images[0];
             return <div className="admin-selected-editor-row" key={work.id}>
               <div className="admin-selected-editor-thumb">{image ? <img alt="" src={image.url} /> : <span>No image</span>}</div>
-              <label>Shop title<input value={edit.title} onChange={(event) => setInlineEdits((current) => ({ ...current, [work.id]: { ...edit, title: event.target.value } }))} /></label>
-              <label>PHP price<input min="0" step="0.01" type="number" value={edit.pricePhp} onChange={(event) => setInlineEdits((current) => ({ ...current, [work.id]: { ...edit, pricePhp: event.target.value } }))} /></label>
-              <label>USD price<input min="0" step="0.01" type="number" value={edit.priceUsd} onChange={(event) => setInlineEdits((current) => ({ ...current, [work.id]: { ...edit, priceUsd: event.target.value } }))} /></label>
+              <Hint id="title"><label>Shop title<input value={edit.title} onChange={(event) => setInlineEdits((current) => ({ ...current, [work.id]: { ...edit, title: event.target.value } }))} /></label></Hint>
+              <Hint id="price"><label>PHP price<input min="0" step="0.01" type="number" value={edit.pricePhp} onChange={(event) => setInlineEdits((current) => ({ ...current, [work.id]: { ...edit, pricePhp: event.target.value } }))} /></label></Hint>
+              <Hint id="price"><label>USD price<input min="0" step="0.01" type="number" value={edit.priceUsd} onChange={(event) => setInlineEdits((current) => ({ ...current, [work.id]: { ...edit, priceUsd: event.target.value } }))} /></label></Hint>
             </div>;
           })}
         </div>
@@ -279,14 +279,14 @@ function WorkRow({ work, selected, onSelect, onStatus, onDelete, disabled }: { w
   const image = work.images.find((item) => item.is_primary) ?? work.images[0];
   return (
     <article className="admin-work-row">
-      <input aria-label={`Select ${work.title}`} checked={selected} onChange={onSelect} type="checkbox" />
+      <Hint id="selectWork"><input aria-label={`Select ${work.title}`} checked={selected} onChange={onSelect} type="checkbox" /></Hint>
       <div className="admin-work-thumb">{image ? <img alt={image.alt ?? work.title} src={image.url} /> : <span>No image</span>}</div>
       <div className="admin-work-summary"><Hint id="viewWork"><Link href={`/studio/catalogue/${work.id}`}>{work.title}</Link></Hint><span>{work.year}{work.month ? ` · ${monthName(work.month)}` : ""} · {work.series_name ?? "Unassigned"}</span></div>
       <div className="admin-work-actions">
         <span className={`admin-status-badge status-${work.status}`}>{titleCase(work.status)}{work.is_new ? " · New" : ""}</span>
         <span className="admin-work-price">{formatPrice(work)}</span>
         <Hint id="rowStatus"><select aria-label={`Set status for ${work.title}`} className="admin-row-status" disabled={disabled} value={work.status} onChange={(event) => onStatus(event.target.value as WorkStatus)}>{statuses.slice(1).map((status) => <option key={status} value={status}>{titleCase(status)}</option>)}</select></Hint>
-        <button className="admin-small-button admin-danger-button" disabled={disabled} onClick={onDelete} type="button">Delete</button>
+        <Hint id="deleteWork"><button className="admin-small-button admin-danger-button" disabled={disabled} onClick={onDelete} type="button">Delete</button></Hint>
       </div>
     </article>
   );

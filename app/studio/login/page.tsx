@@ -39,14 +39,14 @@ export default function AdminLoginPage() {
   return (
     <main className="admin-login-page">
       <div className="admin-login-card">
-        <Link className="admin-back-link" href="/">← Back to site</Link>
+        <Hint id="backToSite"><Link className="admin-back-link" href="/">← Back to site</Link></Hint>
         <p className="admin-eyebrow">Chroma Fairy · Studio</p>
         <p className="admin-muted">Use your existing studio account to continue.</p>
         <form className="admin-login-form" onSubmit={submit}>
-          <label>Email<input autoComplete="email" required type="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label>
-          <label>Password<input autoComplete="current-password" required type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
+          <Hint id="loginEmail"><label>Email<input autoComplete="email" required type="email" value={email} onChange={(event) => setEmail(event.target.value)} /></label></Hint>
+          <Hint id="loginPassword"><label>Password<input autoComplete="current-password" required type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label></Hint>
           {error && <p className="admin-error" role="alert">{error}</p>}
-          <button className={`admin-action-button admin-primary-button${isSubmitting ? " is-busy" : ""}`} disabled={isSubmitting} type="submit"><span className="admin-action-label">{isSubmitting ? "Signing in…" : "Sign in"}</span></button>
+          <Hint id="signIn"><button className={`admin-action-button admin-primary-button${isSubmitting ? " is-busy" : ""}`} disabled={isSubmitting} type="submit"><span className="admin-action-label">{isSubmitting ? "Signing in…" : "Sign in"}</span></button></Hint>
         </form>
         <Hint id="forgotPassword"><Link className="admin-back-link" href="/studio/set-password?mode=forgot">Forgot password?</Link></Hint>
       </div>

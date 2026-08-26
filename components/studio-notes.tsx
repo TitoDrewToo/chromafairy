@@ -127,9 +127,9 @@ export default function StudioNotes({ variant }: { variant: NotesVariant }) {
       </div>
       <div className="studio-notes-tabs" role="tablist" aria-label="Studio note pages">
         {notes.notes.map((note) => (
-          <button className={`studio-notes-tab ${view === "notes" && note.id === active?.id ? "is-active" : ""}`} key={note.id} onClick={() => { selectView("notes"); notes.chooseNote(note.id); }} role="tab" aria-selected={view === "notes" && note.id === active?.id} type="button">
+          <Hint id="notesPage" key={note.id}><button className={`studio-notes-tab ${view === "notes" && note.id === active?.id ? "is-active" : ""}`} onClick={() => { selectView("notes"); notes.chooseNote(note.id); }} role="tab" aria-selected={view === "notes" && note.id === active?.id} type="button">
             {note.title || "Untitled"}
-          </button>
+          </button></Hint>
         ))}
         <Hint id="notesAdd"><button aria-label="Add notes page" className="studio-notes-icon" onClick={() => void notes.addNote()} type="button">＋</button></Hint>
         <Hint id="notesBoardToggle"><button className={`studio-notes-tab studio-notes-board-tab ${view === "board" ? "is-active" : ""}`} onClick={() => selectView("board")} role="tab" aria-selected={view === "board"} type="button">Team board</button></Hint>
@@ -147,13 +147,13 @@ export default function StudioNotes({ variant }: { variant: NotesVariant }) {
       ) : active ? (
         <div className="studio-notes-editor" role="tabpanel">
           <div className="studio-notes-page-heading">
-            {editingTitle ? <input aria-label="Note page title" autoFocus maxLength={120} onBlur={commitRename} onChange={(event) => setDraftTitle(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); commitRename(); } if (event.key === "Escape") { setEditingTitle(false); setDraftTitle(active.title); } }} value={draftTitle} /> : <h3>{active.title || "Untitled"}</h3>}
+            {editingTitle ? <Hint id="notesRename"><input aria-label="Note page title" autoFocus maxLength={120} onBlur={commitRename} onChange={(event) => setDraftTitle(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); commitRename(); } if (event.key === "Escape") { setEditingTitle(false); setDraftTitle(active.title); } }} value={draftTitle} /></Hint> : <h3>{active.title || "Untitled"}</h3>}
             <div className="studio-notes-page-actions">
               <Hint id="notesRename"><button aria-label="Rename notes page" className="studio-notes-icon" onClick={beginRename} type="button">✎</button></Hint>
               <Hint id="notesDelete"><button aria-label="Delete notes page" className="studio-notes-icon is-danger" disabled={notes.notes.length <= 1} onClick={() => void notes.deleteNote(active.id)} type="button">×</button></Hint>
             </div>
           </div>
-          <textarea ref={textareaRef} aria-label={`${active.title || "Untitled"} note`} className="studio-notes-textarea" maxLength={50000} onChange={(event) => notes.updateNote(active.id, { body: event.target.value })} placeholder="Let the thoughts arrive…" value={active.body} />
+          <Hint id="notesEditor"><textarea ref={textareaRef} aria-label={`${active.title || "Untitled"} note`} className="studio-notes-textarea" maxLength={50000} onChange={(event) => notes.updateNote(active.id, { body: event.target.value })} placeholder="Let the thoughts arrive…" value={active.body} /></Hint>
           <div className="studio-notes-footer"><span>{active.body.length.toLocaleString()} / 50,000</span><span className="studio-notes-relative">{relativeTick >= 0 && saveState?.state === "saved" ? `Last saved ${relativeTime(saveState.at)}` : ""}</span></div>
         </div>
       ) : null}
@@ -162,7 +162,7 @@ export default function StudioNotes({ variant }: { variant: NotesVariant }) {
 
   if (variant === "inline") return content;
   return createPortal(<div className={`studio-notes-drawer-layer ${open ? "is-open" : ""}`}>
-    <button ref={tabRef} aria-controls="studio-notes-drawer-panel" aria-expanded={open} aria-label={open ? "Close Studio notes" : "Open Studio notes"} className="studio-notes-drawer-tab" onClick={() => setDrawerOpen(!open)} type="button">Notes</button>
+    <Hint id="notesDrawerToggle"><button ref={tabRef} aria-controls="studio-notes-drawer-panel" aria-expanded={open} aria-label={open ? "Close Studio notes" : "Open Studio notes"} className="studio-notes-drawer-tab" onClick={() => setDrawerOpen(!open)} type="button">Notes</button></Hint>
     <aside id="studio-notes-drawer-panel" ref={panelRef} aria-hidden={!open} className="studio-notes-drawer-panel">{content}</aside>
   </div>, document.body);
 }

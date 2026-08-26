@@ -90,5 +90,5 @@ export function StudioWelcomeCard() {
   const [visible, setVisible] = useState(true);
   useEffect(() => setVisible(window.localStorage.getItem("studio.welcomeDismissed") !== "true"), []);
   if (!visible) return null;
-  return <aside className="studio-welcome-card" role="note"><span>New here? Hover any button or link to see what it does.</span><button aria-label="Dismiss welcome message" onClick={() => { window.localStorage.setItem("studio.welcomeDismissed", "true"); setVisible(false); }} type="button">×</button></aside>;
+  return <aside className="studio-welcome-card" role="note"><span>New here? Hover any button or link to see what it does.</span><Hint id="dismissWelcome"><button aria-label="Dismiss welcome message" onClick={() => { window.localStorage.setItem("studio.welcomeDismissed", "true"); setVisible(false); }} type="button">×</button></Hint></aside>;
 }
