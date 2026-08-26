@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AnimatedFairy from "./animated-fairy";
+import HomeShopPreview, { type HomeShopPreviewItem } from "./home-shop-preview";
 import InquiryForm from "./inquiry-form";
 import { PAINTING_TEXTURES, isPaintingBackgroundVariant, type PaintingBackgroundVariant } from "./backgrounds/painting-textures";
 
 type HomeClientProps = {
   styles: string;
   markup: string;
+  shopPreview: HomeShopPreviewItem[];
 };
 
 const PAINTING_FRAGMENT_SHADER = `
@@ -64,11 +66,12 @@ const PAINTING_FRAGMENT_SHADER = `
     gl_FragColor=vec4(col,1.0);
   }`;
 
-export default function HomeClient({ styles, markup }: HomeClientProps) {
+export default function HomeClient({ styles, markup, shopPreview }: HomeClientProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [backgroundMount, setBackgroundMount] = useState<HTMLElement | null>(null);
   const [fairyMount, setFairyMount] = useState<HTMLElement | null>(null);
   const [commissionMount, setCommissionMount] = useState<HTMLElement | null>(null);
+  const [shopPreviewMount, setShopPreviewMount] = useState<HTMLElement | null>(null);
   const backgroundVariantRef = useRef<PaintingBackgroundVariant | null>(null);
 
   useEffect(() => {
@@ -77,6 +80,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
     setBackgroundMount(document.getElementById("global-background-layer"));
     setFairyMount(root.querySelector<HTMLElement>("#animated-fairy-mount"));
     setCommissionMount(root.querySelector<HTMLElement>("#commission-form-mount"));
+    setShopPreviewMount(root.querySelector<HTMLElement>("#commission-shop-preview-mount"));
   }, []);
 
   useEffect(() => {
@@ -690,6 +694,7 @@ export default function HomeClient({ styles, markup }: HomeClientProps) {
       {backgroundMount ? createPortal(<><canvas id="art" /><div id="artFallback" /></>, backgroundMount) : null}
       {fairyMount ? createPortal(<AnimatedFairy />, fairyMount) : null}
       {commissionMount ? createPortal(<InquiryForm kind="commission" />, commissionMount) : null}
+      {shopPreviewMount && shopPreview.length ? createPortal(<HomeShopPreview items={shopPreview} />, shopPreviewMount) : null}
     </div>
   );
 }
