@@ -110,6 +110,8 @@
   .btn{display:inline-block;font-size:12px;letter-spacing:.24em;text-transform:uppercase;text-decoration:none;color:#fff;
     background:var(--deep);padding:16px 40px;border:none;border-radius:1px;cursor:pointer;transition:background .4s,transform .3s}
   .btn:hover{background:var(--teal);transform:translateY(-2px)}
+  .commission-shop-prompt{margin:34px auto 18px;font-family:var(--serif);font-size:clamp(24px,3.2vw,38px);line-height:1.15;color:#26333c}
+  .commission-shop-button{display:block;width:max-content;margin:0 auto}
   .press-row{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:38px;text-align:left}
   .quote{border-top:2px solid var(--teal);padding-top:20px}
   .quote p{font-family:var(--serif);font-style:italic;font-size:19px;line-height:1.5;color:#26333c}
@@ -475,7 +477,8 @@
           <div class="step"><div class="n">03</div><h4>It arrives</h4><p>Finished, sealed, and delivered — ready for its wall.</p></div>
         </div>
         <a href="#contact" class="btn">Start a commission</a>
-        <p class="lead" style="margin:24px auto 0">Or find a piece already in flow — <a href="/shop" class="btn">visit the shop</a>.</p>
+        <p class="commission-shop-prompt">Or find a piece already in flow —</p>
+        <a href="/shop" class="btn commission-shop-button">visit the shop</a>
       </div>
     </section>
 
