@@ -14,6 +14,11 @@ export function formatPrice(work: { price_php: number | null; price_usd: number 
   return [php, usd ? `(${usd})` : null].filter(Boolean).join(" ");
 }
 
+export function formatDimensions(work: { width: number | null; height: number | null; depth?: number | null; dimension_unit: "cm" | "in" | null }) {
+  const values = [work.width, work.height, work.depth].filter((dimension): dimension is number => dimension !== null && dimension !== undefined);
+  return values.length ? `${values.join(" × ")} ${work.dimension_unit ?? ""}`.trim() : "";
+}
+
 export function getArtworkUrl(supabase: SupabaseClient<Database>, storagePath: string) {
   if (/^https?:\/\//i.test(storagePath)) return storagePath;
   return supabase.storage.from("artwork").getPublicUrl(storagePath).data.publicUrl;

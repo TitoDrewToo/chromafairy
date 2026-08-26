@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { formatPrice } from "../lib/catalogue";
+import { formatDimensions, formatPrice } from "../lib/catalogue";
 import ShopImage from "./shop-image";
 
 export type CatalogueImage = { storage_path: string; alt: string | null; is_primary: boolean | null };
@@ -21,6 +21,8 @@ export type CatalogueWork = {
   series_name: string | null;
   width: number | null;
   height: number | null;
+  depth: number | null;
+  dimension_unit: "cm" | "in" | null;
   images: CatalogueImage[];
 };
 
@@ -43,6 +45,7 @@ function WorkCard({ work }: { work: CatalogueWork }) {
         <div className="shop-card-meta"><span>{work.series_name ?? "Original work"}</span><span className="shop-card-year-status"><span>{work.year}</span><span className={`shop-card-status ${work.status}`}>{statusLabel(work.status, work.is_new)}</span></span></div>
         <Link className="shop-card-title chroma-text" href={`/shop/${work.slug}`}>{work.title}</Link>
         <div className="shop-card-price">{formatPrice(work)}</div>
+        {formatDimensions(work) && <div className="shop-card-dimensions"><span>Dimensions</span><span>{formatDimensions(work)}</span></div>}
       </div>
     </article>
   );

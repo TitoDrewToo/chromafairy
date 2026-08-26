@@ -494,6 +494,20 @@
   font-size: 11px;
 }
 
+.shop-card-dimensions {
+  display: grid;
+  gap: 2px;
+  margin-top: 6px;
+  color: var(--shop-muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.shop-card-dimensions span:first-child {
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .shop-empty {
   padding: 90px 20px;
   border: 1px solid var(--shop-line);
