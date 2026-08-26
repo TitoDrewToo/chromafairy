@@ -76,8 +76,7 @@ export default function AdminLandingPage({ initialContent }: { initialContent: L
       const result = await uploadLandingImage({ sectionKey: section.section_key, file });
       if (!result.ok) return setError(result.error ?? "Could not upload that image.");
       if (!result.path) return setError("The image uploaded without a storage path.");
-      const client = createClient();
-      const nextMedia = [...entry.media]; nextMedia[index] = { ...nextMedia[index], path: client ? getArtworkUrl(client, result.path) : result.path };
+      const nextMedia = [...entry.media]; nextMedia[index] = { ...nextMedia[index], path: result.path };
       updateItem(section.id, entry.id, { media: nextMedia });
       setMessage("Image uploaded. Save the entry to publish it.");
     } catch (uploadError) {

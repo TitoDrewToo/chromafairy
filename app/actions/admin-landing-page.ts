@@ -104,6 +104,11 @@ function normalizeMedia(values: LandingMedia[], sectionKey: LandingSectionKey, i
   if (!Array.isArray(values) || values.length > max) return { ok: false, error: `This entry supports up to ${max} image${max === 1 ? "" : "s"}.` };
   if (sectionKey !== "press" && !values.length) return { ok: false, error: "This entry needs an image." };
   if (itemType === "press_text" && values.length) return { ok: false, error: "Text-only press entries cannot contain an image." };
-  return { ok: true, value: values.map((value) => ({ path: clean(value.path, 1000), alt: clean(value.alt, 240), label: clean(value.label, 240) })).filter((value) => value.path) };
+  return { ok: true, value: values.map((value) => ({ path: clean(toStoredArtworkPath(value.path), 1000), alt: clean(value.alt, 240), label: clean(value.label, 240) })).filter((value) => value.path) };
+}
+function toStoredArtworkPath(value: string) {
+  const marker = "/storage/v1/object/public/artwork/";
+  if (!value.includes(marker)) return value;
+  try { return decodeURIComponent(value.slice(value.indexOf(marker) + marker.length)); } catch { return value; }
 }
 function normalizeStoredPaths(value: unknown): string[] { return Array.isArray(value) ? value.map((item) => item && typeof item.path === "string" ? item.path : "").filter((path) => path.startsWith("landing/")) : []; }
