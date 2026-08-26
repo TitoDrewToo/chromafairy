@@ -71,7 +71,13 @@ function pressTextCard(entry: LandingItem) {
 function pressModal(entry: LandingItem) {
   const image = entry.media[0];
   const modalId = `landing-press-${entry.id.replace(/[^a-z0-9_-]/gi, "-")}`;
-  return `<div id="${attr(modalId)}" class="press-modal" role="dialog" aria-modal="true" aria-labelledby="${attr(modalId)}-title" hidden><figure class="press-modal-card ${image ? "" : "press-instagram-modal-card"}">${image ? `<img loading="lazy" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : ""}<div id="${attr(modalId)}-title" class="eyebrow">${text(entry.title)}</div></figure></div>`;
+  const instagram = !image && isInstagramUrl(entry.link_url)
+    ? `<blockquote class="instagram-media" data-instgrm-permalink="${attr(entry.link_url)}" data-instgrm-version="14"></blockquote><p class="press-instagram-fallback"><a href="${attr(entry.link_url)}" target="_blank" rel="noopener noreferrer">${text(entry.link_label || "Open on Instagram")}</a></p>`
+    : "";
+  const fallback = !image && !instagram && validLink(entry.link_url)
+    ? `<p class="press-instagram-fallback"><a href="${attr(entry.link_url)}" target="_blank" rel="noopener noreferrer">${text(entry.link_label || "Open feature")}</a></p>`
+    : "";
+  return `<div id="${attr(modalId)}" class="press-modal" role="dialog" aria-modal="true" aria-labelledby="${attr(modalId)}-title" hidden><figure class="press-modal-card ${image ? "" : "press-instagram-modal-card"}">${image ? `<img loading="lazy" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : ""}<div id="${attr(modalId)}-title" class="eyebrow">${text(entry.title)}</div>${instagram || fallback}</figure></div>`;
 }
 
 function linkText(value: string, url: string) {
@@ -79,6 +85,14 @@ function linkText(value: string, url: string) {
   return validLink(url) ? `<a href="${attr(url)}" target="_blank" rel="noopener noreferrer">${content}</a>` : content;
 }
 function validLink(value: string) { return /^(https?:\/\/|\/|#)/i.test(value); }
+function isInstagramUrl(value: string) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && (url.hostname === "instagram.com" || url.hostname.endsWith(".instagram.com"));
+  } catch {
+    return false;
+  }
+}
 function paragraph(value?: string) { return value ? `<p class="body" style="margin:16px auto 0;text-align:center">${paragraphText(value)}</p>` : ""; }
 function paragraphText(value: string) { return text(value).replace(/\n/g, "<br />"); }
 function text(value: string) { return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"); }
