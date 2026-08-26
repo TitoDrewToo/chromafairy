@@ -152,7 +152,7 @@ export default function HomeClient({ styles, markup, shopPreview }: HomeClientPr
       if (!target) return;
 
       event.preventDefault();
-      const destination = Math.max(0, target.getBoundingClientRect().top + window.scrollY - 72);
+      const destination = Math.max(0, target.getBoundingClientRect().top + window.scrollY - header.getBoundingClientRect().height);
       const start = window.scrollY;
       const distance = destination - start;
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -484,7 +484,7 @@ export default function HomeClient({ styles, markup, shopPreview }: HomeClientPr
         bright: gl.getUniformLocation(program, "uBright"),
         topExtend: gl.getUniformLocation(program, "uTopExtend"),
       };
-      const sceneStopIds = ["home", "collections", "exhibitions", "gallery", "commission", "press", "about", "contact"];
+      const sceneStopIds = ["home", "collections", "exhibitions", "press", "gallery", "commission", "shop-preview", "about", "contact"];
       const sceneStops = sceneStopIds
         .map((id, index) => ({ id, scene: index / Math.max(1, sceneStopIds.length - 1) }))
         .map((stop) => ({ el: root.querySelector<HTMLElement>(`#${stop.id}`), scene: stop.scene }))
@@ -644,7 +644,7 @@ export default function HomeClient({ styles, markup, shopPreview }: HomeClientPr
     window.addEventListener("mousemove", onMouseMove);
     resize();
 
-    const sceneStopIds = ["home", "collections", "exhibitions", "gallery", "commission", "press", "about", "contact"];
+    const sceneStopIds = ["home", "collections", "exhibitions", "press", "gallery", "commission", "shop-preview", "about", "contact"];
     const sceneStops = sceneStopIds
       .map((id, index) => ({ id, scene: index / Math.max(1, sceneStopIds.length - 1) }))
       .map((stop) => ({ el: root.querySelector<HTMLElement>(`#${stop.id}`), scene: stop.scene }))
