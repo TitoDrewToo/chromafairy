@@ -173,12 +173,14 @@ export default function HomeClient({ styles, markup, shopPreview }: HomeClientPr
         return;
       }
 
-      const duration = Math.min(900, Math.max(450, Math.abs(distance) * 0.28));
+      const duration = Math.min(2200, Math.max(1000, Math.abs(distance) * 0.52));
       const startedAt = performance.now();
       if (activeScrollFrame) window.cancelAnimationFrame(activeScrollFrame);
       const animateScroll = (now: number) => {
         const progress = Math.min(1, (now - startedAt) / duration);
-        const eased = (1 - Math.cos(Math.PI * progress)) / 2;
+        const eased = progress < 0.5
+          ? 16 * progress ** 5
+          : 1 - ((-2 * progress + 2) ** 5) / 2;
         window.scrollTo({
           top: progress === 1 ? destination : start + distance * eased,
           behavior: "auto",
