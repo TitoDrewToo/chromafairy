@@ -13,14 +13,16 @@ export default function HomeShopPreview({ items }: { items: HomeShopPreviewItem[
     <div className="commission-shop-preview-group" aria-hidden={hidden}>
       {items.map((item) => (
         <div className="commission-shop-preview-card" key={`${hidden ? "duplicate-" : ""}${item.title}-${item.imageUrl}`}>
-          <img
-            alt={hidden ? "" : item.alt}
-            decoding="async"
-            loading="lazy"
-            src={getArtworkTransformUrl(item.imageUrl, 640)}
-            srcSet={getArtworkSrcSet(item.imageUrl)}
-          />
-          {!hidden && <span>{item.title}</span>}
+          <div className="commission-shop-preview-frame">
+            <img
+              alt={hidden ? "" : item.alt}
+              decoding="async"
+              loading="lazy"
+              src={getArtworkTransformUrl(item.imageUrl, 640)}
+              srcSet={getArtworkSrcSet(item.imageUrl)}
+            />
+          </div>
+          {item.title.trim() && <span>{item.title}</span>}
         </div>
       ))}
     </div>

@@ -144,15 +144,26 @@ export default function HomeClient({ styles, markup, shopPreview }: HomeClientPr
 
       window.dispatchEvent(new CustomEvent("cf-audio-effect", { detail: { name: "whoosh", volume: 0.1 } }));
 
-      // Desktop keeps the original browser smooth-scroll behavior. The custom
-      // easing is only needed for the mobile menu's more compact viewport.
-      if (window.innerWidth > 860) return;
-
       const target = root.querySelector<HTMLElement>(href);
       if (!target) return;
 
       event.preventDefault();
-      const destination = Math.max(0, target.getBoundingClientRect().top + window.scrollY - header.getBoundingClientRect().height);
+      const alignment: Record<string, "start" | "center"> = {
+        "#collections": "center",
+        "#exhibitions": "start",
+        "#press": "center",
+        "#gallery": "start",
+        "#commission": "center",
+        "#about": "center",
+        "#contact": "center",
+      };
+      const headerHeight = header.getBoundingClientRect().height;
+      const targetTop = target.getBoundingClientRect().top + window.scrollY;
+      const targetHeight = target.getBoundingClientRect().height;
+      const canCenter = targetHeight <= window.innerHeight - headerHeight;
+      const destination = alignment[href] === "center" && canCenter
+        ? Math.max(0, targetTop - Math.max(headerHeight, (window.innerHeight - targetHeight) / 2))
+        : Math.max(0, targetTop - headerHeight);
       const start = window.scrollY;
       const distance = destination - start;
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
