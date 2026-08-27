@@ -220,7 +220,17 @@
 
 .shop-status-filter:not(.active):hover {
   border-color: transparent;
-  color: var(--shop-muted);
+  background-color: transparent !important;
+  background-image: none !important;
+  color: var(--shop-muted) !important;
+  animation: none !important;
+}
+
+.shop-status-filter:not(.active):focus-visible {
+  background-color: transparent !important;
+  background-image: none !important;
+  color: var(--shop-muted) !important;
+  animation: none !important;
 }
 
 .shop-expand-control,
