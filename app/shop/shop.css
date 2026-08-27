@@ -194,29 +194,17 @@
 .shop-status-filter.active,
 .shop-status-filter.active:hover,
 .shop-status-filter.active:focus-visible {
-  border-color: var(--shop-ink);
-  background-color: var(--shop-ink) !important;
-  background-image: none !important;
+  border-color: transparent;
+  background-image: var(--chroma-gradient) !important;
+  background-size: var(--chroma-size);
   color: #fff;
+  animation: chroma-shimmer var(--chroma-duration) linear infinite;
 }
 
 .shop-status-filter.active .shop-filter-label {
   background-image: none;
-  background-size: var(--chroma-size);
-  background-position: 0% 50%;
   color: #fff;
   animation: none;
-}
-
-.shop-status-filter.active:hover .shop-filter-label,
-.shop-status-filter.active:focus-visible .shop-filter-label {
-  background-image: var(--chroma-gradient);
-  background-size: var(--chroma-size);
-  background-position: 0% 50%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: chroma-shimmer var(--chroma-duration) linear infinite;
 }
 
 .shop-status-filter:not(.active):hover .shop-filter-label,
@@ -256,8 +244,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shop-status-filter.active:hover .shop-filter-label,
-  .shop-status-filter.active:focus-visible .shop-filter-label,
+  .shop-status-filter.active,
   .shop-status-filter:not(.active):hover .shop-filter-label,
   .shop-status-filter:not(.active):focus-visible .shop-filter-label,
   .shop-expand-control:hover .shop-filter-label,
