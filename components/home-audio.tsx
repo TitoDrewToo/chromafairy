@@ -6,8 +6,9 @@ const WAVE_TRACKS = [
   { label: "Wave 1", src: "/audio/mixkit-sea-waves-loop-1196.mp3" },
   { label: "Wave 2", src: "/audio/mixkit-distant-sea-humming-ambiance-1191.mp3" },
   { label: "Wave 3", src: "/audio/mixkit-sea-waves-ambience-1189.mp3" },
+  { label: "Wave 4", src: "/audio/mixkit-small-waves-harbor-rocks-1208-loop.mp3" },
 ] as const;
-const DEFAULT_WAVE_INDEX = 1;
+const DEFAULT_WAVE_INDEX = 3;
 const EFFECT_TRACKS = {
   sparkle: "/audio/mixkit-fairy-magic-sparkle-871.mp3",
   glitter: "/audio/mixkit-fairy-glitter-867.mp3",
