@@ -22,6 +22,7 @@ export default function HomeAudio() {
   const effectRefs = useRef<Record<AudioEffectName, HTMLAudioElement | null>>({ sparkle: null, glitter: null, whoosh: null });
   const enabledRef = useRef(true);
   const [enabled, setEnabled] = useState(true);
+  const [waveIndex, setWaveIndex] = useState(DEFAULT_WAVE_INDEX);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -111,9 +112,30 @@ export default function HomeAudio() {
     }
   };
 
+  const cycleWave = async () => {
+    const nextIndex = (waveIndex + 1) % WAVE_TRACKS.length;
+    const audio = audioRef.current;
+    setWaveIndex(nextIndex);
+    if (!audio || !enabledRef.current) return;
+
+    audio.pause();
+    audio.src = WAVE_TRACKS[nextIndex].src;
+    audio.load();
+    const resume = () => {
+      if (enabledRef.current) void audio.play().catch(() => {});
+    };
+    audio.addEventListener("canplay", resume, { once: true });
+    try {
+      await audio.play();
+    } catch {
+      // The new track may still be loading. The canplay listener above
+      // resumes it without changing the user's enabled preference.
+    }
+  };
+
   return (
     <>
-      <audio autoPlay data-home-ambient="true" ref={audioRef} loop preload="auto" src={WAVE_TRACKS[DEFAULT_WAVE_INDEX].src} />
+      <audio autoPlay data-home-ambient="true" ref={audioRef} loop preload="auto" src={WAVE_TRACKS[waveIndex].src} />
       {Object.entries(EFFECT_TRACKS).map(([name, src]) => (
         <audio
           key={name}
@@ -123,6 +145,15 @@ export default function HomeAudio() {
         />
       ))}
       <div className="home-audio-controls">
+        <button
+          aria-label={`Switch ambient wave. Currently ${WAVE_TRACKS[waveIndex].label}`}
+          className="home-audio-wave"
+          onClick={() => void cycleWave()}
+          title="Switch ambient wave"
+          type="button"
+        >
+          {WAVE_TRACKS[waveIndex].label} / {WAVE_TRACKS.length}
+        </button>
         <button
           aria-pressed={enabled}
           aria-label={enabled ? "Turn ambient sound off" : "Turn ambient sound on"}
