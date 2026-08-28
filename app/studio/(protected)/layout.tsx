@@ -67,7 +67,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
       <section className="admin-content">
         <header className="admin-topbar">
           <AdminMobileNav />
-          <Hint id="userRole"><div><span className="admin-user-email">{displayName}</span><span className="admin-role">{role}</span></div></Hint>
+          <Hint id="userRole"><div className="admin-user-identity" aria-label={`${role} ${displayName}`}><span className="admin-role">{role}</span><span className="admin-user-email">{displayName}</span></div></Hint>
           <div className="admin-topbar-actions"><AdminSignOut /></div>
         </header>
         <div className="admin-page-content">{children}</div>
