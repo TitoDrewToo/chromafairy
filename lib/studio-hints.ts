@@ -77,7 +77,7 @@ export const studioHints = {
   averageTicket: "The typical amount a piece sells for.",
   insightPeriod: "Switch between daily, weekly, and monthly traffic and inquiry trends.",
   insightViews: "Every public page load in the selected period. One person opening five pages counts as five views. Studio pages, and visits by you and the AVINTPH team, are excluded.",
-  insightVisitors: "How many people visited, not how many pages they opened. One person viewing five pages is 1 visitor and 5 views. This is a daily figure only — visitors cannot be totalled across a week or month, because the same person is counted fresh each day by design.",
+  insightVisitors: "How many people visited, not how many pages they opened. One person viewing five pages is 1 visitor and 5 views. This is a daily figure only — visitors cannot be totalled across a week or month, because the same person is counted fresh each day by design. Over a week or a month this shows the average number of people per day, since the same person cannot be counted once across multiple days.",
   insightInquiries: "Public inquiries received in the selected period, counted from the inquiry records.",
   insightConversion: "Inquiries per 100 visits. This shows whether attention is turning into interest.",
   insightTrends: "Compare activity across the selected period. Daily unique visitors are only shown for daily buckets.",
