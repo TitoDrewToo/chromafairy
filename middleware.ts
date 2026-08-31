@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { NO_TRACK_COOKIE } from "./lib/studio-tracking-cookie";
 
 export async function middleware(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -35,6 +36,9 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user && !isAuthHandoff) return NextResponse.redirect(new URL("/studio/login", request.url));
   if (user && isLogin) return NextResponse.redirect(new URL("/studio", request.url));
+  if (user && !request.cookies.get("cf_track_opt_in")) {
+    response.cookies.set("cf_no_track", "1", NO_TRACK_COOKIE);
+  }
   return response;
 }
 

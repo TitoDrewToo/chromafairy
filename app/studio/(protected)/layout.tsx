@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import AdminSignOut from "../../../components/admin-sign-out";
 import AdminMobileNav from "../../../components/admin-mobile-nav";
 import { Hint } from "../../../components/studio-hint";
@@ -22,14 +21,6 @@ const managerAreas = [
   ["Insights", "/studio/insights", "navInsights"],
   ["Settings", "/studio/settings", "navSettings"],
 ] as const;
-
-const NO_TRACK_COOKIE = {
-  maxAge: 60 * 60 * 24 * 365 * 2,
-  path: "/",
-  sameSite: "lax" as const,
-  secure: true,
-  httpOnly: true,
-};
 
 export default async function AdminLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const supabase = await createClient();
@@ -62,13 +53,6 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
     supabase.rpc("is_user_manager"),
     supabase.from("inquiries").select("id", { count: "exact", head: true }).eq("status", "new").is("archived_at", null),
   ]);
-
-  if (canManageStudio) {
-    const cookieStore = await cookies();
-    if (!cookieStore.get("cf_track_opt_in")) {
-      try { cookieStore.set("cf_no_track", "1", NO_TRACK_COOKIE); } catch { /* Server Components cannot write cookies. */ }
-    }
-  }
 
   return (
     <div className="admin-shell">

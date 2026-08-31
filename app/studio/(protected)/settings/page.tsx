@@ -2,18 +2,11 @@ import { createClient } from "../../../../lib/supabase/server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import SettingsAdmin from "../../../../components/admin-settings";
+import { NO_TRACK_COOKIE } from "../../../../lib/studio-tracking-cookie";
 import "../../admin.css";
 import "../../operations.css";
 
 export const dynamic = "force-dynamic";
-
-const NO_TRACK_COOKIE = {
-  maxAge: 60 * 60 * 24 * 365 * 2,
-  path: "/",
-  sameSite: "lax" as const,
-  secure: true,
-  httpOnly: true,
-};
 
 export default async function AdminSettingsPage() {
   const supabase = await createClient();
