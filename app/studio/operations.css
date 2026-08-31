@@ -17,6 +17,7 @@
 
 .admin-insights-page { max-width: 1040px; }
 .admin-insights-heading { display: flex; align-items: end; justify-content: space-between; gap: 28px; }
+.admin-insights-coverage { margin: 12px 0 0; color: #5d5952; font-size: 11px; font-variant-numeric: tabular-nums; }
 .admin-period-selector { display: flex; gap: 4px; padding: 4px; border-bottom: 1px solid #ded9cf; }
 .admin-period-selector a { padding: 8px 13px; color: #77736b; font-size: 11px; text-decoration: none; }
 .admin-period-selector a:hover, .admin-period-selector a:focus-visible, .admin-period-selector a.is-selected { background: #a16207; color: #fff; }

@@ -14,6 +14,7 @@ type Summary = { total_views: number; unique_visitors_today: number; top_referre
 type TrafficPoint = { period_start: string; views: number; unique_visitors: number | null };
 type InquiryPoint = { period_start: string; inquiries: number };
 type Point = { label: string; periodStart: string; views: number; inquiries: number; conversion: number };
+type TrackingStartRpc = (functionName: "get_tracking_started_at", args: Record<string, never>) => Promise<{ data: string | null; error: unknown }>;
 
 const PERIODS: Array<{ value: Period; label: string }> = [
   { value: "day", label: "Day" },
@@ -34,7 +35,8 @@ export default async function AdminInsightsPage({ searchParams }: { searchParams
   const previousRange = getPeriodRange(period, -1);
   const trendRange = getTrendRange(period);
   const lifetimeTo = new Date();
-  const [currentSummary, previousSummary, currentInquiries, previousInquiries, traffic, inquiries, topPages, lifetime] = await Promise.all([
+  const trackingStartRpc = admin.rpc.bind(admin) as unknown as TrackingStartRpc;
+  const [currentSummary, previousSummary, currentInquiries, previousInquiries, traffic, inquiries, topPages, lifetime, trackingStart] = await Promise.all([
     admin.rpc("get_traffic_summary", toRpcRange(currentRange)),
     admin.rpc("get_traffic_summary", toRpcRange(previousRange)),
     admin.rpc("get_inquiry_total", toRpcRange(currentRange)),
@@ -43,29 +45,34 @@ export default async function AdminInsightsPage({ searchParams }: { searchParams
     admin.rpc("get_inquiry_counts_by_period", { p_granularity: period, ...toRpcRange(trendRange) }),
     admin.rpc("get_top_pages", { ...toRpcRange(currentRange), p_limit: 7 }),
     admin.rpc("get_traffic_summary", { p_from: new Date(0).toISOString(), p_to: lifetimeTo.toISOString() }),
+    trackingStartRpc("get_tracking_started_at", {}),
   ]);
 
-  if (currentSummary.error || previousSummary.error || currentInquiries.error || previousInquiries.error || traffic.error || inquiries.error || topPages.error || lifetime.error) return <AdminMessage message="Insights could not be loaded." />;
+  if (currentSummary.error || previousSummary.error || currentInquiries.error || previousInquiries.error || traffic.error || inquiries.error || topPages.error || lifetime.error || trackingStart.error) return <AdminMessage message="Insights could not be loaded." />;
   const current = currentSummary.data?.[0] ?? emptySummary();
   const previous = previousSummary.data?.[0] ?? emptySummary();
   const currentInquiryCount = currentInquiries.data ?? 0;
   const previousInquiryCount = previousInquiries.data ?? 0;
   const points = buildPoints((traffic.data ?? []) as TrafficPoint[], (inquiries.data ?? []) as InquiryPoint[]);
   const populatedPoints = points.filter((point) => point.views > 0 || point.inquiries > 0);
-  const hasEverTracked = (lifetime.data?.[0]?.total_views ?? 0) > 0;
+  const lifetimeSummary = lifetime.data?.[0] ?? emptySummary();
+  const trackingStartedAt = trackingStart.data ? new Date(trackingStart.data) : null;
+  const viewsCoverCurrentPeriod = trackingStartedAt !== null && trackingStartedAt <= currentRange.from;
+  const viewsCoverPreviousPeriod = trackingStartedAt !== null && trackingStartedAt <= previousRange.from;
+  const hasEverTracked = lifetimeSummary.total_views > 0;
   const hasPeriodData = current.total_views > 0 || currentInquiryCount > 0;
   const previousLabel = previousPeriodLabel(period);
-  const viewsDelta = previous.total_views > 0 ? current.total_views - previous.total_views : null;
+  const viewsDelta = viewsCoverPreviousPeriod && previous.total_views > 0 ? current.total_views - previous.total_views : null;
   const inquiryDelta = previous.total_views > 0 || previousInquiryCount > 0 ? currentInquiryCount - previousInquiryCount : null;
-  const currentConversion = conversion(currentInquiryCount, current.total_views);
-  const previousConversion = conversion(previousInquiryCount, previous.total_views);
+  const currentConversion = viewsCoverCurrentPeriod ? conversion(currentInquiryCount, current.total_views) : null;
+  const previousConversion = viewsCoverPreviousPeriod ? conversion(previousInquiryCount, previous.total_views) : null;
   const conversionDelta = previousConversion !== null && currentConversion !== null ? currentConversion - previousConversion : null;
 
   return (
     <div className="admin-dashboard admin-operations-page admin-insights-page">
       <p className="admin-eyebrow">Studio intelligence</p>
       <div className="admin-insights-heading">
-        <div><h1>Studio insights</h1><p className="admin-muted">A calm read on attention, interest, and what drew it.</p></div>
+        <div><h1>Studio insights</h1><p className="admin-muted">A calm read on attention, interest, and what drew it.</p>{trackingStartedAt ? <p className="admin-insights-coverage">Tracking since {formatTrackingDate(trackingStartedAt)} · {formatNumber(lifetimeSummary.tracked_days)} day{lifetimeSummary.tracked_days === 1 ? "" : "s"} of data</p> : null}</div>
         <nav className="admin-period-selector" aria-label="Insight period">
           {PERIODS.map((item) => <Hint id="insightPeriod" key={item.value}><Link className={item.value === period ? "is-selected" : ""} href={`/studio/insights?period=${item.value}`} aria-current={item.value === period ? "page" : undefined}>{item.label}</Link></Hint>)}
         </nav>
@@ -75,19 +82,19 @@ export default async function AdminInsightsPage({ searchParams }: { searchParams
 
       <section className="admin-insight-block admin-attention-block" aria-labelledby="attention-heading">
         <div className="admin-insights-section-heading"><h2 id="attention-heading">Attention</h2><span>{periodLabel(period)}</span></div>
-        <div className="admin-insight-stat-row"><Hint id="insightViews"><Stat label="Views" value={formatNumber(current.total_views)} delta={formatDelta(viewsDelta, previousLabel, false)} points={points.map((point) => point.views)} /></Hint></div>
+        <div className="admin-insight-stat-row"><Hint id="insightViews"><Stat label="Views" value={formatNumber(current.total_views)} delta={formatDelta(viewsDelta, previousLabel, false)} note={null} points={points.map((point) => point.views)} /></Hint><Stat label="Visitors" value={period === "day" ? formatNumber(current.unique_visitors_today) : "—"} delta={null} note={period === "day" ? null : "daily figure only"} points={[]} /></div>
         {populatedPoints.length >= 6 ? <AreaTrend points={points.filter((point) => point.views > 0)} title="Views over time" /> : null}
       </section>
 
       <section className="admin-insight-block admin-interest-block" aria-labelledby="interest-heading">
         <div className="admin-insights-section-heading"><h2 id="interest-heading">Interest</h2><span>Is attention turning into conversation?</span></div>
         <div className="admin-insights-hero"><strong>{formatNumber(currentInquiryCount)}</strong><span>inquiries {period === "day" ? "today" : period === "week" ? "this week" : "this month"}</span><small>{formatDelta(inquiryDelta, previousLabel, false) ?? ""}</small></div>
-        <div className="admin-insight-stat-row admin-interest-stats"><Hint id="insightInquiries"><Stat label="Inquiries" value={formatNumber(currentInquiryCount)} delta={formatDelta(inquiryDelta, previousLabel, false)} points={points.map((point) => point.inquiries)} /></Hint><Hint id="insightConversion"><Stat label="Per 100 visits" value={currentConversion !== null ? currentConversion.toFixed(1) : "—"} delta={formatDelta(conversionDelta, previousLabel, true)} points={points.map((point) => point.conversion)} /></Hint></div>
+        <div className="admin-insight-stat-row admin-interest-stats"><Hint id="insightConversion"><Stat label="Per 100 visits" value={currentConversion !== null ? currentConversion.toFixed(1) : "—"} delta={formatDelta(conversionDelta, previousLabel, true)} note={currentConversion === null && trackingStartedAt ? `from ${formatTrackingDate(trackingStartedAt)}` : null} points={points.map((point) => point.conversion)} /></Hint></div>
       </section>
 
       <section className="admin-insight-block admin-what-drew-block" aria-labelledby="what-drew-heading">
-        <div className="admin-insights-section-heading"><h2 id="what-drew-heading">What drew it</h2><span>{current.tracked_days} tracked day{current.tracked_days === 1 ? "" : "s"} · top referrer: {current.top_referrer ?? "Direct / unknown"}</span></div>
-        <div className="admin-top-pages-list">{topPages.data?.length ? topPages.data.map((page, index) => <div className="admin-top-page-row" key={page.path}><span title={page.path}>{page.path}</span><i><b style={{ width: `${Math.max(5, (page.views / Math.max(1, topPages.data?.[0]?.views ?? 1)) * 100)}%`, opacity: String(Math.max(.42, 1 - index * .08)) }} /></i><strong>{formatNumber(page.views)}</strong></div>) : <p className="admin-empty-state">No pages in this period.</p>}</div>
+        <div className="admin-insights-section-heading"><h2 id="what-drew-heading">What drew it</h2><span>Top referrer: {current.top_referrer ?? "Direct / unknown"}</span></div>
+        <div className="admin-top-pages-list">{topPages.data?.length ? topPages.data.map((page, index) => <div className="admin-top-page-row" key={page.path}><span title={page.path}>{displayPath(page.path)}</span><i><b style={{ width: `${Math.max(5, (page.views / Math.max(1, topPages.data?.[0]?.views ?? 1)) * 100)}%`, opacity: String(Math.max(.42, 1 - index * .08)) }} /></i><strong>{formatNumber(page.views)}</strong></div>) : <p className="admin-empty-state">No pages in this period.</p>}</div>
       </section>
     </div>
   );
@@ -110,11 +117,13 @@ function previousPeriodLabel(period: Period) { return period === "day" ? "yester
 function conversion(inquiries: number, views: number) { return views > 0 ? (inquiries / views) * 100 : null; }
 function buildPoints(traffic: TrafficPoint[], inquiries: InquiryPoint[]): Point[] { const inquiryByDate = new Map(inquiries.map((point) => [point.period_start, point.inquiries])); return traffic.map((point) => { const inquiryCount = inquiryByDate.get(point.period_start) ?? 0; return { periodStart: point.period_start, label: formatDate(point.period_start), views: point.views, inquiries: inquiryCount, conversion: conversion(inquiryCount, point.views) ?? 0 }; }); }
 function formatDate(value: string) { return new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`)); }
+function formatTrackingDate(value: Date) { return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }).format(value); }
+function displayPath(path: string) { return path === "/" ? "Home" : path === "/shop" ? "Shop" : path === "/about" ? "About" : path; }
 function formatNumber(value: number) { return value.toLocaleString("en-PH"); }
 function formatDelta(value: number | null, previousLabel: string, decimal: boolean) { if (value === null) return null; const sign = value > 0 ? "+" : value < 0 ? "−" : ""; const amount = decimal ? Math.abs(value).toFixed(1) : formatNumber(Math.abs(value)); return `${sign}${amount} from ${previousLabel}`; }
 
-function Stat({ label, value, delta, points }: { label: string; value: string; delta: string | null; points: number[] }) { return <div className="admin-insight-stat"><span>{label}</span><strong>{value}</strong>{delta ? <small>{delta}</small> : <small className="is-empty" aria-hidden="true">&nbsp;</small>}<Sparkline points={points} label={`${label} trend`} /></div>; }
-function Sparkline({ points, label }: { points: number[]; label: string }) { const max = Math.max(1, ...points); const width = 120; const height = 34; const step = points.length > 1 ? width / (points.length - 1) : width; const path = points.map((value, index) => `${index ? "L" : "M"}${(index * step).toFixed(2)},${(height - (value / max) * (height - 3)).toFixed(2)}`).join(" "); const fill = path ? `${path} L ${width},${height} L 0,${height} Z` : ""; const endIndex = points.length - 1; const endX = endIndex * step; const endY = points[endIndex] === undefined ? height : height - (points[endIndex] / max) * (height - 3); return <svg className="admin-sparkline" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label}>{fill ? <path className="admin-spark-fill" d={fill} /> : null}{path ? <path d={path} /> : null}{points.length ? <circle className="admin-spark-end" cx={endX} cy={endY} r="2.5"><title>{`${label}, ${formatNumber(points[endIndex])}`}</title></circle> : null}</svg>; }
+function Stat({ label, value, delta, note, points }: { label: string; value: string; delta: string | null; note: string | null; points: number[] }) { return <div className="admin-insight-stat"><span>{label}</span><strong>{value}</strong>{delta ? <small>{delta}</small> : note ? <small>{note}</small> : <small className="is-empty" aria-hidden="true">&nbsp;</small>}<Sparkline points={points} label={`${label} trend`} /></div>; }
+function Sparkline({ points, label }: { points: number[]; label: string }) { const populated = points.filter((value) => value > 0); if (populated.length < 2) return <svg className="admin-sparkline" viewBox="0 0 120 34" role="img" aria-label={label} />; const max = Math.max(1, ...points); const width = 120; const height = 34; const step = width / (points.length - 1); const path = points.map((value, index) => `${index ? "L" : "M"}${(index * step).toFixed(2)},${(height - (value / max) * (height - 3)).toFixed(2)}`).join(" "); const fill = `${path} L ${width},${height} L 0,${height} Z`; const endIndex = points.length - 1; const endValue = points[endIndex]; const endX = endIndex * step; const endY = height - (endValue / max) * (height - 3); return <svg className="admin-sparkline" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={label}><path className="admin-spark-fill" d={fill} /><path d={path} /><circle className="admin-spark-end" cx={endX} cy={endY} r="2.5"><title>{`${label}, ${formatNumber(endValue)}`}</title></circle></svg>; }
 function AreaTrend({ points, title }: { points: Point[]; title: string }) { const width = 760; const height = 180; const max = Math.max(1, ...points.map((point) => point.views)); const xStep = points.length > 1 ? width / (points.length - 1) : width; const coords = points.map((point, index) => ({ x: index * xStep, y: height - (point.views / max) * (height - 24) })); const line = coords.map((point, index) => `${index ? "L" : "M"}${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(" "); const area = `${line} L ${width},${height} L 0,${height} Z`; const peakIndex = points.reduce((best, point, index) => point.views > points[best].views ? index : best, 0); return <div className="admin-area-trend"><h3>{title}</h3><svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${title}, ${points.length} populated periods`}><path className="admin-area-fill" d={area} /><path className="admin-area-line" d={line} /><line className="admin-area-baseline" x1="0" y1={height} x2={width} y2={height} />{coords.map((point, index) => <g className="admin-chart-point" key={points[index].periodStart}><title>{`${points[index].label}: ${formatNumber(points[index].views)} views`}</title><line className="admin-chart-crosshair" x1={point.x} y1="0" x2={point.x} y2={height} /><circle cx={point.x} cy={point.y} r="10" />{index === peakIndex || index === coords.length - 1 ? <text x={point.x} y={Math.max(15, point.y - 10)} textAnchor={index === 0 ? "start" : index === coords.length - 1 ? "end" : "middle"}>{formatNumber(points[index].views)}</text> : null}</g>)}</svg></div>; }
 function EmptyState({ kind, message }: { kind: "none" | "period" | "sparse"; message: string }) { return <p className={`admin-insights-empty is-${kind}`} role="status">{message}</p>; }
 function AdminMessage({ message }: { message: string }) { return <div className="admin-dashboard"><p className="admin-eyebrow">Studio intelligence</p><h1>Studio insights</h1><p className="admin-muted">{message}</p></div>; }

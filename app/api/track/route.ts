@@ -11,6 +11,9 @@ function emptyResponse() {
 
 export async function POST(request: NextRequest) {
   try {
+    const hasStudioSession = request.cookies.getAll().some(({ name }) => /^sb-[^-]+(?:-[^-]+)*-auth-token(?:\.\d+)?$/.test(name));
+    if (hasStudioSession) return emptyResponse();
+
     const body = await request.arrayBuffer();
     if (body.byteLength > MAX_BODY_BYTES) return emptyResponse();
 
