@@ -601,12 +601,19 @@
   flex: 0 0 24px;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  background: var(--shop-ink);
-  border-radius: 2px;
 }
 
-.shop-footer-avint-mark img { width: 20px; height: 20px; object-fit: contain; }
+.shop-footer-avint-mark img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  filter: brightness(0);
+  opacity: .55;
+  transition: opacity 220ms ease;
+}
+
+.shop-footer-avint:hover .shop-footer-avint-mark img,
+.shop-footer-avint:focus-visible .shop-footer-avint-mark img { opacity: 1; }
 
 @media (max-width: 720px) {
   .shop-footer { align-items: flex-start; flex-direction: column; gap: 18px; }
