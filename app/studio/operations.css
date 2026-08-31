@@ -15,6 +15,31 @@
 @media (max-width: 820px) { .admin-sales-layout { grid-template-columns: 1fr; }.admin-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .admin-two-col { grid-template-columns: 1fr; }.admin-order-card { grid-template-columns: 1fr auto; }.admin-order-card select { grid-column: 1 / -1; width: 100%; }.admin-metric-grid { grid-template-columns: 1fr 1fr; }.admin-insight-row { grid-template-columns: minmax(0, 1fr) auto; }.admin-insight-row b { grid-column: 1 / -1; text-align: left; } }
 
+.admin-insights-page { max-width: 1040px; }
+.admin-insights-heading { display: flex; align-items: end; justify-content: space-between; gap: 28px; }
+.admin-insights-range { margin: 12px 0 0; color: #a6844d; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.admin-period-selector { display: flex; gap: 4px; padding: 4px; border: 1px solid #ded9cf; background: rgba(255,255,255,.48); }
+.admin-period-selector a { padding: 8px 13px; color: #77736b; font-size: 11px; text-decoration: none; }
+.admin-period-selector a:hover, .admin-period-selector a:focus-visible, .admin-period-selector a.is-selected { background: #171715; color: #fff; }
+.admin-insights-empty { margin: 28px 0 -8px; padding: 14px 16px; border-left: 2px solid #a6844d; background: rgba(255,255,255,.5); color: #5d5952; font-size: 13px; }
+.admin-insights-metrics { grid-template-columns: repeat(2, minmax(0, 240px)); margin-bottom: 16px; }
+.admin-insights-metrics .admin-metric strong { font-size: 36px; }
+.admin-insights-context { display: flex; flex-wrap: wrap; gap: 8px 24px; color: #77736b; font-size: 11px; }
+.admin-insights-trends { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 38px; }
+.admin-trend-card { min-width: 0; padding: 20px; border: 1px solid #ded9cf; background: rgba(255,255,255,.5); }
+.admin-trend-card h2, .admin-top-pages-section h2 { margin: 0 0 18px; color: #765b2d; font-size: 11px; font-weight: 400; letter-spacing: .18em; text-transform: uppercase; }
+.admin-trend-list { display: grid; gap: 11px; }
+.admin-trend-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) 38px; align-items: center; gap: 9px; }
+.admin-trend-label, .admin-trend-row b { color: #77736b; font-size: 10px; }
+.admin-trend-row b { color: #765b2d; font-weight: 400; text-align: right; }
+.admin-trend-track { height: 7px; overflow: hidden; background: #ebe7df; }
+.admin-trend-bar { display: block; height: 100%; background: var(--chroma-gradient); background-size: 300% 100%; animation: chroma-shimmer 7s linear infinite; }
+.admin-top-pages-section { max-width: 820px; margin-top: 38px; }
+.admin-top-pages-section .admin-insight-row { grid-template-columns: minmax(0, 1fr) auto; }
+.admin-top-pages-section .admin-insight-row b { color: #765b2d; font-weight: 400; }
+@media (max-width: 700px) { .admin-insights-heading { align-items: start; flex-direction: column; gap: 18px; }.admin-period-selector { width: 100%; }.admin-period-selector a { flex: 1; text-align: center; }.admin-insights-trends { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .admin-trend-bar { animation: none; } }
+
 .admin-scheduling-layout { display: grid; grid-template-columns: minmax(280px, 430px) minmax(0, 1fr); align-items: start; gap: clamp(28px, 6vw, 78px); margin-top: 34px; }.admin-scheduling-column { display: grid; gap: 20px; }.admin-schedule-list { display: grid; gap: 10px; }.admin-schedule-list h2 { margin: 0 0 4px; color: #765b2d; font-size: 11px; font-weight: 400; letter-spacing: .18em; text-transform: uppercase; }.admin-schedule-card { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px; border: 1px solid #ded9cf; background: rgba(255,255,255,.62); }.admin-schedule-card strong, .admin-schedule-card span, .admin-schedule-card small { display: block; }.admin-schedule-card strong { font-family: "Cormorant Garamond", Georgia, serif; font-size: 21px; font-weight: 500; }.admin-schedule-card span { margin-top: 4px; color: #77736b; font-size: 11px; }.admin-schedule-card small { margin-top: 5px; color: #5d5952; font-size: 11px; }.admin-schedule-card select { padding: 7px; border: 1px solid #cfc8bb; background: #fff; font: 11px "Jost", sans-serif; }.admin-field-label { display: block; margin-bottom: 8px; color: #77736b; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }.admin-weekday-picker { display: flex; flex-wrap: wrap; gap: 6px; }.admin-weekday-picker label { display: flex; align-items: center; gap: 5px; padding: 7px 8px; border: 1px solid #cfc8bb; color: #5d5952; font-size: 11px; }.admin-weekday-picker input { accent-color: #765b2d; }.admin-user-section { margin-top: 34px; }.admin-invite-form { max-width: 460px; }.admin-user-list { display: grid; gap: 10px; max-width: 760px; margin-top: 26px; }.admin-user-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 15px; border: 1px solid #ded9cf; background: rgba(255,255,255,.62); }.admin-user-card strong, .admin-user-card span { display: block; }.admin-user-card strong { font-family: "Cormorant Garamond", Georgia, serif; font-size: 21px; font-weight: 500; }.admin-user-card span { margin-top: 4px; color: #77736b; font-size: 11px; }.admin-user-card b { color: #765b2d; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }.admin-flag-list { display: grid; gap: 10px; max-width: 760px; margin-top: 34px; }.admin-flag-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px; border: 1px solid #ded9cf; background: rgba(255,255,255,.62); }.admin-flag-card strong { font-family: "Cormorant Garamond", Georgia, serif; font-size: 21px; font-weight: 500; }.admin-flag-card p { margin: 5px 0 0; color: #77736b; font-size: 12px; }.admin-flag-toggle { min-width: 58px; padding: 8px 10px; border: 1px solid #cfc8bb; background: transparent; color: #77736b; cursor: pointer; font: 10px "Jost", sans-serif; letter-spacing: .15em; text-transform: uppercase; }.admin-flag-toggle.is-on { border-color: #56745c; color: #56745c; }
 @media (max-width: 820px) { .admin-scheduling-layout { grid-template-columns: 1fr; } }
 @media (max-width: 560px) { .admin-schedule-card, .admin-user-card, .admin-flag-card { align-items: start; flex-direction: column; } }

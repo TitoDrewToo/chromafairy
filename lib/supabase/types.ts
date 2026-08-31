@@ -273,6 +273,14 @@ export type StudioBoardPost = {
   created_at: string;
 };
 
+export type PageView = {
+  id: string;
+  path: string;
+  referrer: string | null;
+  visitor_hash: string;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -374,6 +382,12 @@ export type Database = {
         Update: Partial<StudioBoardPost>;
         Relationships: [];
       };
+      page_views: {
+        Row: PageView;
+        Insert: Partial<Omit<PageView, "id" | "created_at">> & Partial<Pick<PageView, "id" | "created_at">>;
+        Update: Partial<PageView>;
+        Relationships: [];
+      };
       landing_sections: {
         Row: LandingSection;
         Insert: Partial<LandingSection>;
@@ -450,6 +464,26 @@ export type Database = {
           p_environment?: string | null;
         };
         Returns: ErrorEvent;
+      };
+      get_traffic_summary: {
+        Args: { p_from: string; p_to: string };
+        Returns: { total_views: number; unique_visitors_today: number; top_referrer: string | null; tracked_days: number }[];
+      };
+      get_views_by_period: {
+        Args: { p_granularity: string; p_from: string; p_to: string };
+        Returns: { period_start: string; views: number; unique_visitors: number | null }[];
+      };
+      get_top_pages: {
+        Args: { p_from: string; p_to: string; p_limit?: number };
+        Returns: { path: string; views: number }[];
+      };
+      get_inquiry_counts_by_period: {
+        Args: { p_granularity: string; p_from: string; p_to: string };
+        Returns: { period_start: string; inquiries: number }[];
+      };
+      get_inquiry_total: {
+        Args: { p_from: string; p_to: string };
+        Returns: number;
       };
     };
     Enums: {

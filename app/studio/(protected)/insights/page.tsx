@@ -1,43 +1,87 @@
-import { createClient } from "../../../../lib/supabase/server";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { createAdminClient } from "../../../../lib/supabase/admin";
+import { createClient } from "../../../../lib/supabase/server";
+import { Hint } from "../../../../components/studio-hint";
 import "../../admin.css";
 import "../../operations.css";
-import { Hint } from "../../../../components/studio-hint";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminInsightsPage() {
-  const supabase = await createClient();
-  if (!supabase) return <AdminMessage message="Supabase is not configured." />;
-  const { data: canViewInsights } = await supabase.rpc("is_user_manager");
+type Period = "day" | "week" | "month";
+type Range = { from: Date; to: Date; label: string };
+type TrafficPoint = { period_start: string; views: number; unique_visitors: number | null };
+type InquiryPoint = { period_start: string; inquiries: number };
+
+const PERIODS: Array<{ value: Period; label: string }> = [
+  { value: "day", label: "Day" },
+  { value: "week", label: "Week" },
+  { value: "month", label: "Month" },
+];
+
+export default async function AdminInsightsPage({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
+  const period = await getPeriod(searchParams);
+  const sessionClient = await createClient();
+  if (!sessionClient) return <AdminMessage message="Supabase is not configured." />;
+  const { data: canViewInsights } = await sessionClient.rpc("is_user_manager");
   if (!canViewInsights) redirect("/studio");
-  const [{ data: orders, error }, { data: works }, { data: series }, { data: customers }] = await Promise.all([
-    supabase.from("orders").select("id, customer_id, work_id, amount, currency, sale_date, payment_status"),
-    supabase.from("works").select("id, title, year, series_id"),
-    supabase.from("series").select("id, name"),
-    supabase.from("customers").select("id, name, email"),
+
+  const admin = createAdminClient();
+  if (!admin) return <AdminMessage message="Insights are not configured." />;
+  const range = getRange(period);
+  const now = new Date();
+  const [{ data: summary, error: summaryError }, { data: lifetime, error: lifetimeError }, { data: traffic, error: trafficError }, { data: inquiries, error: inquiriesError }, { data: inquiryTotal, error: inquiryTotalError }, { data: topPages, error: pagesError }] = await Promise.all([
+    admin.rpc("get_traffic_summary", { p_from: range.from.toISOString(), p_to: range.to.toISOString() }),
+    admin.rpc("get_traffic_summary", { p_from: new Date(0).toISOString(), p_to: now.toISOString() }),
+    admin.rpc("get_views_by_period", { p_granularity: period, p_from: range.from.toISOString(), p_to: range.to.toISOString() }),
+    admin.rpc("get_inquiry_counts_by_period", { p_granularity: period, p_from: range.from.toISOString(), p_to: range.to.toISOString() }),
+    admin.rpc("get_inquiry_total", { p_from: range.from.toISOString(), p_to: range.to.toISOString() }),
+    admin.rpc("get_top_pages", { p_from: range.from.toISOString(), p_to: range.to.toISOString(), p_limit: 8 }),
   ]);
-  if (error) return <AdminMessage message="Insights could not be loaded." />;
-  const validOrders = (orders ?? []).filter((order) => order.payment_status === "paid");
-  const worksById = new Map((works ?? []).map((work) => [work.id, work]));
-  const seriesById = new Map((series ?? []).map((item) => [item.id, item.name]));
-  const customerCounts = new Map<string, number>();
-  validOrders.forEach((order) => { if (order.customer_id) customerCounts.set(order.customer_id, (customerCounts.get(order.customer_id) ?? 0) + 1); });
-  const buyers = customerCounts.size;
-  const repeatBuyers = Array.from(customerCounts.values()).filter((count) => count > 1).length;
-  const totalRevenue = validOrders.reduce((sum, order) => sum + Number(order.amount ?? 0), 0);
-  const averageTicket = validOrders.length ? totalRevenue / validOrders.length : 0;
-  const bySeries = aggregate(validOrders, (order) => { const work = order.work_id ? worksById.get(order.work_id) : null; return work?.series_id ? seriesById.get(work.series_id) ?? "Unassigned series" : "Unassigned series"; });
-  const byYear = aggregate(validOrders, (order) => { const work = order.work_id ? worksById.get(order.work_id) : null; return String(work?.year ?? (order.sale_date ? new Date(order.sale_date).getFullYear() : "Unknown")); });
-  const perCustomer = Array.from(customerCounts.entries()).map(([id, count]) => ({ name: customers?.find((customer) => customer.id === id)?.name || customers?.find((customer) => customer.id === id)?.email || "Unknown", count, average: (validOrders.filter((order) => order.customer_id === id).reduce((sum, order) => sum + Number(order.amount ?? 0), 0) / count) })).sort((a, b) => b.average - a.average);
-  return <div className="admin-dashboard admin-operations-page"><p className="admin-eyebrow">Studio intelligence</p><h1>Insights</h1><p className="admin-muted">Read-only performance from paid manual orders.</p><div className="admin-metric-grid"><Metric label="Revenue" value={`PHP ${totalRevenue.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`} /><Metric label="Paid orders" value={String(validOrders.length)} /><Metric label="Average ticket" value={`PHP ${averageTicket.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`} /><Metric label="Repeat-buyer rate" value={`${buyers ? Math.round((repeatBuyers / buyers) * 100) : 0}%`} /></div><InsightTable title="Revenue by series" rows={bySeries} /><InsightTable title="Revenue by year" rows={byYear} /><section className="admin-insight-section"><h2>Average ticket by customer</h2>{perCustomer.length ? <div className="admin-insight-table">{perCustomer.map((row) => <div className="admin-insight-row" key={row.name}><span>{row.name}</span><span>{row.count} order{row.count === 1 ? "" : "s"}</span><b>PHP {row.average.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</b></div>)}</div> : <p className="admin-empty-state">No paid orders yet.</p>}</section></div>;
+
+  if (summaryError || lifetimeError || trafficError || inquiriesError || inquiryTotalError || pagesError) return <AdminMessage message="Insights could not be loaded." />;
+  const current = summary?.[0] ?? { total_views: 0, unique_visitors_today: 0, top_referrer: null, tracked_days: 0 };
+  const hasEverTracked = (lifetime?.[0]?.total_views ?? 0) > 0;
+  const hasPeriodTraffic = current.total_views > 0;
+  const trafficPoints = (traffic ?? []) as TrafficPoint[];
+  const inquiryPoints = (inquiries ?? []) as InquiryPoint[];
+  const maxViews = Math.max(1, ...trafficPoints.map((point) => point.views));
+  const maxInquiries = Math.max(1, ...inquiryPoints.map((point) => point.inquiries));
+
+  return (
+    <div className="admin-dashboard admin-operations-page admin-insights-page">
+      <p className="admin-eyebrow">Studio intelligence</p>
+      <div className="admin-insights-heading">
+        <div><h1>Studio insights</h1><p className="admin-muted">A quiet read on who is finding the work and raising a hand.</p></div>
+        <nav className="admin-period-selector" aria-label="Insight period">
+          {PERIODS.map((item) => <Hint id="insightPeriod" key={item.value}><Link className={item.value === period ? "is-selected" : ""} href={`/studio/insights?period=${item.value}`} aria-current={item.value === period ? "page" : undefined}>{item.label}</Link></Hint>)}
+        </nav>
+      </div>
+      <p className="admin-insights-range">{range.label} · {period === "day" ? "Daily unique visitors are available" : "Unique visitors are daily-only"}</p>
+      {!hasEverTracked ? <EmptyState message="No traffic recorded yet." /> : !hasPeriodTraffic ? <EmptyState message="No traffic in this period." /> : null}
+      <div className="admin-metric-grid admin-insights-metrics"><Hint id="insightViews"><Metric label="Page views" value={formatNumber(current.total_views)} /></Hint><Hint id="insightInquiries"><Metric label="Inquiries" value={formatNumber(inquiryTotal ?? 0)} /></Hint></div>
+      <div className="admin-insights-context"><span>{formatNumber(current.unique_visitors_today)} unique visitors today</span><span>{formatNumber(current.tracked_days)} tracked day{current.tracked_days === 1 ? "" : "s"}</span><span>Top referrer: {current.top_referrer ?? "Direct / unknown"}</span></div>
+      <div className="admin-insights-trends">
+        <Hint id="insightTrends"><Trend title="Page views" points={trafficPoints.map((point) => ({ label: formatDate(point.period_start), value: point.views, detail: period === "day" && point.unique_visitors !== null ? `${point.unique_visitors} daily unique visitors` : `${point.views} views` }))} max={maxViews} /></Hint>
+        <Hint id="insightTrends"><Trend title="Inquiries" points={inquiryPoints.map((point) => ({ label: formatDate(point.period_start), value: point.inquiries, detail: `${point.inquiries} inquiries` }))} max={maxInquiries} /></Hint>
+      </div>
+      <section className="admin-insight-section admin-top-pages-section"><Hint id="insightTopPages"><h2>Top pages</h2></Hint>{topPages?.length ? <div className="admin-insight-table">{topPages.map((page) => <div className="admin-insight-row" key={page.path}><span>{page.path}</span><b>{formatNumber(page.views)} view{page.views === 1 ? "" : "s"}</b></div>)}</div> : <p className="admin-empty-state">No pages in this period.</p>}</section>
+    </div>
+  );
 }
 
-function aggregate(orders: Array<{ amount: number | null; work_id: string | null; sale_date: string | null }>, key: (order: { work_id: string | null; sale_date: string | null }) => string) {
-  const values = new Map<string, { revenue: number; count: number }>();
-  orders.forEach((order) => { const label = key(order); const current = values.get(label) ?? { revenue: 0, count: 0 }; values.set(label, { revenue: current.revenue + Number(order.amount ?? 0), count: current.count + 1 }); });
-  return Array.from(values.entries()).map(([label, value]) => ({ label, ...value })).sort((a, b) => b.revenue - a.revenue);
+async function getPeriod(searchParams: Promise<{ period?: string }>): Promise<Period> { const value = (await searchParams).period; return value === "week" || value === "month" ? value : "day"; }
+function getRange(period: Period): Range {
+  const now = new Date();
+  if (period === "day") { const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)); return { from: new Date(to.getTime() - 14 * 86400000), to, label: "Last 14 days" }; }
+  if (period === "week") { const currentMonday = startOfWeek(now); return { from: new Date(currentMonday.getTime() - 12 * 7 * 86400000), to: new Date(currentMonday.getTime() + 7 * 86400000), label: "Last 12 weeks" }; }
+  const currentMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+  return { from: new Date(Date.UTC(currentMonth.getUTCFullYear(), currentMonth.getUTCMonth() - 11, 1)), to: new Date(Date.UTC(currentMonth.getUTCFullYear(), currentMonth.getUTCMonth() + 1, 1)), label: "Last 12 months" };
 }
-function Metric({ label, value }: { label: string; value: string }) { const hintId = label === "Revenue" || label === "Paid orders" ? "revenue" : label === "Average ticket" ? "averageTicket" : "repeatBuyer"; return <Hint id={hintId}><div className="admin-metric"><span>{label}</span><strong>{value}</strong></div></Hint>; }
-function InsightTable({ title, rows }: { title: string; rows: Array<{ label: string; revenue: number; count: number }> }) { return <section className="admin-insight-section"><Hint id="revenue"><h2>{title}</h2></Hint>{rows.length ? <div className="admin-insight-table">{rows.map((row) => <div className="admin-insight-row" key={row.label}><span>{row.label}</span><span>{row.count} sale{row.count === 1 ? "" : "s"}</span><b>PHP {row.revenue.toLocaleString("en-PH", { minimumFractionDigits: 2 })}</b></div>)}</div> : <p className="admin-empty-state">No paid orders yet.</p>}</section>; }
-function AdminMessage({ message }: { message: string }) { return <div className="admin-dashboard"><p className="admin-eyebrow">Studio intelligence</p><h1>Insights</h1><p className="admin-muted">{message}</p></div>; }
+function startOfWeek(date: Date) { const day = date.getUTCDay(); const daysSinceMonday = day === 0 ? 6 : day - 1; return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() - daysSinceMonday)); }
+function formatNumber(value: number) { return value.toLocaleString("en-PH"); }
+function formatDate(value: string) { return new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${value}T00:00:00Z`)); }
+function Metric({ label, value }: { label: string; value: string }) { return <div className="admin-metric"><span>{label}</span><strong>{value}</strong></div>; }
+function Trend({ title, points, max }: { title: string; points: Array<{ label: string; value: number; detail: string }>; max: number }) { return <section className="admin-trend-card"><h2>{title} trend</h2>{points.length ? <div className="admin-trend-list" aria-label={`${title} by period`}>{points.map((point) => <div className="admin-trend-row" key={`${title}-${point.label}`}><span className="admin-trend-label">{point.label}</span><span className="admin-trend-track"><span className="admin-trend-bar" style={{ width: `${Math.max(point.value ? 4 : 0, (point.value / max) * 100)}%` }} /></span><b title={point.detail}>{formatNumber(point.value)}</b></div>)}</div> : <p className="admin-empty-state">No {title.toLowerCase()} in this period.</p>}</section>; }
+function EmptyState({ message }: { message: string }) { return <p className="admin-insights-empty" role="status">{message}</p>; }
+function AdminMessage({ message }: { message: string }) { return <div className="admin-dashboard"><p className="admin-eyebrow">Studio intelligence</p><h1>Studio insights</h1><p className="admin-muted">{message}</p></div>; }
