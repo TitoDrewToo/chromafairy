@@ -82,7 +82,7 @@ export default async function AdminInsightsPage({ searchParams }: { searchParams
 
       <section className="admin-insight-block admin-attention-block" aria-labelledby="attention-heading">
         <div className="admin-insights-section-heading"><h2 id="attention-heading">Attention</h2><span>{periodLabel(period)}</span></div>
-        <div className="admin-insight-stat-row"><Hint id="insightViews"><Stat label="Views" value={formatNumber(current.total_views)} delta={formatDelta(viewsDelta, previousLabel, false)} note={null} points={points.map((point) => point.views)} /></Hint><Stat label="Visitors" value={period === "day" ? formatNumber(current.unique_visitors_today) : "—"} delta={null} note={period === "day" ? null : "daily figure only"} points={[]} /></div>
+        <div className="admin-insight-stat-row"><Hint id="insightViews"><Stat label="Views" value={formatNumber(current.total_views)} delta={formatDelta(viewsDelta, previousLabel, false)} note={null} points={points.map((point) => point.views)} /></Hint><Hint id="insightVisitors"><Stat label="Visitors" value={period === "day" ? formatNumber(current.unique_visitors_today) : "—"} delta={null} note={period === "day" ? null : "daily figure only"} points={[]} /></Hint></div>
         {populatedPoints.length >= 6 ? <AreaTrend points={points.filter((point) => point.views > 0)} title="Views over time" /> : null}
       </section>
 
