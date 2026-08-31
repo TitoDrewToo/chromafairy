@@ -566,14 +566,51 @@
 .shop-skeleton-meta .shop-skeleton-line { margin-top: 0; }
 
 .shop-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
   margin-top: 110px;
   padding: 26px 0 34px;
   border-top: 1px solid var(--shop-line);
   color: var(--shop-muted);
   font-size: 10px;
   letter-spacing: 0.16em;
-  text-align: center;
   text-transform: uppercase;
+}
+
+.shop-footer-credit { text-align: left; }
+
+.shop-footer-avint {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--shop-muted);
+  text-align: right;
+  text-decoration: none;
+  transition: color 220ms ease, opacity 220ms ease;
+}
+
+.shop-footer-avint:hover,
+.shop-footer-avint:focus-visible { color: var(--shop-ink); }
+
+.shop-footer-avint-mark {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--shop-ink);
+  border-radius: 2px;
+}
+
+.shop-footer-avint-mark img { width: 20px; height: 20px; object-fit: contain; }
+
+@media (max-width: 720px) {
+  .shop-footer { align-items: flex-start; flex-direction: column; gap: 18px; }
+  .shop-footer-avint { align-self: flex-end; }
 }
 
 .shop-product {

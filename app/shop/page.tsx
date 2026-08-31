@@ -34,7 +34,13 @@ export default function ShopPage() {
           <Suspense fallback={<ShopSkeleton />}>
             <ShopData />
           </Suspense>
-          <footer className="shop-footer">Chroma Fairy · Fluid abstract artist · Philippines</footer>
+          <footer className="shop-footer">
+            <span className="shop-footer-credit">Chroma Fairy · Fluid abstract artist · Philippines</span>
+            <a className="shop-footer-avint" href="https://www.avintph.com" target="_blank" rel="noreferrer" aria-label="AVINTPH Information Technology Solutions">
+              <span className="shop-footer-avint-mark"><img src="/avintelligence-stacked.svg" alt="" /></span>
+              <span>Built by AVINTPH Information Technology Solutions</span>
+            </a>
+          </footer>
       </div>
     </main>
   );
