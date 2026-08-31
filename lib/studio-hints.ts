@@ -78,6 +78,7 @@ export const studioHints = {
   insightPeriod: "Switch between daily, weekly, and monthly traffic and inquiry trends.",
   insightViews: "Every public page visit recorded in the selected period. Studio visits are excluded.",
   insightInquiries: "Public inquiries received in the selected period, counted from the inquiry records.",
+  insightConversion: "Inquiries per 100 visits. This shows whether attention is turning into interest.",
   insightTrends: "Compare activity across the selected period. Daily unique visitors are only shown for daily buckets.",
   insightTopPages: "The public pages receiving the most visits in the selected period.",
   customerLtv: "How often each customer buys, and their total value over time.",
