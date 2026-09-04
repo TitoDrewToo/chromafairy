@@ -45,6 +45,7 @@ function SaveState({ state, at }: { state?: "idle" | "saving" | "saved" | "error
 
 export default function StudioNotes({ variant }: { variant: NotesVariant }) {
   const notes = useStudioNotes(true);
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<NotesView>("notes");
   const [editingTitle, setEditingTitle] = useState(false);
@@ -56,6 +57,7 @@ export default function StudioNotes({ variant }: { variant: NotesVariant }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    setMounted(true);
     setOpen(readNotesStorage("studio.notesOpen") === "true");
     setView(readNotesStorage("studio.notesView") === "board" ? "board" : "notes");
   }, []);
@@ -173,7 +175,7 @@ export default function StudioNotes({ variant }: { variant: NotesVariant }) {
   );
 
   if (variant === "inline") return content;
-  if (typeof document === "undefined") return null;
+  if (!mounted || typeof document === "undefined") return null;
   return createPortal(<div className={`studio-notes-drawer-layer ${open ? "is-open" : ""}`}>
     <Hint id="notesDrawerToggle"><button ref={tabRef} aria-controls="studio-notes-drawer-panel" aria-expanded={open} aria-label={open ? "Close Studio notes" : "Open Studio notes"} className="studio-notes-drawer-tab" onClick={() => setDrawerOpen(!open)} type="button">Notes</button></Hint>
     <aside id="studio-notes-drawer-panel" ref={panelRef} aria-hidden={!open} className="studio-notes-drawer-panel">{content}</aside>
