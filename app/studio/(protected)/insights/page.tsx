@@ -104,9 +104,9 @@ export default async function AdminInsightsPage({ searchParams }: { searchParams
             {PERIODS.map((item) => <Hint id="insightPeriod" key={item.value}><Link className={item.value === period ? "is-selected" : ""} href={selectionQuery(item.value)} aria-current={item.value === period ? "page" : undefined}>{item.label}</Link></Hint>)}
           </nav>
           <div className="admin-insights-range-nav" aria-label={`${periodLabel(period)} range navigation`}>
-            <Link href={selectionQuery(period, offset - 1)} aria-label={`Previous ${period}`}>←</Link>
+            <Hint id="insightPreviousPeriod"><Link href={selectionQuery(period, offset - 1)} aria-label={`Previous ${period}`}>←</Link></Hint>
             <span><strong>{rangeLabel(currentRange, period)}</strong><small>{offset === 0 ? periodCurrentLabel(period) : periodOffsetLabel(period, offset)}</small></span>
-            {offset < 0 ? <Link href={selectionQuery(period, offset + 1)} aria-label={`Next ${period}`}>→</Link> : <span className="is-disabled" aria-hidden="true">→</span>}
+            {offset < 0 ? <Hint id="insightNextPeriod"><Link href={selectionQuery(period, offset + 1)} aria-label={`Next ${period}`}>→</Link></Hint> : <span className="is-disabled" aria-hidden="true">→</span>}
           </div>
         </div>
       </div>
@@ -114,7 +114,7 @@ export default async function AdminInsightsPage({ searchParams }: { searchParams
       {!hasEverTracked ? <EmptyState kind="none" message="No traffic recorded yet. Tracking has started, and figures will appear as visitors arrive." /> : !hasPeriodData ? <EmptyState kind="period" message={`No traffic or inquiries in ${rangeLabel(currentRange, period)}.`} /> : points.length > 0 && points.filter((point) => point.views > 0 || point.inquiries > 0).length < 6 ? <EmptyState kind="sparse" message="Figures are ready. Trends appear after six populated periods." /> : null}
 
       <section className="admin-insight-outcome" aria-labelledby="outcome-heading">
-        <div><p className="admin-eyebrow">Outcome</p><h2 id="outcome-heading">Inquiries submitted</h2><p>Real inquiries received in the selected period. Test submissions are excluded.</p></div>
+        <div><p className="admin-eyebrow">Outcome</p><Hint id="insightInquiries"><h2 id="outcome-heading">Inquiries submitted</h2></Hint><p>Real inquiries received in the selected period. Test submissions are excluded.</p></div>
         <div className="admin-insights-hero"><strong>{formatNumber(currentInquiryCount)}</strong><span>{periodLabel(period).toLowerCase()}</span><small>{formatDelta(inquiryDelta, previousLabel, false) ?? "No earlier period to compare"}</small></div>
       </section>
 
@@ -137,13 +137,13 @@ export default async function AdminInsightsPage({ searchParams }: { searchParams
 
       <div className="admin-insights-duo">
       <section className="admin-insight-block admin-pieces-block" aria-labelledby="pieces-heading">
-        <div className="admin-insights-section-heading"><div><h2 id="pieces-heading">Pieces viewed</h2><p>Which works earned attention, and their share of piece views.</p></div><span>{formatNumber(artworkSummary.piece_views)} piece views</span></div>
+        <div className="admin-insights-section-heading"><div><Hint id="insightPieces"><h2 id="pieces-heading">Pieces viewed</h2></Hint><p>Which works earned attention, and their share of piece views.</p></div><span>{formatNumber(artworkSummary.piece_views)} piece views</span></div>
         {artworks.length ? <div className="admin-piece-list">{artworks.map((artwork) => { const share = artworkSummary.piece_views > 0 ? (artwork.views / artworkSummary.piece_views) * 100 : 0; return <div className="admin-piece-row" key={artwork.work_id ?? artwork.slug}><div className="admin-piece-label"><strong>{artwork.title}</strong><small>{artwork.slug}</small></div><i><b style={{ width: `${Math.max(3, share)}%` }} /></i><span><strong>{formatNumber(artwork.views)}</strong><small>{formatPercent(share)} share</small></span></div>; })}</div> : <p className="admin-empty-state">No piece views in this period.</p>}
         {artworkSummary.pieces_viewed > 0 ? <p className="admin-insight-footnote">{formatNumber(artworkSummary.pieces_viewed)} piece{artworkSummary.pieces_viewed === 1 ? "" : "s"} viewed · {formatAverage(artworkSummary.views_per_piece ?? 0)} views per piece</p> : null}
       </section>
 
       <section className="admin-insight-block admin-what-drew-block" aria-labelledby="what-drew-heading">
-        <div className="admin-insights-section-heading"><div><h2 id="what-drew-heading">What drew it</h2><p>Pages that brought the most attention into the studio.</p></div><span>Top referrer: {current.top_referrer ?? "Direct / unknown"}</span></div>
+        <div className="admin-insights-section-heading"><div><Hint id="insightTopPages"><h2 id="what-drew-heading">What drew it</h2></Hint><p>Pages that brought the most attention into the studio.</p></div><span>Top referrer: {current.top_referrer ?? "Direct / unknown"}</span></div>
         <div className="admin-top-pages-list">{topPages.data?.length ? topPages.data.map((page, index) => <div className="admin-top-page-row" key={page.path}><span title={page.path}>{displayPath(page.path)}</span><i><b style={{ width: `${Math.max(5, (page.views / Math.max(1, topPages.data?.[0]?.views ?? 1)) * 100)}%`, opacity: String(Math.max(.42, 1 - index * .08)) }} /></i><strong>{formatNumber(page.views)}</strong></div>) : <p className="admin-empty-state">No pages in this period.</p>}</div>
       </section>
       </div>
@@ -195,7 +195,7 @@ function Sparkline({ points, label }: { points: number[]; label: string }) {
 function BarTrend({ points, valueKey, title, valueLabel }: { points: Point[]; valueKey: "views" | "inquiries"; title: string; valueLabel: string }) {
   const values = points.map((point) => point[valueKey]);
   const max = Math.max(1, ...values);
-  return <div className="admin-bar-trend"><h3>{title}</h3><div className="admin-bar-chart" role="img" aria-label={`${title}, ${points.length} populated periods`}>{points.map((point, index) => <div className="admin-bar-column" key={`${point.periodStart}-${valueKey}`} title={`${point.label}: ${formatNumber(values[index])} ${valueLabel}`}><span style={{ height: `${Math.max(values[index] > 0 ? 5 : 0, (values[index] / max) * 100)}%` }} /><small>{index === 0 || index === points.length - 1 ? point.label : ""}</small></div>)}</div><p className="admin-chart-caption">{formatNumber(Math.max(...values))} peak {valueLabel}</p></div>;
+  return <div className="admin-bar-trend"><Hint id="insightTrends"><h3>{title}</h3></Hint><div className="admin-bar-chart" role="img" aria-label={`${title}, ${points.length} populated periods`}>{points.map((point, index) => <div className="admin-bar-column" key={`${point.periodStart}-${valueKey}`} title={`${point.label}: ${formatNumber(values[index])} ${valueLabel}`}><span style={{ height: `${Math.max(values[index] > 0 ? 5 : 0, (values[index] / max) * 100)}%` }} /><small>{index === 0 || index === points.length - 1 ? point.label : ""}</small></div>)}</div><p className="admin-chart-caption">{formatNumber(Math.max(...values))} peak {valueLabel}</p></div>;
 }
 function EmptyState({ kind, message }: { kind: "none" | "period" | "sparse"; message: string }) { return <p className={`admin-insights-empty is-${kind}`} role="status">{message}</p>; }
 function AdminMessage({ message }: { message: string }) { return <div className="admin-dashboard"><p className="admin-eyebrow">Studio intelligence</p><h1>Studio insights</h1><p className="admin-muted">{message}</p></div>; }

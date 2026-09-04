@@ -80,7 +80,12 @@ export function useStudioNotes(enabled = true) {
         loadedNotes = [created as StudioNote];
       }
 
-      const rememberedId = window.localStorage.getItem("studio.notesActiveId");
+      let rememberedId: string | null = null;
+      try {
+        rememberedId = window.localStorage.getItem("studio.notesActiveId");
+      } catch {
+        // Use the first note when browser storage is unavailable.
+      }
       const nextActive = loadedNotes.some((note) => note.id === rememberedId) ? rememberedId : loadedNotes[0].id;
       setNotes(loadedNotes);
       setActiveId(nextActive);
@@ -101,7 +106,11 @@ export function useStudioNotes(enabled = true) {
 
   const chooseNote = useCallback((id: string) => {
     setActiveId(id);
-    window.localStorage.setItem("studio.notesActiveId", id);
+    try {
+      window.localStorage.setItem("studio.notesActiveId", id);
+    } catch {
+      // Note selection still works for this session without persistence.
+    }
   }, []);
 
   const saveNote = useCallback((note: StudioNote) => {

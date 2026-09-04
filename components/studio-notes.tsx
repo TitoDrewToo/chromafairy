@@ -8,6 +8,22 @@ import { useStudioNotes } from "../lib/use-studio-notes";
 type NotesVariant = "inline" | "drawer";
 type NotesView = "notes" | "board";
 
+function readNotesStorage(key: string) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeNotesStorage(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // The drawer remains usable when storage is blocked by the browser.
+  }
+}
+
 function relativeTime(value: string | null) {
   if (!value) return "";
   const seconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000));
@@ -42,8 +58,8 @@ export default function StudioNotes({ variant }: { variant: NotesVariant }) {
 
   useEffect(() => {
     setMounted(true);
-    setOpen(window.localStorage.getItem("studio.notesOpen") === "true");
-    setView(window.localStorage.getItem("studio.notesView") === "board" ? "board" : "notes");
+    setOpen(readNotesStorage("studio.notesOpen") === "true");
+    setView(readNotesStorage("studio.notesView") === "board" ? "board" : "notes");
   }, []);
 
   useEffect(() => {
@@ -69,13 +85,13 @@ export default function StudioNotes({ variant }: { variant: NotesVariant }) {
       const target = event.target as Node;
       if (!panelRef.current?.contains(target) && !tabRef.current?.contains(target)) {
         setOpen(false);
-        window.localStorage.setItem("studio.notesOpen", "false");
+        writeNotesStorage("studio.notesOpen", "false");
       }
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setOpen(false);
-        window.localStorage.setItem("studio.notesOpen", "false");
+        writeNotesStorage("studio.notesOpen", "false");
         tabRef.current?.focus();
       }
     };
@@ -93,11 +109,11 @@ export default function StudioNotes({ variant }: { variant: NotesVariant }) {
   const saveState = active ? notes.saveStates[active.id] : undefined;
   const setDrawerOpen = (next: boolean) => {
     setOpen(next);
-    window.localStorage.setItem("studio.notesOpen", String(next));
+    writeNotesStorage("studio.notesOpen", String(next));
   };
   const selectView = (next: NotesView) => {
     setView(next);
-    window.localStorage.setItem("studio.notesView", next);
+    writeNotesStorage("studio.notesView", next);
   };
   const beginRename = () => {
     if (!active) return;

@@ -80,8 +80,9 @@
 .admin-period-selector { border-bottom: 1px solid #ded9cf; }
 .admin-period-selector a { transition: background-color 180ms ease, color 180ms ease; }
 .admin-insights-range-nav { display: grid; grid-template-columns: 30px minmax(150px, 1fr) 30px; align-items: center; width: min(100%, 300px); border-bottom: 1px solid #ded9cf; }
-.admin-insights-range-nav > a, .admin-insights-range-nav > .is-disabled { display: grid; width: 30px; height: 34px; place-items: center; color: #765b2d; font-size: 20px; text-decoration: none; }
-.admin-insights-range-nav > a:hover, .admin-insights-range-nav > a:focus-visible { background: #a16207; color: #fff; }
+.admin-insights-range-nav > a, .admin-insights-range-nav > .studio-hint-anchor, .admin-insights-range-nav > .is-disabled { display: grid; width: 30px; height: 34px; place-items: center; color: #765b2d; font-size: 20px; text-decoration: none; }
+.admin-insights-range-nav > .studio-hint-anchor > a { display: grid; width: 30px; height: 34px; place-items: center; color: inherit; text-decoration: none; }
+.admin-insights-range-nav > a:hover, .admin-insights-range-nav > a:focus-visible, .admin-insights-range-nav > .studio-hint-anchor:hover, .admin-insights-range-nav > .studio-hint-anchor:focus-within { background: #a16207; color: #fff; }
 .admin-insights-range-nav > .is-disabled { color: #cfc8bb; }
 .admin-insights-range-nav > span:not(.is-disabled) { display: grid; justify-items: center; gap: 2px; }
 .admin-insights-range-nav strong { color: #171715; font-size: 12px; font-weight: 500; letter-spacing: .02em; }
