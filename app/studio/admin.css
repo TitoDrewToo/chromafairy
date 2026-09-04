@@ -242,6 +242,7 @@
 }
 .studio-notes-inline .studio-notes-editor { flex: 1; display: flex; flex-direction: column; }
 .studio-notes-inline .studio-notes-textarea { flex: 1; }
+.studio-notes-editor > .studio-hint-anchor { display: flex; width: 100%; flex: 1; flex-direction: column; }
 .studio-notes-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
 .studio-notes-kicker { margin: 0 0 3px; color: var(--notes-bronze); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; }
 .studio-notes h2 { margin: 0; font: 500 clamp(25px, 3vw, 36px)/1 "Cormorant Garamond", Georgia, serif; }
