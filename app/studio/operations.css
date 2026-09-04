@@ -71,6 +71,75 @@
 .admin-flag-group { display: grid; gap: 10px; }
 .admin-flag-group-label { margin: 0 0 2px; color: #77736b; font-size: 10px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; }
 
+.admin-insights-page { max-width: 1120px; }
+.admin-insights-heading { position: relative; align-items: end; min-height: 164px; padding-bottom: 30px; border-bottom: 1px solid #ded9cf; overflow: hidden; }
+.admin-insights-heading::after { position: absolute; z-index: -1; top: 4px; right: -10%; width: 58%; height: 150px; background: var(--chroma-gradient); background-size: var(--chroma-size); border-radius: 50%; content: ""; filter: blur(48px); opacity: .1; pointer-events: none; }
+.admin-insights-heading h1 { max-width: 12ch; margin: 6px 0 0; font: 500 clamp(38px, 5vw, 58px)/.92 "Cormorant Garamond", Georgia, serif; letter-spacing: -.025em; }
+.admin-insights-heading .admin-muted { max-width: 38ch; margin-top: 15px; font-size: 14px; line-height: 1.55; }
+.admin-insights-controls { display: grid; justify-items: end; gap: 16px; }
+.admin-period-selector { border-bottom: 1px solid #ded9cf; }
+.admin-period-selector a { transition: background-color 180ms ease, color 180ms ease; }
+.admin-insights-range-nav { display: grid; grid-template-columns: 30px minmax(150px, 1fr) 30px; align-items: center; width: min(100%, 300px); border-bottom: 1px solid #ded9cf; }
+.admin-insights-range-nav > a, .admin-insights-range-nav > .is-disabled { display: grid; width: 30px; height: 34px; place-items: center; color: #765b2d; font-size: 20px; text-decoration: none; }
+.admin-insights-range-nav > a:hover, .admin-insights-range-nav > a:focus-visible { background: #a16207; color: #fff; }
+.admin-insights-range-nav > .is-disabled { color: #cfc8bb; }
+.admin-insights-range-nav > span:not(.is-disabled) { display: grid; justify-items: center; gap: 2px; }
+.admin-insights-range-nav strong { color: #171715; font-size: 12px; font-weight: 500; letter-spacing: .02em; }
+.admin-insights-range-nav small { color: #77736b; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.admin-insight-outcome { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 360px); align-items: end; gap: 40px; margin-top: 50px; padding-bottom: 40px; border-bottom: 1px solid #ded9cf; }
+.admin-insight-outcome h2 { margin: 6px 0 0; color: #171715; font: 500 clamp(28px, 4vw, 43px)/1 "Cormorant Garamond", Georgia, serif; }
+.admin-insight-outcome > div:first-child > p:last-child { max-width: 36ch; margin-top: 12px; color: #77736b; font-size: 13px; line-height: 1.55; }
+.admin-insights-hero { justify-items: start; margin: 0; }
+.admin-insights-hero strong { color: #171715; font: 500 clamp(62px, 8vw, 92px)/.78 "Cormorant Garamond", Georgia, serif; letter-spacing: -.04em; }
+.admin-insights-hero span { color: #77736b; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+.admin-insights-hero small { margin-top: 13px; color: #77736b; font-size: 12px; }
+.admin-insight-block { margin-top: 48px; padding-top: 28px; }
+.admin-insights-section-heading { align-items: end; }
+.admin-insights-section-heading h2 { color: #171715; font-size: 12px; font-weight: 500; letter-spacing: .2em; }
+.admin-insights-section-heading p { margin-top: 8px; color: #77736b; font-size: 13px; }
+.admin-insight-stat-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(22px, 5vw, 64px); margin-top: 34px; }
+.admin-insight-stat > span { color: #77736b; font-size: 10px; letter-spacing: .18em; }
+.admin-insight-stat > strong { margin-top: 12px; color: #171715; font: 500 clamp(42px, 5vw, 58px)/.9 "Cormorant Garamond", Georgia, serif; letter-spacing: -.025em; }
+.admin-insight-stat > small { min-height: 18px; margin-top: 9px; color: #77736b; font-size: 11px; }
+.admin-insight-stat > small.admin-insight-secondary { margin-top: 2px; color: #8a8378; font-size: 10px; }
+.admin-insight-trends { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 38px; margin-top: 42px; }
+.admin-area-trend { margin-top: 0; padding-top: 18px; border-top: 1px solid #ded9cf; }
+.admin-area-trend h3 { margin-bottom: 18px; color: #77736b; font-size: 10px; letter-spacing: .16em; }
+.admin-interest-summary { display: grid; grid-template-columns: auto auto; align-items: baseline; gap: 5px 18px; max-width: 470px; margin-top: 30px; padding-left: 18px; border-left: 2px solid #a16207; }
+.admin-interest-summary span { color: #77736b; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; }
+.admin-interest-summary strong { color: #171715; font: 500 58px/.9 "Cormorant Garamond", Georgia, serif; letter-spacing: -.03em; }
+.admin-interest-summary p { grid-column: 1 / -1; margin-top: 9px; color: #77736b; font-size: 12px; }
+.admin-piece-list { display: grid; gap: 20px; max-width: 900px; margin-top: 30px; }
+.admin-piece-row { display: grid; grid-template-columns: minmax(150px, 220px) minmax(100px, 1fr) 92px; align-items: center; gap: 18px; }
+.admin-piece-label { min-width: 0; }
+.admin-piece-label strong, .admin-piece-label small, .admin-piece-row > span strong, .admin-piece-row > span small { display: block; }
+.admin-piece-label strong { overflow: hidden; color: #4e4a43; font-size: 13px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+.admin-piece-label small { margin-top: 4px; overflow: hidden; color: #8a8378; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.admin-piece-row > i { display: block; height: 12px; overflow: hidden; background: #ebe7df; }
+.admin-piece-row > i > b { display: block; height: 100%; min-width: 3px; background: #a16207; opacity: .72; }
+.admin-piece-row > span { text-align: right; }
+.admin-piece-row > span strong { color: #171715; font-size: 13px; font-variant-numeric: tabular-nums; }
+.admin-piece-row > span small { margin-top: 3px; color: #77736b; font-size: 10px; font-variant-numeric: tabular-nums; }
+.admin-insight-footnote { margin-top: 22px; color: #77736b; font-size: 11px; }
+.admin-top-pages-list { margin-top: 30px; }
+.admin-top-page-row { grid-template-columns: minmax(130px, 220px) minmax(120px, 1fr) 52px; gap: 18px; }
+.admin-top-page-row > i { height: 12px; background: #ebe7df; }
+.admin-top-page-row > i > b { min-width: 4px; border-radius: 0; opacity: .8; }
+.admin-top-page-row > strong { font-size: 13px; }
+@media (max-width: 700px) {
+  .admin-insights-heading { align-items: start; gap: 28px; min-height: 0; }
+  .admin-insights-heading::after { right: -40%; width: 100%; }
+  .admin-insights-controls { justify-items: stretch; width: 100%; }
+  .admin-period-selector { width: 100%; }
+  .admin-insights-range-nav { width: 100%; }
+  .admin-insight-outcome { grid-template-columns: 1fr; gap: 28px; margin-top: 38px; }
+  .admin-insights-hero strong { font-size: 76px; }
+  .admin-insight-trends { grid-template-columns: 1fr; gap: 28px; }
+  .admin-piece-row { grid-template-columns: minmax(120px, 1fr) 72px; gap: 12px; }
+  .admin-piece-row > i { grid-column: 1 / -1; grid-row: 2; }
+  .admin-piece-row > span { grid-column: 2; grid-row: 1; }
+}
+
 .admin-inquiry-workspace { max-width: 1120px; margin-top: 34px; }
 .admin-inquiry-toolbar { display: grid; gap: 14px; padding: 18px; border: 1px solid #ded9cf; background: rgba(255,255,255,.42); }
 .admin-inquiry-search, .admin-inquiry-filters label { display: grid; gap: 7px; color: #77736b; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
