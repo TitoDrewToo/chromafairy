@@ -1,3 +1,4 @@
+.admin-blog-page { max-width: none; }
 .admin-blog-editor { margin-top: 34px; }
 .admin-blog-layout { display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 720px); gap: clamp(28px, 6vw, 72px); align-items: start; }
 .admin-blog-list { display: grid; gap: 8px; }

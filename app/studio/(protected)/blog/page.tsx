@@ -10,6 +10,8 @@ export const dynamic = "force-dynamic";
 export default async function AdminBlogPage() {
   const posts = await getBlogPosts({ publishedOnly: false });
   const supabase = await createClient();
-  const { data: canEdit } = supabase ? await supabase.rpc("is_blog_editor") : { data: false };
-  return <div className="admin-dashboard admin-blog-page"><p className="admin-eyebrow">Studio publishing</p><h1>Blog</h1><p className="admin-muted">Write the notes behind the work. Drafts stay private until they are ready to be shared.</p><AdminBlog canEdit={Boolean(canEdit)} initialPosts={posts} /></div>;
+  const { data: { user } } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+  const { data: profile } = supabase && user ? await supabase.from("profiles").select("role").eq("id", user.id).maybeSingle() : { data: null };
+  const canEdit = ["owner", "admin", "developer"].includes(profile?.role ?? "");
+  return <div className="admin-dashboard admin-blog-page"><p className="admin-eyebrow">Studio publishing</p><h1>Blog</h1><p className="admin-muted">Create, edit, and publish notes from the studio.</p><AdminBlog canEdit={canEdit} initialPosts={posts} /></div>;
 }

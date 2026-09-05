@@ -18,10 +18,11 @@ export async function upsertBlogPost(input: BlogInput) {
   const body = clean(input.body, 50000);
   if (!title || !body) return { ok: false, error: "A title and body are required." };
   const publishedAt = input.publishedAt ? `${input.publishedAt}T12:00:00.000Z` : null;
-  const { error } = await supabase.from("blog_posts").upsert({ id: input.id, slug: input.slug, title, excerpt: clean(input.excerpt, 600), body, is_published: Boolean(input.isPublished), published_at: input.isPublished ? publishedAt ?? new Date().toISOString() : publishedAt });
+  const { data: post, error } = await supabase.from("blog_posts").upsert({ id: input.id, slug: input.slug, title, excerpt: clean(input.excerpt, 600), body, is_published: Boolean(input.isPublished), published_at: input.isPublished ? publishedAt ?? new Date().toISOString() : publishedAt }).select().single();
   if (error) return { ok: false, error: error.code === "23505" ? "That slug is already in use." : "Could not save that blog entry." };
+  if (!post) return { ok: false, error: "The entry was not returned after saving." };
   revalidatePath("/blog"); revalidatePath(`/blog/${input.slug}`); revalidatePath("/studio/blog"); revalidatePath("/sitemap.xml");
-  return { ok: true };
+  return { ok: true, post };
 }
 
 export async function setBlogPublished(id: string, isPublished: boolean) {
