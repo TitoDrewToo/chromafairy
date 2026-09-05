@@ -1,5 +1,24 @@
 .admin-blog-page { max-width: none; }
 .admin-blog-editor { margin-top: 34px; }
+.admin-blog-toolbar, .admin-blog-composer-heading { display: flex; align-items: start; justify-content: space-between; gap: 22px; }
+.admin-blog-toolbar { margin-bottom: 22px; }
+.admin-blog-toolbar .admin-action-button { flex: 0 0 auto; padding: 14px 18px; }
+.admin-blog-composer { display: grid; gap: 14px; padding-top: 20px; border-top: 1px solid #ded9cf; }
+.admin-blog-composer-heading h3 { margin: 3px 0 0; font: 500 27px/1 "Cormorant Garamond", Georgia, serif; }
+.admin-blog-add-blocks, .admin-blog-format-tools, .admin-blog-image-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+.admin-blog-block { display: grid; gap: 10px; padding: 15px; border: 1px solid #ded9cf; background: rgba(255,255,255,.55); }
+.admin-blog-block-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #77736b; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+.admin-blog-block-bar > div { display: flex; gap: 5px; }
+.admin-blog-block textarea, .admin-blog-block > input { box-sizing: border-box; width: 100%; padding: 11px 12px; border: 1px solid #cfc8bb; background: #fff; color: #171715; font: 15px/1.55 "Jost", sans-serif; }
+.admin-blog-block textarea { resize: vertical; }
+.admin-blog-block-heading { min-height: 58px; font: 400 27px/1 "Cormorant Garamond", Georgia, serif !important; }
+.admin-blog-block-quote { min-height: 64px; color: #765b2d !important; font: 400 22px/1.25 "Cormorant Garamond", Georgia, serif !important; }
+.admin-blog-image-actions label { display: inline-flex; align-items: center; gap: 7px; color: #77736b; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.admin-blog-image-actions select { padding: 7px; border: 1px solid #cfc8bb; background: #fff; color: #5d5952; font: 11px "Jost", sans-serif; }
+.admin-blog-image-preview { display: block; width: min(100%, 560px); max-height: 360px; object-fit: contain; background: #eeeae2; }
+.admin-blog-image-empty { display: grid; min-height: 130px; place-items: center; background: #eeeae2; color: #999288; font-size: 12px; }
+.admin-blog-preview { margin-top: 24px; padding: 20px; border: 1px solid #ded9cf; background: #fbfaf7; }
+@media (max-width: 760px) { .admin-blog-toolbar, .admin-blog-composer-heading { display: grid; } .admin-blog-toolbar .admin-action-button { justify-self: start; } .admin-blog-add-blocks { justify-content: start; } }
 .admin-blog-layout { display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 720px); gap: clamp(28px, 6vw, 72px); align-items: start; }
 .admin-blog-list { display: grid; gap: 8px; }
 .admin-blog-list .admin-action-button { margin-bottom: 10px; }

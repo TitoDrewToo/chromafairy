@@ -1,3 +1,5 @@
+import type { BlogContent } from "../blog-content";
+
 export type UserRole = "owner" | "admin" | "staff" | "developer";
 export type WorkStatus = "draft" | "available" | "reserved" | "sold";
 export type InquiryType = "piece" | "commission";
@@ -49,6 +51,7 @@ export type BlogPost = {
   title: string;
   excerpt: string;
   body: string;
+  content: BlogContent;
   is_published: boolean;
   published_at: string | null;
   created_at: string;
