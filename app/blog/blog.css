@@ -40,6 +40,8 @@
 .blog-block-paragraph p:last-child, .blog-block-split-text p:last-child { margin-bottom: 0; }
 .blog-block-heading { margin: 18px 0 -4px; color: var(--shop-ink); font: 500 clamp(30px, 5vw, 48px)/.95 "Cormorant Garamond", Georgia, serif; }
 .blog-block-quote { margin: 8px 0; padding: 22px 0 22px 24px; border-left: 2px solid var(--shop-gold); color: var(--shop-gold-deep); font: 400 clamp(24px, 4vw, 38px)/1.05 "Cormorant Garamond", Georgia, serif; }
+.blog-block-quote.is-half { width: min(100%, 52%); }
+.blog-block-quote.align-right { margin-left: auto; }
 .blog-block-quote mark, .blog-block-paragraph mark, .blog-block-split-text mark { padding: 0 .12em; background: #e9d99d; color: inherit; }
 .blog-block-image { margin: 0; }
 .blog-block-image img { display: block; width: 100%; max-height: 760px; object-fit: contain; background: #eeeae2; }
@@ -51,4 +53,4 @@
 .blog-blocks.is-preview { gap: 18px; margin-top: 18px; }
 .blog-blocks.is-preview .blog-block-paragraph p, .blog-blocks.is-preview .blog-block-split-text p { font-size: 15px; line-height: 1.55; }
 @media (max-width: 640px) { .blog-block-image.is-half { width: 100%; } .blog-block-split { grid-template-columns: 1fr; gap: 20px; } .blog-block-split.align-right .blog-block-image { order: 0; } }
-@media (max-width: 640px) { .blog-frame { width: min(100% - 32px, 1120px); } .blog-year { grid-template-columns: 1fr; gap: 14px; } .blog-entry { grid-template-columns: 1fr; gap: 7px; } .blog-entry time { text-align: left; } }
+@media (max-width: 640px) { .blog-frame { width: min(100% - 32px, 1120px); } .blog-block-quote.is-half { width: auto; } .blog-year { grid-template-columns: 1fr; gap: 14px; } .blog-entry { grid-template-columns: 1fr; gap: 7px; } .blog-entry time { text-align: left; } }

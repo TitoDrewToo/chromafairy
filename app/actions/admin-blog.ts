@@ -15,7 +15,8 @@ type BlogInput = { id: string; slug: string; title: string; excerpt: string; bod
 export async function upsertBlogPost(input: BlogInput) {
   const supabase = await createClient();
   if (!supabase) return { ok: false, error: "Supabase is not configured." };
-  const { data: allowed } = await supabase.rpc("is_blog_editor");
+  const { data: allowed, error: permissionError } = await supabase.rpc("is_blog_editor");
+  if (permissionError) return { ok: false, error: "Blog permissions are not available yet. Apply the Blog migration before saving entries." };
   if (!allowed) return { ok: false, error: "Only owners, admins, and developers can edit blog entries." };
   if (!UUID_PATTERN.test(input.id) || !SLUG_PATTERN.test(input.slug) || input.slug.length > 160) return { ok: false, error: "Use a lowercase slug with letters, numbers, and hyphens." };
   const title = clean(input.title, 240);
@@ -24,7 +25,7 @@ export async function upsertBlogPost(input: BlogInput) {
   if (!title || !body) return { ok: false, error: "A title and body are required." };
   const publishedAt = input.publishedAt ? `${input.publishedAt}T12:00:00.000Z` : null;
   const { data: post, error } = await supabase.from("blog_posts").upsert({ id: input.id, slug: input.slug, title, excerpt: clean(input.excerpt, 600), body, content, is_published: Boolean(input.isPublished), published_at: input.isPublished ? publishedAt ?? new Date().toISOString() : publishedAt }).select().single();
-  if (error) return { ok: false, error: error.code === "23505" ? "That slug is already in use." : "Could not save that blog entry." };
+  if (error) return { ok: false, error: error.code === "23505" ? "That slug is already in use." : error.code === "PGRST204" || error.code === "42703" ? "Blog layout storage is not available yet. Apply the Blog blocks migration before saving." : "Could not save that blog entry." };
   if (!post) return { ok: false, error: "The entry was not returned after saving." };
   revalidatePath("/blog"); revalidatePath(`/blog/${input.slug}`); revalidatePath("/studio/blog"); revalidatePath("/sitemap.xml");
   return { ok: true, post };
@@ -35,7 +36,8 @@ export async function setBlogPublished(id: string, isPublished: boolean) {
   if (!supabase) return { ok: false, error: "Supabase is not configured." };
   if (!UUID_PATTERN.test(id) || typeof isPublished !== "boolean") return { ok: false, error: "Invalid blog entry." };
   const { data, error } = await supabase.rpc("set_blog_published", { p_id: id, p_is_published: isPublished });
-  if (error || !data) return { ok: false, error: "You do not have permission to change publication state." };
+  if (error) return { ok: false, error: "Blog publishing is not available yet. Apply the Blog migration before publishing entries." };
+  if (!data) return { ok: false, error: "You do not have permission to change publication state." };
   revalidatePath("/blog"); revalidatePath("/studio/blog"); revalidatePath("/sitemap.xml");
   return { ok: true };
 }

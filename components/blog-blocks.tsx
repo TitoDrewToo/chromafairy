@@ -10,7 +10,7 @@ export default function BlogBlocks({ content, fallbackBody, preview = false }: {
 
 function BlogBlockView({ block }: { block: BlogBlock }) {
   if (block.type === "heading") return <h2 className="blog-block-heading">{inlineText(block.text)}</h2>;
-  if (block.type === "quote") return <blockquote className="blog-block-quote">{inlineText(block.text)}</blockquote>;
+  if (block.type === "quote") return <blockquote className={`blog-block-quote is-${block.width} align-${block.align}`}>{inlineText(block.text)}</blockquote>;
   if (block.type === "image") return <figure className={`blog-block-image is-${block.width} align-${block.align}`}><img src={blogImageUrl(block.path)} alt={block.alt} loading="lazy" /></figure>;
   if (block.type === "split") return <div className={`blog-block-split align-${block.align}`}><figure className="blog-block-image is-half"><img src={blogImageUrl(block.path)} alt={block.alt} loading="lazy" /></figure><div className="blog-block-split-text">{paragraphs(block.text)}</div></div>;
   return <div className="blog-block-paragraph">{paragraphs(block.text)}</div>;

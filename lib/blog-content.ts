@@ -1,6 +1,6 @@
 export type BlogTextBlock = { id: string; type: "text"; text: string };
 export type BlogHeadingBlock = { id: string; type: "heading"; text: string };
-export type BlogQuoteBlock = { id: string; type: "quote"; text: string };
+export type BlogQuoteBlock = { id: string; type: "quote"; text: string; width: "full" | "half"; align: "left" | "right" };
 export type BlogImageBlock = { id: string; type: "image"; path: string; alt: string; width: "full" | "half"; align: "left" | "right" };
 export type BlogSplitBlock = { id: string; type: "split"; path: string; alt: string; align: "left" | "right"; text: string };
 export type BlogBlock = BlogTextBlock | BlogHeadingBlock | BlogQuoteBlock | BlogImageBlock | BlogSplitBlock;
@@ -21,7 +21,9 @@ export function normalizeBlogContent(value: unknown, postId?: string): BlogConte
     const text = typeof raw.text === "string" ? raw.text.slice(0, 10000) : "";
     if (["text", "heading", "quote"].includes(raw.type)) {
       textLength += text.length;
-      return text ? [{ id, type: raw.type as BlogTextBlock["type"], text }] as BlogBlock[] : [];
+      if (!text) return [];
+      if (raw.type === "quote") return [{ id, type: "quote", text, width: raw.width === "half" ? "half" : "full", align: raw.align === "right" ? "right" : "left" }];
+      return [{ id, type: raw.type as BlogTextBlock["type"], text }] as BlogBlock[];
     }
     if (raw.type === "image" && validBlogPath(raw.path, postId)) return [{ id, type: "image", path: raw.path, alt: clean(raw.alt, 240), width: raw.width === "half" ? "half" : "full", align: raw.align === "right" ? "right" : "left" }];
     if (raw.type === "split" && validBlogPath(raw.path, postId)) {

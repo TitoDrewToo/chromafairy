@@ -15,6 +15,8 @@
 .admin-blog-block-quote { min-height: 64px; color: #765b2d !important; font: 400 22px/1.25 "Cormorant Garamond", Georgia, serif !important; }
 .admin-blog-image-actions label { display: inline-flex; align-items: center; gap: 7px; color: #77736b; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
 .admin-blog-image-actions select { padding: 7px; border: 1px solid #cfc8bb; background: #fff; color: #5d5952; font: 11px "Jost", sans-serif; }
+.admin-blog-format-tools label { display: inline-flex; align-items: center; gap: 7px; color: #77736b; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.admin-blog-format-tools select { padding: 7px; border: 1px solid #cfc8bb; background: #fff; color: #5d5952; font: 11px "Jost", sans-serif; }
 .admin-blog-image-preview { display: block; width: min(100%, 560px); max-height: 360px; object-fit: contain; background: #eeeae2; }
 .admin-blog-image-empty { display: grid; min-height: 130px; place-items: center; background: #eeeae2; color: #999288; font-size: 12px; }
 .admin-blog-preview { margin-top: 24px; padding: 20px; border: 1px solid #ded9cf; background: #fbfaf7; }
