@@ -43,6 +43,17 @@ export type LandingItem = {
   created_at: string;
   updated_at: string;
 };
+export type BlogPost = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  body: string;
+  is_published: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
 
 export type Work = {
   id: string;
@@ -400,6 +411,12 @@ export type Database = {
         Update: Partial<LandingItem>;
         Relationships: [];
       };
+      blog_posts: {
+        Row: BlogPost;
+        Insert: Partial<BlogPost>;
+        Update: Partial<BlogPost>;
+        Relationships: [];
+      };
     };
     Views: {
       public_feature_flags: {
@@ -420,6 +437,18 @@ export type Database = {
       };
       is_user_manager: {
         Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_blog_editor: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      is_blog_publisher: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      set_blog_published: {
+        Args: { p_id: string; p_is_published: boolean };
         Returns: boolean;
       };
       record_sale: {

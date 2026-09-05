@@ -312,10 +312,11 @@
   .showtext .meta{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8fa1ab;margin-top:12px;font-weight:300}
 
   footer{position:relative;z-index:10;text-align:center;padding:44px;background:var(--ink);color:rgba(255,255,255,.6);font-size:12px;letter-spacing:.14em}
-  footer .footer-instagram{position:absolute;left:clamp(20px,5vw,64px);top:50%;z-index:20;display:grid;place-items:center;padding:10px;transform:translateY(-50%);color:rgba(255,255,255,.9);text-decoration:none;transition:transform .35s ease}
-  footer .footer-instagram:hover,footer .footer-instagram:focus-visible{transform:translateY(-50%) scale(1.12)}
-  footer .footer-instagram svg{display:block;width:28px;height:28px;color:inherit;stroke:currentColor!important;stroke-width:2;transition:transform .35s ease}
-  footer .footer-instagram:hover svg,footer .footer-instagram:focus-visible svg{transform:rotate(-8deg) scale(1.08);animation:footer-instagram-chroma 2.6s linear infinite}
+  footer .footer-social{position:absolute;left:clamp(20px,5vw,64px);top:50%;z-index:20;display:flex;align-items:center;gap:8px;transform:translateY(-50%)}
+  footer .footer-social a{display:grid;place-items:center;padding:10px;color:rgba(255,255,255,.9);text-decoration:none;transition:transform .35s ease}
+  footer .footer-social a:hover,footer .footer-social a:focus-visible{transform:translateY(-2px) scale(1.12)}
+  footer .footer-social svg{display:block;width:28px;height:28px;color:inherit;stroke:currentColor!important;stroke-width:2;transition:transform .35s ease}
+  footer .footer-social a:hover svg,footer .footer-social a:focus-visible svg{transform:rotate(-8deg) scale(1.08);animation:footer-instagram-chroma 2.6s linear infinite}
   @keyframes footer-instagram-chroma{0%,100%{color:#6fe8dd}33%{color:#ff9bc9}66%{color:#f5d477}}
   footer .footer-logo-option-wrap{position:relative;display:block;width:min(153px,62vw);height:108px;margin:0 auto 18px;transform-origin:center}
   footer .footer-logo-option{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 5px 9px rgba(166,132,77,.2));transition:filter .3s ease,transform .3s ease}
@@ -323,7 +324,7 @@
   footer .footer-logo-option-wrap.is-v2.is-shimmer-ready::after{position:absolute;inset:0;display:block;background:var(--chroma-gradient);background-size:260% 100%;mix-blend-mode:screen;opacity:.62;pointer-events:none;content:"";mask:url('/fairy-logo-option-v2.png') center/contain no-repeat;-webkit-mask:url('/fairy-logo-option-v2.png') center/contain no-repeat;animation:footer-fairy-shimmer 3.94s linear infinite}
   @keyframes footer-fairy-life{0%,100%{filter:drop-shadow(0 5px 9px rgba(166,132,77,.2));transform:scale(1)}50%{filter:drop-shadow(0 6px 14px rgba(87,232,255,.34)) drop-shadow(0 0 11px rgba(255,102,196,.2));transform:scale(1.025)}}
   @keyframes footer-fairy-shimmer{from{background-position:120% 50%}to{background-position:-20% 50%}}
-  @media(prefers-reduced-motion:reduce){footer .footer-logo-option-wrap,footer .footer-logo-option,footer .footer-logo-option-wrap::after,footer .footer-instagram{animation:none;transition:none}}
+  @media(prefers-reduced-motion:reduce){footer .footer-logo-option-wrap,footer .footer-logo-option,footer .footer-logo-option-wrap::after,footer .footer-social a,footer .footer-social svg{animation:none;transition:none}}
   footer .brand2{font-family:var(--hero-script);font-size:26px;color:#fff}
 
   @media(max-width:860px){
@@ -573,7 +574,7 @@
     </section>
   </main>
 
-  <footer><a class="footer-instagram" href="https://www.instagram.com/chroma_fairy/" target="_blank" rel="noopener noreferrer" aria-label="Chroma Fairy on Instagram"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.55" cy="6.55" r=".8" fill="currentColor" stroke="none"/></svg></a><div class="footer-logo-option-wrap is-v2" data-deferred-footer><img loading="lazy" class="footer-logo-option" data-src="/fairy-logo-option-v2.png" alt="Chroma Fairy logo, version 2"></div><div class="brand2">Samantha Ty</div><div style="margin-top:8px">Fluid abstract artist · Philippines · © 2026</div></footer>
+  <footer><div class="footer-social"><a href="https://www.instagram.com/chroma_fairy/" target="_blank" rel="noopener noreferrer" aria-label="Chroma Fairy on Instagram"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.55" cy="6.55" r=".8" fill="currentColor" stroke="none"/></svg></a><a href="/blog" aria-label="Chroma Fairy Journal"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4.5h10.5A3.5 3.5 0 0 1 19 8v11.5H8.5A3.5 3.5 0 0 1 5 16V4.5Z"/><path d="M5 4.5v11A3.5 3.5 0 0 0 8.5 19M9 9h6M9 12.5h5"/></svg></a></div><div class="footer-logo-option-wrap is-v2" data-deferred-footer><img loading="lazy" class="footer-logo-option" data-src="/fairy-logo-option-v2.png" alt="Chroma Fairy logo, version 2"></div><div class="brand2">Samantha Ty</div><div style="margin-top:8px">Fluid abstract artist · Philippines · © 2026</div></footer>
 
 <script>
 /* =========================================================

@@ -61,7 +61,12 @@ function pressImageCard(entry: LandingItem) {
   const modalId = `landing-press-${entry.id.replace(/[^a-z0-9_-]/gi, "-")}`;
   const socialClass = `press-social-art-${slug(entry.title)}`;
   const socialTile = `<span class="press-instagram-tile press-social-art ${attr(socialClass)}" aria-hidden="true"><span class="press-social-veil"></span><span class="press-social-dust press-social-dust-one"></span><span class="press-social-dust press-social-dust-two"></span><span class="press-social-dust press-social-dust-three"></span><span class="press-social-center"><strong>${text(entry.title)}</strong><span>${text(entry.eyebrow || "Social feature")}</span></span></span>`;
-  return `<div class="quote adb-feature"><button class="press-cover-trigger" type="button" aria-haspopup="dialog" aria-controls="${attr(modalId)}">${image ? `<img loading="lazy" class="press-cover-image" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : socialTile}<span class="press-cover-caption">${text(image?.label || entry.link_label || "Open feature")}</span></button>${entry.body ? `<p>${linkText(entry.body, entry.link_url)}</p>` : ""}<div class="src">${text(entry.source)}</div></div>`;
+  const cover = image ? `<img loading="lazy" class="press-cover-image" src="${attr(image.path)}" alt="${attr(image.alt)}" />` : socialTile;
+  const caption = `<span class="press-cover-caption">${text(image?.label || entry.link_label || "Open feature")}</span>`;
+  const coverLink = isInternalLink(entry.link_url)
+    ? `<a class="press-cover-trigger press-cover-link" href="${attr(entry.link_url)}">${cover}${caption}</a>`
+    : `<button class="press-cover-trigger" type="button" aria-haspopup="dialog" aria-controls="${attr(modalId)}">${cover}${caption}</button>`;
+  return `<div class="quote adb-feature">${coverLink}${entry.body ? `<p>${linkText(entry.body, entry.link_url)}</p>` : ""}<div class="src">${text(entry.source)}</div></div>`;
 }
 
 function pressTextCard(entry: LandingItem) {
@@ -82,9 +87,10 @@ function pressModal(entry: LandingItem) {
 
 function linkText(value: string, url: string) {
   const content = paragraphText(value);
-  return validLink(url) ? `<a href="${attr(url)}" target="_blank" rel="noopener noreferrer">${content}</a>` : content;
+  return validLink(url) ? `<a href="${attr(url)}"${isInternalLink(url) ? "" : " target=\"_blank\" rel=\"noopener noreferrer\""}>${content}</a>` : content;
 }
 function validLink(value: string) { return /^(https?:\/\/|\/|#)/i.test(value); }
+function isInternalLink(value: string) { return /^\/blog(?:\/|$)/i.test(value); }
 function isInstagramUrl(value: string) {
   try {
     const url = new URL(value);

@@ -1,0 +1,20 @@
+.admin-blog-editor { margin-top: 34px; }
+.admin-blog-layout { display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 720px); gap: clamp(28px, 6vw, 72px); align-items: start; }
+.admin-blog-list { display: grid; gap: 8px; }
+.admin-blog-list .admin-action-button { margin-bottom: 10px; }
+.admin-blog-list-item { display: grid; gap: 5px; padding: 14px 15px; border: 1px solid #ded9cf; background: rgba(255,255,255,.48); color: #4e4a43; cursor: pointer; text-align: left; }
+.admin-blog-list-item.is-active { border-color: #a6844d; background: rgba(255,255,255,.82); }
+.admin-blog-list-item strong { overflow: hidden; font: 500 20px/1 "Cormorant Garamond", Georgia, serif; text-overflow: ellipsis; white-space: nowrap; }
+.admin-blog-list-item span, .admin-blog-form small { color: #77736b; font-size: 10px; letter-spacing: .04em; }
+.admin-blog-form { display: grid; gap: 16px; }
+.admin-blog-form-heading { display: flex; align-items: start; justify-content: space-between; gap: 18px; margin-bottom: 8px; }
+.admin-blog-form-heading h2 { margin: 5px 0 0; font: 500 34px/.95 "Cormorant Garamond", Georgia, serif; }
+.admin-blog-form > label { display: grid; gap: 7px; color: #77736b; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.admin-blog-form input, .admin-blog-form textarea { box-sizing: border-box; width: 100%; padding: 10px 11px; border: 1px solid #cfc8bb; background: #fff; color: #171715; font: 14px/1.45 "Jost", sans-serif; letter-spacing: normal; text-transform: none; }
+.admin-blog-form textarea { resize: vertical; }
+.admin-blog-form input:disabled, .admin-blog-form textarea:disabled { background: #f1eee7; color: #77736b; cursor: not-allowed; }
+.admin-blog-body { min-height: 280px; font-family: "Cormorant Garamond", Georgia, serif !important; font-size: 18px !important; line-height: 1.6 !important; }
+.admin-blog-form-meta { display: flex; align-items: end; flex-wrap: wrap; gap: 20px; }
+.admin-blog-form-meta > label:first-child { display: grid; gap: 7px; color: #77736b; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.admin-blog-form-meta input[type="date"] { width: 170px; }
+@media (max-width: 760px) { .admin-blog-layout { grid-template-columns: 1fr; } .admin-blog-list { order: 2; } .admin-blog-form { order: 1; } }

@@ -11,6 +11,8 @@ const staffAreas = [
   ["Landing page", "/studio/landing-page", "navLandingPage"],
   ["Catalogue", "/studio/catalogue", "navCatalogue"],
   ["Inquiries", "/studio/inquiries", "navInquiries"],
+  ["Insights", "/studio/insights", "navInsights"],
+  ["Blog", "/studio/blog", "navBlog"],
   ["Sales / Orders", "/studio/sales", "navSales"],
   ["Customers", "/studio/customers", "navCustomers"],
   ["Scheduling", "/studio/scheduling", "navScheduling"],
@@ -18,7 +20,6 @@ const staffAreas = [
 
 const managerAreas = [
   ["Users", "/studio/users", "navUsers"],
-  ["Insights", "/studio/insights", "navInsights"],
   ["Settings", "/studio/settings", "navSettings"],
 ] as const;
 
@@ -59,7 +60,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
       <aside id="admin-sidebar" className="admin-sidebar">
         <Hint id="wordmark"><Link className="admin-wordmark" href="/studio">Chroma Fairy<span>Studio</span></Link></Hint>
         <nav id="admin-sidebar-nav" className="admin-nav" aria-label="Studio areas">
-          {staffAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}{href === "/studio/inquiries" && newInquiryCount ? <span className="admin-nav-badge" aria-label={`${newInquiryCount} new inquiries`}>({newInquiryCount})</span> : null}</Link></Hint>)}
+          {staffAreas.map(([label, href, hintId]) => href === "/studio/insights" && !canManageStudio ? null : <Hint id={hintId} key={href}><Link href={href}>{label}{href === "/studio/inquiries" && newInquiryCount ? <span className="admin-nav-badge" aria-label={`${newInquiryCount} new inquiries`}>({newInquiryCount})</span> : null}</Link></Hint>)}
           {canManageStudio && managerAreas.map(([label, href, hintId]) => <Hint id={hintId} key={href}><Link href={href}>{label}</Link></Hint>)}
         </nav>
         <Hint id="viewSite"><Link className="admin-site-link" href="/">← View site</Link></Hint>
