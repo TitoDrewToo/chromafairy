@@ -5,7 +5,7 @@ import { cloneElement, isValidElement, type ReactElement, type ReactNode } from 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { studioHints, type StudioHintId } from "../lib/studio-hints";
 
-type HintChildProps = { onMouseEnter?: (event: React.MouseEvent) => void; onMouseLeave?: (event: React.MouseEvent) => void; onFocus?: (event: React.FocusEvent) => void; onBlur?: (event: React.FocusEvent) => void; onKeyDown?: (event: React.KeyboardEvent) => void; "aria-describedby"?: string };
+type HintChildProps = { onMouseEnter?: (event: React.MouseEvent) => void; onMouseLeave?: (event: React.MouseEvent) => void; onFocus?: (event: React.FocusEvent) => void; onBlur?: (event: React.FocusEvent) => void; onPointerDown?: (event: React.PointerEvent) => void; onKeyDown?: (event: React.KeyboardEvent) => void; "aria-describedby"?: string };
 
 export function Hint({ id, children, className = "" }: { id: StudioHintId; children: ReactElement | ReactNode; className?: string }) {
   const [open, setOpen] = useState(false);
@@ -59,7 +59,7 @@ export function Hint({ id, children, className = "" }: { id: StudioHintId; child
     window.addEventListener("resize", positionTooltip);
     window.addEventListener("scroll", positionTooltip, true);
     return () => { window.cancelAnimationFrame(frame); window.removeEventListener("resize", positionTooltip); window.removeEventListener("scroll", positionTooltip, true); };
-  }, [open]);
+  }, [open, tooltipId]);
 
   const element = isValidElement(children) ? children as ReactElement<HintChildProps> : null;
   const child = element
@@ -67,10 +67,17 @@ export function Hint({ id, children, className = "" }: { id: StudioHintId; child
     // eslint-disable-next-line react-hooks/refs
     ? cloneElement(element, {
       "aria-describedby": open ? tooltipId : undefined,
-      onMouseEnter: (event: React.MouseEvent) => { element.props.onMouseEnter?.(event); reveal(); },
+      onMouseEnter: (event: React.MouseEvent) => {
+        element.props.onMouseEnter?.(event);
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) reveal();
+      },
       onMouseLeave: (event: React.MouseEvent) => { element.props.onMouseLeave?.(event); dismiss(); },
-      onFocus: (event: React.FocusEvent) => { element.props.onFocus?.(event); reveal(); },
+      onFocus: (event: React.FocusEvent) => {
+        element.props.onFocus?.(event);
+        if ((event.currentTarget as HTMLElement).matches(":focus-visible")) reveal();
+      },
       onBlur: (event: React.FocusEvent) => { element.props.onBlur?.(event); dismiss(); },
+      onPointerDown: (event: React.PointerEvent) => { element.props.onPointerDown?.(event); dismiss(); },
       onKeyDown: (event: React.KeyboardEvent) => { element.props.onKeyDown?.(event); if (event.key === "Escape") dismiss(); },
     })
     : children;
