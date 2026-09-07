@@ -37,7 +37,7 @@
   display: block;
   width: 104px;
   height: 72px;
-  animation: fairy-life 6.4s ease-in-out infinite;
+  animation: fairy-life 4.8s ease-in-out infinite;
 }
 
 .shop-brand::after {
@@ -47,7 +47,7 @@
   background: var(--chroma-gradient);
   background-size: var(--chroma-size);
   content: "";
-  opacity: calc(var(--fairy-intensity, .72) * .52);
+  opacity: calc(var(--fairy-intensity, .72) * .9);
   pointer-events: none;
   mix-blend-mode: screen;
   mask-image: url('/fairy-logo-option-v2.png');
@@ -58,7 +58,7 @@
   -webkit-mask-position: center;
   -webkit-mask-repeat: no-repeat;
   -webkit-mask-size: contain;
-  animation: fairy-shimmer calc(var(--chroma-duration) * 1.35) linear infinite;
+  animation: fairy-shimmer calc(var(--chroma-duration) * .82) linear infinite;
 }
 
 .shop-brand:hover::after,

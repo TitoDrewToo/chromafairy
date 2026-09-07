@@ -1,8 +1,8 @@
 .blog-shell { min-height: 100vh; background: var(--shop-paper); color: var(--shop-ink); font-family: "Jost", system-ui, sans-serif; }
 .blog-frame { width: min(100% - 44px, 1120px); margin: 0 auto; }
 .blog-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 28px 0 24px; border-bottom: 1px solid var(--shop-line); }
-.blog-brand { position: relative; display: block; width: 104px; height: 72px; animation: fairy-life 6.4s ease-in-out infinite; }
-.blog-brand::after { position: absolute; inset: 0; display: block; background: var(--chroma-gradient); background-size: var(--chroma-size); content: ""; opacity: calc(var(--fairy-intensity, .72) * .52); pointer-events: none; mix-blend-mode: screen; mask-image: url('/fairy-logo-option-v2.png'); mask-position: center; mask-repeat: no-repeat; mask-size: contain; -webkit-mask-image: url('/fairy-logo-option-v2.png'); -webkit-mask-position: center; -webkit-mask-repeat: no-repeat; -webkit-mask-size: contain; animation: fairy-shimmer calc(var(--chroma-duration) * 1.35) linear infinite; }
+.blog-brand { position: relative; display: block; width: 104px; height: 72px; animation: fairy-life 4.8s ease-in-out infinite; }
+.blog-brand::after { position: absolute; inset: 0; display: block; background: var(--chroma-gradient); background-size: var(--chroma-size); content: ""; opacity: calc(var(--fairy-intensity, .72) * .9); pointer-events: none; mix-blend-mode: screen; mask-image: url('/fairy-logo-option-v2.png'); mask-position: center; mask-repeat: no-repeat; mask-size: contain; -webkit-mask-image: url('/fairy-logo-option-v2.png'); -webkit-mask-position: center; -webkit-mask-repeat: no-repeat; -webkit-mask-size: contain; animation: fairy-shimmer calc(var(--chroma-duration) * .82) linear infinite; }
 .blog-brand:hover::after, .blog-brand:focus-visible::after { opacity: calc(var(--fairy-intensity, .72) * .9); animation: fairy-shimmer calc(var(--chroma-duration) * .82) linear infinite; }
 .blog-brand:hover, .blog-brand:focus-visible { animation: fairy-life 4.8s ease-in-out infinite; }
 .blog-brand img { display: block; width: 100%; height: 100%; object-fit: contain; }
