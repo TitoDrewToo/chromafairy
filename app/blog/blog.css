@@ -1,7 +1,10 @@
 .blog-shell { min-height: 100vh; background: var(--shop-paper); color: var(--shop-ink); font-family: "Jost", system-ui, sans-serif; }
 .blog-frame { width: min(100% - 44px, 1120px); margin: 0 auto; }
 .blog-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 28px 0 24px; border-bottom: 1px solid var(--shop-line); }
-.blog-brand { display: block; width: 104px; height: 72px; }
+.blog-brand { position: relative; display: block; width: 104px; height: 72px; }
+.blog-brand::after { position: absolute; inset: 0; display: block; background: var(--chroma-gradient); background-size: var(--chroma-size); content: ""; opacity: 0; pointer-events: none; mix-blend-mode: screen; mask-image: url('/fairy-logo-option-v2.png'); mask-position: center; mask-repeat: no-repeat; mask-size: contain; -webkit-mask-image: url('/fairy-logo-option-v2.png'); -webkit-mask-position: center; -webkit-mask-repeat: no-repeat; -webkit-mask-size: contain; }
+.blog-brand:hover::after, .blog-brand:focus-visible::after { opacity: calc(var(--fairy-intensity, .72) * .9); animation: fairy-shimmer calc(var(--chroma-duration) * .82) linear infinite; }
+.blog-brand:hover, .blog-brand:focus-visible { animation: fairy-life 4.8s ease-in-out infinite; }
 .blog-brand img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .blog-back { color: var(--shop-muted); font-size: 11px; letter-spacing: .18em; text-decoration: none; text-transform: uppercase; }
 .blog-back:hover, .blog-back:focus-visible { color: var(--shop-gold-deep); }
@@ -35,6 +38,14 @@
 .blog-post-body p { max-width: 62ch; margin: 0 0 24px; color: #4e4a43; font: 18px/1.75 "Cormorant Garamond", Georgia, serif; }
 .blog-post-back { display: inline-block; margin-top: 35px; color: var(--shop-muted); font-size: 10px; letter-spacing: .18em; text-decoration: none; text-transform: uppercase; }
 .blog-post-back:hover, .blog-post-back:focus-visible { color: var(--shop-gold-deep); }
+.blog-share { position: relative; display: grid; grid-template-columns: minmax(150px, .7fr) minmax(0, 1.3fr); gap: 28px; align-items: center; margin-top: 64px; padding: 28px 0; border-top: 1px solid var(--shop-line); border-bottom: 1px solid var(--shop-line); }
+.blog-share-kicker { margin: 0 0 6px; color: var(--shop-gold-deep); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; }
+.blog-share h2 { margin: 0; color: var(--shop-ink); font: 500 27px/1 "Cormorant Garamond", Georgia, serif; }
+.blog-share-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.blog-share-action { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 8px 11px; border: 1px solid var(--shop-line); border-radius: 999px; background: transparent; color: var(--shop-muted); cursor: pointer; font: 500 9px/1 "Jost", system-ui, sans-serif; letter-spacing: .08em; text-decoration: none; text-transform: uppercase; transition: border-color 220ms ease, color 220ms ease, transform 220ms ease; }
+.blog-share-action svg { width: 15px; height: 15px; fill: currentColor; }
+.blog-share-action:hover, .blog-share-action:focus-visible { border-color: transparent; background-image: var(--chroma-gradient); background-size: var(--chroma-size); color: #fff; animation: chroma-shimmer var(--chroma-duration) linear infinite; transform: translateY(-1px); }
+.blog-share-status { position: absolute; overflow: hidden; width: 1px; height: 1px; clip: rect(0 0 0 0); white-space: nowrap; }
 .blog-blocks { display: grid; gap: 32px; margin-top: 55px; }
 .blog-block-paragraph p, .blog-block-split-text p { max-width: 62ch; margin: 0 0 24px; color: #4e4a43; font: 18px/1.75 "Cormorant Garamond", Georgia, serif; }
 .blog-block-paragraph p:last-child, .blog-block-split-text p:last-child { margin-bottom: 0; }
@@ -53,4 +64,5 @@
 .blog-blocks.is-preview { gap: 18px; margin-top: 18px; }
 .blog-blocks.is-preview .blog-block-paragraph p, .blog-blocks.is-preview .blog-block-split-text p { font-size: 15px; line-height: 1.55; }
 @media (max-width: 640px) { .blog-block-image.is-half { width: 100%; } .blog-block-split { grid-template-columns: 1fr; gap: 20px; } .blog-block-split.align-right .blog-block-image { order: 0; } }
-@media (max-width: 640px) { .blog-frame { width: min(100% - 32px, 1120px); } .blog-block-quote.is-half { width: auto; } .blog-year { grid-template-columns: 1fr; gap: 14px; } .blog-entry { grid-template-columns: 1fr; gap: 7px; } .blog-entry time { text-align: left; } }
+@media (prefers-reduced-motion: reduce) { .blog-brand:hover, .blog-brand:focus-visible, .blog-brand:hover::after, .blog-brand:focus-visible::after, .blog-share-action:hover, .blog-share-action:focus-visible { animation: none; } }
+@media (max-width: 640px) { .blog-frame { width: min(100% - 32px, 1120px); } .blog-brand { width: 82px; height: 58px; } .blog-block-quote.is-half { width: auto; } .blog-year { grid-template-columns: 1fr; gap: 14px; } .blog-entry { grid-template-columns: 1fr; gap: 7px; } .blog-entry time { text-align: left; } .blog-share { grid-template-columns: 1fr; gap: 20px; } .blog-share-actions { justify-content: flex-start; } .blog-share-action { flex: 1 1 42%; justify-content: center; } }
