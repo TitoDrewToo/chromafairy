@@ -1,13 +1,15 @@
 .admin-blog-page { max-width: none; }
 .admin-blog-editor { margin-top: 34px; }
 .admin-blog-toolbar, .admin-blog-composer-heading { display: flex; align-items: start; justify-content: space-between; gap: 22px; }
+.admin-blog-composer-heading > div:first-child { flex: 0 0 220px; }
 .admin-blog-toolbar { margin-bottom: 22px; }
 .admin-blog-toolbar .admin-action-button { flex: 0 0 auto; padding: 14px 18px; }
+.admin-blog-toolbar .admin-action-button:hover, .admin-blog-toolbar .admin-action-button:focus-visible { border-color: transparent; background: var(--chroma-gradient) !important; background-size: var(--chroma-size); color: #fff; animation: chroma-shimmer var(--chroma-duration) linear infinite; }
 .admin-blog-composer { display: grid; gap: 14px; padding-top: 20px; border-top: 1px solid #ded9cf; }
 .admin-blog-composer-heading h3 { margin: 3px 0 0; font: 500 27px/1 "Cormorant Garamond", Georgia, serif; }
-.admin-blog-add-blocks { display: grid; grid-template-columns: repeat(5, minmax(78px, 1fr)); gap: 8px; flex: 1 1 520px; max-width: 560px; }
+.admin-blog-add-blocks { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; flex: 1 1 auto; max-width: none; }
 .admin-blog-format-tools, .admin-blog-image-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
-.admin-blog-tool { position: relative; display: grid; min-height: 78px; grid-template-columns: 30px minmax(0, 1fr); grid-template-rows: 1fr auto; align-items: start; gap: 5px 8px; overflow: hidden; padding: 10px 9px; border-color: #d8d0c1; background: linear-gradient(145deg, rgba(255,255,255,.82), rgba(241,238,231,.7)); color: #4e4a43; text-align: left; transition: border-color 220ms ease, box-shadow 220ms ease, color 220ms ease, transform 220ms ease, background 220ms ease; }
+.admin-blog-tool { position: relative; display: grid; min-height: 92px; grid-template-columns: 34px minmax(0, 1fr); grid-template-rows: 1fr auto; align-items: start; gap: 7px 10px; overflow: hidden; padding: 12px; border-color: #d8d0c1; background: linear-gradient(145deg, rgba(255,255,255,.82), rgba(241,238,231,.7)); color: #4e4a43; text-align: left; transition: border-color 220ms ease, box-shadow 220ms ease, color 220ms ease, transform 220ms ease, background 220ms ease; }
 .admin-blog-tool::before { position: absolute; inset: 0 0 auto; height: 2px; background: var(--chroma-gradient); background-size: var(--chroma-size); content: ""; opacity: 0; transition: opacity 220ms ease; }
 .admin-blog-tool:hover, .admin-blog-tool:focus-visible { border-color: transparent; background: #fff; box-shadow: 0 10px 24px rgba(55,45,25,.1); color: #171715; transform: translateY(-2px); }
 .admin-blog-tool:hover::before, .admin-blog-tool:focus-visible::before { opacity: 1; animation: chroma-shimmer var(--chroma-duration) linear infinite; }
@@ -17,7 +19,7 @@
 .admin-blog-tool:hover .admin-blog-tool-icon, .admin-blog-tool:focus-visible .admin-blog-tool-icon { border-color: transparent; background: var(--chroma-gradient); background-size: var(--chroma-size); color: #fff; animation: chroma-shimmer var(--chroma-duration) linear infinite; transform: rotate(-6deg) scale(1.05); }
 .admin-blog-tool-copy { display: grid; min-width: 0; gap: 3px; align-self: center; }
 .admin-blog-tool-copy strong { overflow: hidden; font: 500 14px/1 "Cormorant Garamond", Georgia, serif; text-overflow: ellipsis; white-space: nowrap; }
-.admin-blog-tool-copy small { overflow: hidden; color: #77736b; font-size: 9px; letter-spacing: .01em; line-height: 1.25; text-overflow: ellipsis; }
+.admin-blog-tool-copy small { color: #77736b; font-size: 10px; letter-spacing: .01em; line-height: 1.35; }
 .admin-blog-tool-plus { grid-column: 2; justify-self: end; color: #a6844d; font: 16px/1 "Cormorant Garamond", Georgia, serif; transition: color 220ms ease, transform 220ms ease; }
 .admin-blog-tool:hover .admin-blog-tool-plus, .admin-blog-tool:focus-visible .admin-blog-tool-plus { color: #ff66c4; transform: rotate(90deg); }
 .admin-blog-block { display: grid; gap: 10px; padding: 15px; border: 1px solid #ded9cf; background: rgba(255,255,255,.55); }
@@ -34,10 +36,11 @@
 .admin-blog-image-preview { display: block; width: min(100%, 560px); max-height: 360px; object-fit: contain; background: #eeeae2; }
 .admin-blog-image-empty { display: grid; min-height: 130px; place-items: center; background: #eeeae2; color: #999288; font-size: 12px; }
 .admin-blog-preview { margin-top: 24px; padding: 20px; border: 1px solid #ded9cf; background: #fbfaf7; }
-@media (prefers-reduced-motion: reduce) { .admin-blog-tool, .admin-blog-tool::before, .admin-blog-tool-icon, .admin-blog-tool-plus { transition: none; animation: none; } }
+@media (prefers-reduced-motion: reduce) { .admin-blog-toolbar .admin-action-button:hover, .admin-blog-toolbar .admin-action-button:focus-visible, .admin-blog-tool, .admin-blog-tool::before, .admin-blog-tool-icon, .admin-blog-tool-plus { transition: none; animation: none; } }
 @media (max-width: 760px) { .admin-blog-toolbar, .admin-blog-composer-heading { display: grid; } .admin-blog-toolbar .admin-action-button { justify-self: start; } .admin-blog-add-blocks { grid-template-columns: repeat(2, minmax(120px, 1fr)); max-width: none; } }
-.admin-blog-layout { display: grid; grid-template-columns: minmax(230px, 280px) minmax(0, 720px); gap: clamp(28px, 6vw, 72px); align-items: start; }
+.admin-blog-layout { display: grid; grid-template-columns: minmax(230px, 280px) minmax(0, 1fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
 .admin-blog-layout.is-archive-only { grid-template-columns: minmax(280px, 520px); }
+.admin-blog-layout.is-archive-only .admin-blog-empty-selection { display: none; }
 .admin-blog-list { display: grid; align-content: start; gap: 12px; }
 .admin-blog-archive-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; padding-bottom: 13px; border-bottom: 1px solid #ded9cf; }
 .admin-blog-archive-heading .admin-eyebrow { margin-bottom: 5px; }
