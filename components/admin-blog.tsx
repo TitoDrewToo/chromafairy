@@ -10,7 +10,7 @@ const emptyPost = (): BlogPost => ({ id: crypto.randomUUID(), slug: "new-entry",
 const dateValue = (value: string | null) => value ? value.slice(0, 10) : "";
 const blogDate = (value: string | null) => value ? new Intl.DateTimeFormat("en-PH", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(value)) : "Unpublished";
 const slugify = (value: string) => value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 160);
-const contentOf = (post: BlogPost): BlogContent => post.content?.version === 1 ? normalizeBlogContent(post.content, post.id) : emptyBlogContent();
+const contentOf = (post: BlogPost): BlogContent => post.content?.version === 1 ? normalizeBlogContent(post.content, post.id, true) : emptyBlogContent();
 const archiveKey = (post: Pick<BlogPost, "published_at" | "created_at">) => { const value = post.published_at ?? post.created_at; if (!value) return "drafts"; const year = new Date(value).getUTCFullYear(); return Number.isNaN(year) ? "drafts" : String(year); };
 
 function newBlock(type: BlogBlock["type"]): BlogBlock {

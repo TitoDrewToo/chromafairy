@@ -12,7 +12,7 @@ const BLOG_PATH = /^blog\/[0-9a-f-]{36}\//i;
 
 export function emptyBlogContent(): BlogContent { return { version: 1, blocks: [] }; }
 
-export function normalizeBlogContent(value: unknown, postId?: string): BlogContent {
+export function normalizeBlogContent(value: unknown, postId?: string, preserveEmpty = false): BlogContent {
   const rawBlocks = value && typeof value === "object" && "blocks" in value && Array.isArray(value.blocks) ? value.blocks : [];
   let textLength = 0;
   const blocks = rawBlocks.slice(0, MAX_BLOCKS).flatMap((raw): BlogBlock[] => {
@@ -21,7 +21,7 @@ export function normalizeBlogContent(value: unknown, postId?: string): BlogConte
     const text = typeof raw.text === "string" ? raw.text.slice(0, 10000) : "";
     if (["text", "heading", "quote"].includes(raw.type)) {
       textLength += text.length;
-      if (!text) return [];
+      if (!text && !preserveEmpty) return [];
       if (raw.type === "quote") {
         const companionText = clean(raw.companionText, 10000);
         textLength += companionText.length;
@@ -29,14 +29,14 @@ export function normalizeBlogContent(value: unknown, postId?: string): BlogConte
       }
       return [{ id, type: raw.type as BlogTextBlock["type"], text }] as BlogBlock[];
     }
-    if (raw.type === "image" && validBlogPath(raw.path, postId)) {
+    if (raw.type === "image" && (validBlogPath(raw.path, postId) || preserveEmpty)) {
       const companionText = clean(raw.companionText, 10000);
       textLength += companionText.length;
-      return [{ id, type: "image", path: raw.path, alt: clean(raw.alt, 240), companionText, width: raw.width === "half" ? "half" : "full", align: raw.align === "right" ? "right" : "left" }];
+      return [{ id, type: "image", path: validBlogPath(raw.path, postId) ? raw.path : "", alt: clean(raw.alt, 240), companionText, width: raw.width === "half" ? "half" : "full", align: raw.align === "right" ? "right" : "left" }];
     }
-    if (raw.type === "split" && validBlogPath(raw.path, postId)) {
+    if (raw.type === "split" && (validBlogPath(raw.path, postId) || preserveEmpty)) {
       textLength += text.length;
-      return [{ id, type: "split", path: raw.path, alt: clean(raw.alt, 240), align: raw.align === "right" ? "right" : "left", text }];
+      return [{ id, type: "split", path: validBlogPath(raw.path, postId) ? raw.path : "", alt: clean(raw.alt, 240), align: raw.align === "right" ? "right" : "left", text }];
     }
     return [];
   });
