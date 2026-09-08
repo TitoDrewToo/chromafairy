@@ -1,19 +1,20 @@
 import type { BlogBlock, BlogContent } from "../lib/blog-content";
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 
 const imageBase = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""}/storage/v1/object/public/artwork/`;
 export function blogImageUrl(path: string) { return /^https?:\/\//i.test(path) ? path : `${imageBase}${path}`; }
 
-export default function BlogBlocks({ content, fallbackBody, preview = false }: { content?: BlogContent | null; fallbackBody?: string; preview?: boolean }) {
+export default function BlogBlocks({ content, fallbackBody, preview = false, onResize }: { content?: BlogContent | null; fallbackBody?: string; preview?: boolean; onResize?: (id: string, width: number) => void }) {
   const blocks = content?.blocks?.length ? content.blocks : fallbackBody ? [{ id: "legacy-body", type: "text" as const, text: fallbackBody }] : [];
-  return <div className={`blog-blocks${preview ? " is-preview" : ""}`}>{blocks.map((block) => <BlogBlockView block={block} key={block.id} preview={preview} />)}</div>;
+  return <div className={`blog-blocks${preview ? " is-preview" : ""}`}>{blocks.map((block) => <BlogBlockView block={block} key={block.id} preview={preview} onResize={onResize} />)}</div>;
 }
 
-function BlogBlockView({ block, preview }: { block: BlogBlock; preview: boolean }) {
+function BlogBlockView({ block, preview, onResize }: { block: BlogBlock; preview: boolean; onResize?: (id: string, width: number) => void }) {
   if (block.type === "heading") return <h2 className="blog-block-heading">{inlineText(block.text)}</h2>;
   if (block.type === "quote") return <div className={`blog-block-quote-layout is-${block.width} align-${block.align}${block.companionText || block.source ? " has-companion" : ""}`}><blockquote className="blog-block-quote">{block.text ? inlineText(block.text) : preview ? <span className="blog-block-empty-copy">Write a highlighted thought here.</span> : null}</blockquote>{block.companionText || block.source ? <aside className="blog-block-companion">{block.companionText ? paragraphs(block.companionText) : null}{block.source ? <cite>— {inlineText(block.source)}</cite> : null}</aside> : null}</div>;
-  if (block.type === "image") return <div className={`blog-block-image-layout is-${block.width} align-${block.align}${block.companionText ? " has-companion" : ""}`}><figure className="blog-block-image">{block.path ? <img src={blogImageUrl(block.path)} alt={block.alt} loading="lazy" /> : <div className="blog-block-image-empty">Choose a photo to see it in the preview.</div>}</figure>{block.companionText ? <aside className="blog-block-companion">{paragraphs(block.companionText)}</aside> : null}</div>;
-  if (block.type === "highlight-image") return <div className={`blog-block-highlight-image layout-${block.layout} image-${block.imageSide} order-${block.stackedOrder}`}><figure className="blog-block-highlight-image-photo">{block.path ? <img src={blogImageUrl(block.path)} alt={block.alt} loading="lazy" /> : <div className="blog-block-image-empty">Choose a photo to see it in the preview.</div>}{block.caption ? <figcaption>{paragraphs(block.caption)}</figcaption> : null}</figure><div className="blog-block-highlight-image-quote"><blockquote className="blog-block-quote">{block.text ? inlineText(block.text) : preview ? <span className="blog-block-empty-copy">Write a highlighted thought here.</span> : null}</blockquote>{block.source ? <cite>— {inlineText(block.source)}</cite> : null}</div></div>;
-  if (block.type === "split") return <div className={`blog-block-split align-${block.align}`}><figure className="blog-block-image is-half">{block.path ? <img src={blogImageUrl(block.path)} alt={block.alt} loading="lazy" /> : <div className="blog-block-image-empty">Choose a photo to see it in the preview.</div>}</figure><div className="blog-block-split-text">{block.text ? paragraphs(block.text) : preview ? <p className="blog-block-empty-copy">Write the text beside this photo.</p> : null}</div></div>;
+  if (block.type === "image") return <div className={`blog-block-image-layout is-${block.width} align-${block.align}${block.companionText ? " has-companion" : ""}`} style={block.companionText ? gridStyle(block.imageWidth, block.align) : undefined}><figure className="blog-block-image">{block.path ? <img src={blogImageUrl(block.path)} alt={block.alt} loading="lazy" /> : <div className="blog-block-image-empty">Choose a photo to see it in the preview.</div>}</figure>{block.companionText ? <aside className="blog-block-companion">{paragraphs(block.companionText)}</aside> : null}{preview && onResize && block.companionText ? <ResizeHandle blockId={block.id} imageSide={block.align} width={block.imageWidth} onResize={onResize} /> : null}</div>;
+  if (block.type === "highlight-image") return <div className={`blog-block-highlight-image layout-${block.layout} image-${block.imageSide} order-${block.stackedOrder}`} style={block.layout === "side-by-side" ? gridStyle(block.imageWidth, block.imageSide) : undefined}><figure className="blog-block-highlight-image-photo">{block.path ? <img src={blogImageUrl(block.path)} alt={block.alt} loading="lazy" /> : <div className="blog-block-image-empty">Choose a photo to see it in the preview.</div>}{block.caption ? <figcaption>{paragraphs(block.caption)}</figcaption> : null}</figure><div className="blog-block-highlight-image-quote"><blockquote className="blog-block-quote">{block.text ? inlineText(block.text) : preview ? <span className="blog-block-empty-copy">Write a highlighted thought here.</span> : null}</blockquote>{block.source ? <cite>— {inlineText(block.source)}</cite> : null}</div>{preview && onResize && block.layout === "side-by-side" ? <ResizeHandle blockId={block.id} imageSide={block.imageSide} width={block.imageWidth} onResize={onResize} /> : null}</div>;
+  if (block.type === "split") return <div className={`blog-block-split align-${block.align}`} style={gridStyle(block.imageWidth, block.align)}><figure className="blog-block-image is-half">{block.path ? <img src={blogImageUrl(block.path)} alt={block.alt} loading="lazy" /> : <div className="blog-block-image-empty">Choose a photo to see it in the preview.</div>}</figure><div className="blog-block-split-text">{block.text ? paragraphs(block.text) : preview ? <p className="blog-block-empty-copy">Write the text beside this photo.</p> : null}</div>{preview && onResize ? <ResizeHandle blockId={block.id} imageSide={block.align} width={block.imageWidth} onResize={onResize} /> : null}</div>;
   return <div className="blog-block-paragraph">{block.text ? paragraphs(block.text) : preview ? <p className="blog-block-empty-copy">Write a paragraph to see it here.</p> : null}</div>;
 }
 
@@ -21,4 +22,24 @@ function paragraphs(text: string) { return text.split(/\n\s*\n/).map((paragraph,
 function inlineText(text: string) {
   const tokens = text.split(/(\*\*[^*]+\*\*|==[^=]+==|\*[^*]+\*)/g).filter(Boolean);
   return tokens.map((token, index) => token.startsWith("**") && token.endsWith("**") ? <strong key={index}>{token.slice(2, -2)}</strong> : token.startsWith("==") && token.endsWith("==") ? <mark key={index}>{token.slice(2, -2)}</mark> : token.startsWith("*") && token.endsWith("*") ? <em key={index}>{token.slice(1, -1)}</em> : <span key={index}>{token}</span>);
+}
+
+function gridStyle(width: number, _imageSide: "left" | "right") { return { "--blog-image-width": `${width}%` } as CSSProperties; }
+
+function ResizeHandle({ blockId, imageSide, width, onResize }: { blockId: string; imageSide: "left" | "right"; width: number; onResize: (id: string, width: number) => void }) {
+  const startResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    const handle = event.currentTarget;
+    const parent = handle.parentElement;
+    if (!parent) return;
+    const update = (move: PointerEvent) => {
+      const bounds = parent.getBoundingClientRect();
+      const raw = imageSide === "right" ? ((bounds.right - move.clientX) / bounds.width) * 100 : ((move.clientX - bounds.left) / bounds.width) * 100;
+      onResize(blockId, Math.min(70, Math.max(30, Math.round(raw))));
+    };
+    const stop = () => { document.removeEventListener("pointermove", update); document.removeEventListener("pointerup", stop); };
+    document.addEventListener("pointermove", update);
+    document.addEventListener("pointerup", stop, { once: true });
+  };
+  return <button aria-label={`Resize image, currently ${width}% wide`} className="blog-block-resize-handle" onPointerDown={startResize} style={{ "--blog-image-width": `${width}%` } as CSSProperties} type="button"><span aria-hidden="true">↔</span></button>;
 }

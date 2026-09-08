@@ -1,9 +1,9 @@
 export type BlogTextBlock = { id: string; type: "text"; text: string };
 export type BlogHeadingBlock = { id: string; type: "heading"; text: string };
 export type BlogQuoteBlock = { id: string; type: "quote"; text: string; companionText: string; source: string; width: "full" | "half"; align: "left" | "right" };
-export type BlogImageBlock = { id: string; type: "image"; path: string; alt: string; companionText: string; width: "full" | "half"; align: "left" | "right" };
-export type BlogHighlightImageBlock = { id: string; type: "highlight-image"; path: string; alt: string; text: string; source: string; caption: string; layout: "side-by-side" | "stacked"; imageSide: "left" | "right"; stackedOrder: "image-first" | "quote-first" };
-export type BlogSplitBlock = { id: string; type: "split"; path: string; alt: string; align: "left" | "right"; text: string };
+export type BlogImageBlock = { id: string; type: "image"; path: string; alt: string; companionText: string; width: "full" | "half"; imageWidth: number; align: "left" | "right" };
+export type BlogHighlightImageBlock = { id: string; type: "highlight-image"; path: string; alt: string; text: string; source: string; caption: string; layout: "side-by-side" | "stacked"; imageWidth: number; imageSide: "left" | "right"; stackedOrder: "image-first" | "quote-first" };
+export type BlogSplitBlock = { id: string; type: "split"; path: string; alt: string; imageWidth: number; align: "left" | "right"; text: string };
 export type BlogBlock = BlogTextBlock | BlogHeadingBlock | BlogQuoteBlock | BlogImageBlock | BlogHighlightImageBlock | BlogSplitBlock;
 export type BlogContent = { version: 1; blocks: BlogBlock[] };
 
@@ -34,16 +34,16 @@ export function normalizeBlogContent(value: unknown, postId?: string, preserveEm
       const caption = clean(raw.caption, 10000);
       if (!text && !caption && !clean(raw.source, 240) && !preserveEmpty) return [];
       textLength += text.length + caption.length;
-      return [{ id, type: "highlight-image", path: validBlogPath(raw.path, postId) ? raw.path : "", alt: clean(raw.alt, 240), text, source: clean(raw.source, 240), caption, layout: raw.layout === "stacked" ? "stacked" : "side-by-side", imageSide: raw.imageSide === "right" ? "right" : "left", stackedOrder: raw.stackedOrder === "quote-first" ? "quote-first" : "image-first" }];
+      return [{ id, type: "highlight-image", path: validBlogPath(raw.path, postId) ? raw.path : "", alt: clean(raw.alt, 240), text, source: clean(raw.source, 240), caption, layout: raw.layout === "stacked" ? "stacked" : "side-by-side", imageWidth: boundedWidth(raw.imageWidth, 50), imageSide: raw.imageSide === "right" ? "right" : "left", stackedOrder: raw.stackedOrder === "quote-first" ? "quote-first" : "image-first" }];
     }
     if (raw.type === "image" && (validBlogPath(raw.path, postId) || preserveEmpty)) {
       const companionText = clean(raw.companionText, 10000);
       textLength += companionText.length;
-      return [{ id, type: "image", path: validBlogPath(raw.path, postId) ? raw.path : "", alt: clean(raw.alt, 240), companionText, width: raw.width === "half" ? "half" : "full", align: raw.align === "right" ? "right" : "left" }];
+      return [{ id, type: "image", path: validBlogPath(raw.path, postId) ? raw.path : "", alt: clean(raw.alt, 240), companionText, width: raw.width === "half" ? "half" : "full", imageWidth: boundedWidth(raw.imageWidth, 50), align: raw.align === "right" ? "right" : "left" }];
     }
     if (raw.type === "split" && (validBlogPath(raw.path, postId) || preserveEmpty)) {
       textLength += text.length;
-      return [{ id, type: "split", path: validBlogPath(raw.path, postId) ? raw.path : "", alt: clean(raw.alt, 240), align: raw.align === "right" ? "right" : "left", text }];
+      return [{ id, type: "split", path: validBlogPath(raw.path, postId) ? raw.path : "", alt: clean(raw.alt, 240), imageWidth: boundedWidth(raw.imageWidth, 47), align: raw.align === "right" ? "right" : "left", text }];
     }
     return [];
   });
@@ -84,3 +84,4 @@ export function blogContentText(content: BlogContent) {
 }
 export function validBlogPath(value: unknown, postId?: string): value is string { return typeof value === "string" && BLOG_PATH.test(value) && (!postId || value.startsWith(`blog/${postId}/`)); }
 function clean(value: unknown, max: number) { return String(value ?? "").trim().slice(0, max); }
+function boundedWidth(value: unknown, fallback: number) { const width = typeof value === "number" && Number.isFinite(value) ? value : fallback; return Math.min(70, Math.max(30, Math.round(width))); }
