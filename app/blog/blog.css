@@ -72,8 +72,22 @@
 .blog-block-companion p:last-child { margin-bottom: 0; }
 .blog-block-companion cite { display: block; margin-top: 18px; color: var(--shop-gold-deep); font-size: 14px; font-style: normal; letter-spacing: .04em; }
 .blog-block-empty-copy { color: #aaa39a !important; font-style: italic; }
+.blog-block-highlight-image { display: grid; gap: clamp(24px, 5vw, 64px); align-items: center; }
+.blog-block-highlight-image.layout-side-by-side { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.blog-block-highlight-image.layout-side-by-side.image-right .blog-block-highlight-image-photo { order: 2; }
+.blog-block-highlight-image.layout-side-by-side.image-right .blog-block-highlight-image-quote { order: 1; }
+.blog-block-highlight-image.layout-stacked { grid-template-columns: 1fr; gap: 26px; }
+.blog-block-highlight-image.layout-stacked.order-quote-first .blog-block-highlight-image-quote { order: 1; }
+.blog-block-highlight-image.layout-stacked.order-quote-first .blog-block-highlight-image-photo { order: 2; }
+.blog-block-highlight-image-photo { margin: 0; }
+.blog-block-highlight-image-photo img { display: block; width: 100%; max-height: 760px; object-fit: contain; background: #eeeae2; }
+.blog-block-highlight-image-photo figcaption { margin-top: 12px; color: #77736b; font: 14px/1.45 "Cormorant Garamond", Georgia, serif; }
+.blog-block-highlight-image-photo figcaption p { margin: 0 0 8px; }
+.blog-block-highlight-image-quote { min-width: 0; }
+.blog-block-highlight-image-quote .blog-block-quote { margin: 0; }
+.blog-block-highlight-image-quote cite { display: block; margin: 18px 0 0 24px; color: var(--shop-gold-deep); font: 14px/1.4 "Cormorant Garamond", Georgia, serif; font-style: normal; letter-spacing: .04em; }
 .blog-blocks.is-preview { gap: 18px; margin-top: 18px; }
 .blog-blocks.is-preview .blog-block-paragraph p, .blog-blocks.is-preview .blog-block-split-text p { font-size: 15px; line-height: 1.55; }
-@media (max-width: 640px) { .blog-block-image.is-half { width: 100%; } .blog-block-quote-layout.has-companion, .blog-block-image-layout.has-companion { grid-template-columns: 1fr; gap: 18px; } .blog-block-quote-layout.is-half:not(.has-companion), .blog-block-image-layout.is-half:not(.has-companion) { width: 100%; } .blog-block-quote-layout.is-half.align-right .blog-block-quote, .blog-block-image-layout.is-half.align-right .blog-block-image, .blog-block-quote-layout.is-half.align-right .blog-block-companion, .blog-block-image-layout.is-half.align-right .blog-block-companion { order: initial; } .blog-block-split { grid-template-columns: 1fr; gap: 20px; } .blog-block-split.align-right .blog-block-image { order: 0; } }
+@media (max-width: 640px) { .blog-block-image.is-half { width: 100%; } .blog-block-quote-layout.has-companion, .blog-block-image-layout.has-companion, .blog-block-highlight-image.layout-side-by-side { grid-template-columns: 1fr; gap: 18px; } .blog-block-quote-layout.is-half:not(.has-companion), .blog-block-image-layout.is-half:not(.has-companion) { width: 100%; } .blog-block-quote-layout.is-half.align-right .blog-block-quote, .blog-block-image-layout.is-half.align-right .blog-block-image, .blog-block-quote-layout.is-half.align-right .blog-block-companion, .blog-block-image-layout.is-half.align-right .blog-block-companion, .blog-block-highlight-image.layout-side-by-side.image-right .blog-block-highlight-image-photo, .blog-block-highlight-image.layout-side-by-side.image-right .blog-block-highlight-image-quote { order: initial; } .blog-block-split { grid-template-columns: 1fr; gap: 20px; } .blog-block-split.align-right .blog-block-image { order: 0; } }
 @media (prefers-reduced-motion: reduce) { .blog-brand, .blog-brand:hover, .blog-brand:focus-visible, .blog-brand::after, .blog-brand:hover::after, .blog-brand:focus-visible::after, .blog-share-action:hover, .blog-share-action:focus-visible { animation: none; } }
 @media (max-width: 640px) { .blog-frame { width: min(100% - 32px, 1120px); } .blog-brand { width: 82px; height: 58px; } .blog-block-quote.is-half { width: auto; } .blog-year { grid-template-columns: 1fr; gap: 14px; } .blog-entry { grid-template-columns: 1fr; gap: 7px; } .blog-entry time { text-align: left; } .blog-share { grid-template-columns: 1fr; gap: 20px; } .blog-share-actions { justify-content: flex-start; } .blog-share-action { flex: 1 1 42%; justify-content: center; } }

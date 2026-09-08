@@ -2,8 +2,9 @@ export type BlogTextBlock = { id: string; type: "text"; text: string };
 export type BlogHeadingBlock = { id: string; type: "heading"; text: string };
 export type BlogQuoteBlock = { id: string; type: "quote"; text: string; companionText: string; source: string; width: "full" | "half"; align: "left" | "right" };
 export type BlogImageBlock = { id: string; type: "image"; path: string; alt: string; companionText: string; width: "full" | "half"; align: "left" | "right" };
+export type BlogHighlightImageBlock = { id: string; type: "highlight-image"; path: string; alt: string; text: string; source: string; caption: string; layout: "side-by-side" | "stacked"; imageSide: "left" | "right"; stackedOrder: "image-first" | "quote-first" };
 export type BlogSplitBlock = { id: string; type: "split"; path: string; alt: string; align: "left" | "right"; text: string };
-export type BlogBlock = BlogTextBlock | BlogHeadingBlock | BlogQuoteBlock | BlogImageBlock | BlogSplitBlock;
+export type BlogBlock = BlogTextBlock | BlogHeadingBlock | BlogQuoteBlock | BlogImageBlock | BlogHighlightImageBlock | BlogSplitBlock;
 export type BlogContent = { version: 1; blocks: BlogBlock[] };
 
 const MAX_BLOCKS = 80;
@@ -29,6 +30,12 @@ export function normalizeBlogContent(value: unknown, postId?: string, preserveEm
       }
       return [{ id, type: raw.type as BlogTextBlock["type"], text }] as BlogBlock[];
     }
+    if (raw.type === "highlight-image" && (validBlogPath(raw.path, postId) || preserveEmpty)) {
+      const caption = clean(raw.caption, 10000);
+      if (!text && !caption && !clean(raw.source, 240) && !preserveEmpty) return [];
+      textLength += text.length + caption.length;
+      return [{ id, type: "highlight-image", path: validBlogPath(raw.path, postId) ? raw.path : "", alt: clean(raw.alt, 240), text, source: clean(raw.source, 240), caption, layout: raw.layout === "stacked" ? "stacked" : "side-by-side", imageSide: raw.imageSide === "right" ? "right" : "left", stackedOrder: raw.stackedOrder === "quote-first" ? "quote-first" : "image-first" }];
+    }
     if (raw.type === "image" && (validBlogPath(raw.path, postId) || preserveEmpty)) {
       const companionText = clean(raw.companionText, 10000);
       textLength += companionText.length;
@@ -43,6 +50,13 @@ export function normalizeBlogContent(value: unknown, postId?: string, preserveEm
   if (textLength > MAX_TEXT) {
     let remaining = MAX_TEXT;
     return { version: 1, blocks: blocks.map((block) => {
+      if (block.type === "highlight-image") {
+        const clippedText = block.text.slice(0, Math.max(0, remaining));
+        remaining -= clippedText.length;
+        const clippedCaption = block.caption.slice(0, Math.max(0, remaining));
+        remaining -= clippedCaption.length;
+        return { ...block, text: clippedText, caption: clippedCaption };
+      }
       if ("text" in block) {
         const clipped = block.text.slice(0, Math.max(0, remaining));
         remaining -= clipped.length;
@@ -64,6 +78,7 @@ export function blogContentText(content: BlogContent) {
     if (block.type === "text" || block.type === "heading" || block.type === "split") return [block.text];
     if (block.type === "quote") return [block.companionText, block.source].filter(Boolean);
     if (block.type === "image") return [block.companionText].filter(Boolean);
+    if (block.type === "highlight-image") return [block.text, block.source, block.caption].filter(Boolean);
     return [];
   }).join("\n\n");
 }
