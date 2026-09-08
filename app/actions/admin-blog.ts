@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createAdminClient } from "../../lib/supabase/admin";
 import { createClient } from "../../lib/supabase/server";
 import { convertHeicToJpeg, isHeicFile } from "../../lib/server-image-conversion";
 import { imageContentType, imageExtension, isCompatibleImageType } from "../../lib/image-types";
@@ -52,7 +53,10 @@ export async function deleteBlogPost(id: string) {
   const { error } = await supabase.from("blog_posts").delete().eq("id", id);
   if (error) return { ok: false, error: "Could not delete that blog entry." };
   const paths = existing ? normalizeBlogContent(existing.content, id).blocks.flatMap((block) => "path" in block && validBlogPath(block.path, id) ? [block.path] : []) : [];
-  if (paths.length) await supabase.storage.from("artwork").remove(paths);
+  if (paths.length) {
+    const admin = createAdminClient();
+    if (admin) await admin.storage.from("artwork").remove(paths);
+  }
   revalidatePath("/blog"); revalidatePath("/studio/blog"); revalidatePath("/sitemap.xml");
   return { ok: true };
 }
@@ -62,18 +66,22 @@ export async function uploadBlogImage(input: { postId: string; file: File }) {
   if (!supabase) return { ok: false, error: "Supabase is not configured." };
   const { data: allowed } = await supabase.rpc("is_blog_editor");
   if (!allowed || !UUID_PATTERN.test(input.postId)) return { ok: false, error: "Not authorized." };
-  const extension = imageExtension(input.file?.name);
-  const isHeic = isHeicFile(input.file);
+  const file = input.file;
+  const hasFileData = Boolean(file && typeof file.size === "number" && typeof file.arrayBuffer === "function");
+  const extension = imageExtension(file?.name);
+  const isHeic = isHeicFile(file);
   const contentType = imageContentType(extension);
-  if (!input.file || input.file.size <= 0 || input.file.size > 10 * 1024 * 1024 || (!isHeic && !isCompatibleImageType(input.file.type, contentType, extension))) return { ok: false, error: "Use a JPG, PNG, WebP, GIF, HEIC, or HEIF image up to 10 MB." };
-  let body: File | Buffer = input.file;
+  if (!hasFileData || file.size <= 0 || file.size > 10 * 1024 * 1024 || (!isHeic && !isCompatibleImageType(file.type, contentType, extension))) return { ok: false, error: "Use a JPG, PNG, WebP, GIF, HEIC, or HEIF image up to 10 MB." };
+  const admin = createAdminClient();
+  if (!admin) return { ok: false, error: "The image storage service is not configured." };
+  let body: File | Buffer = file;
   let uploadType = contentType ?? "application/octet-stream";
   if (isHeic) {
-    try { body = await convertHeicToJpeg(input.file); uploadType = "image/jpeg"; } catch { return { ok: false, error: "HEIC could not be converted. Please use a JPG or PNG copy." }; }
+    try { body = await convertHeicToJpeg(file); uploadType = "image/jpeg"; } catch { return { ok: false, error: "HEIC could not be converted. Please use a JPG or PNG copy." }; }
   }
   const extensionToStore = isHeic || extension === "jpeg" ? "jpg" : extension;
   const path = `blog/${input.postId}/${crypto.randomUUID()}.${extensionToStore}`;
-  const { error } = await supabase.storage.from("artwork").upload(path, body, { contentType: uploadType, upsert: false });
+  const { error } = await admin.storage.from("artwork").upload(path, body, { contentType: uploadType, upsert: false });
   return error ? { ok: false, error: "Could not upload that image." } : { ok: true, path };
 }
 
@@ -82,7 +90,9 @@ export async function removeBlogImage(postId: string, path: string) {
   if (!supabase) return { ok: false, error: "Supabase is not configured." };
   const { data: allowed } = await supabase.rpc("is_blog_editor");
   if (!allowed || !UUID_PATTERN.test(postId) || !validBlogPath(path, postId)) return { ok: false, error: "Not authorized." };
-  const { error } = await supabase.storage.from("artwork").remove([path]);
+  const admin = createAdminClient();
+  if (!admin) return { ok: false, error: "The image storage service is not configured." };
+  const { error } = await admin.storage.from("artwork").remove([path]);
   return error ? { ok: false, error: "Could not remove that image." } : { ok: true };
 }
 
