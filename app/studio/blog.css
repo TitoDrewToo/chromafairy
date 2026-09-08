@@ -35,6 +35,8 @@
 .admin-blog-format-tools select { padding: 7px; border: 1px solid #cfc8bb; background: #fff; color: #5d5952; font: 11px "Jost", sans-serif; }
 .admin-blog-image-preview { display: block; width: min(100%, 560px); max-height: 360px; object-fit: contain; background: #eeeae2; }
 .admin-blog-image-empty { display: grid; min-height: 130px; place-items: center; background: #eeeae2; color: #999288; font-size: 12px; }
+.admin-blog-block .admin-blog-image-empty { width: 100%; padding: 18px; border: 1px dashed #cfc8bb; cursor: pointer; font: 12px/1.4 "Jost", sans-serif; letter-spacing: .05em; transition: border-color 180ms ease, color 180ms ease, background 180ms ease; }
+.admin-blog-block .admin-blog-image-empty:hover, .admin-blog-block .admin-blog-image-empty:focus-visible { border-color: #ff66c4; background: #fff; color: #765b2d; }
 .admin-blog-workspace { display: block; }
 .admin-blog-workspace .admin-blog-composer { min-width: 0; }
 .admin-blog-preview { position: static; min-width: 0; max-height: none; overflow: visible; margin-top: 28px; padding: clamp(20px, 3vw, 34px); border: 1px solid #ded9cf; background: #fbfaf7; box-shadow: 0 16px 38px rgba(55,45,25,.06); }
