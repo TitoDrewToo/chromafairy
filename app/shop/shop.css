@@ -209,8 +209,8 @@
   animation: none;
 }
 
-.shop-status-filter:hover,
-.shop-status-filter:focus-visible {
+.shop-status-filter.chroma-control:hover,
+.shop-status-filter.chroma-control:focus-visible {
   border-color: transparent;
   background-color: var(--shop-ink) !important;
   background-image: linear-gradient(var(--shop-ink), var(--shop-ink)), var(--chroma-gradient) !important;
@@ -221,8 +221,8 @@
   animation: chroma-shimmer var(--chroma-duration) linear infinite;
 }
 
-.shop-status-filter:hover .shop-filter-label,
-.shop-status-filter:focus-visible .shop-filter-label {
+.shop-status-filter.chroma-control:hover .shop-filter-label,
+.shop-status-filter.chroma-control:focus-visible .shop-filter-label {
   background-image: var(--chroma-gradient);
   background-size: var(--chroma-size);
   background-position: 0% 50%;
