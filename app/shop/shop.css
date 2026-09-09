@@ -209,8 +209,20 @@
   animation: none;
 }
 
-.shop-status-filter:not(.active):hover .shop-filter-label,
-.shop-status-filter:not(.active):focus-visible .shop-filter-label {
+.shop-status-filter:hover,
+.shop-status-filter:focus-visible {
+  border-color: transparent;
+  background-color: var(--shop-ink) !important;
+  background-image: linear-gradient(var(--shop-ink), var(--shop-ink)), var(--chroma-gradient) !important;
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  background-size: auto, var(--chroma-size);
+  color: #fff !important;
+  animation: chroma-shimmer var(--chroma-duration) linear infinite;
+}
+
+.shop-status-filter:hover .shop-filter-label,
+.shop-status-filter:focus-visible .shop-filter-label {
   background-image: var(--chroma-gradient);
   background-size: var(--chroma-size);
   background-position: 0% 50%;
@@ -218,21 +230,6 @@
   background-clip: text;
   color: transparent;
   animation: chroma-shimmer var(--chroma-duration) linear infinite;
-}
-
-.shop-status-filter:not(.active):hover {
-  border-color: transparent;
-  background-color: transparent !important;
-  background-image: none !important;
-  color: var(--shop-muted) !important;
-  animation: none !important;
-}
-
-.shop-status-filter:not(.active):focus-visible {
-  background-color: transparent !important;
-  background-image: none !important;
-  color: var(--shop-muted) !important;
-  animation: none !important;
 }
 
 .shop-expand-control,
@@ -257,8 +254,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .shop-status-filter.active,
-  .shop-status-filter:not(.active):hover .shop-filter-label,
-  .shop-status-filter:not(.active):focus-visible .shop-filter-label,
+  .shop-status-filter:hover,
+  .shop-status-filter:focus-visible,
+  .shop-status-filter:hover .shop-filter-label,
+  .shop-status-filter:focus-visible .shop-filter-label,
   .shop-expand-control:hover .shop-filter-label,
   .shop-expand-control:focus-visible .shop-filter-label { animation: none; }
 }
